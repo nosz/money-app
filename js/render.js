@@ -49,7 +49,7 @@ const mlist = () => {
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
     all = allT().filter((x) => x.d.slice(0, 7) >= from && x.d.slice(0, 7) <= cur),
     ms = [...new Set(all.map((x) => x.d.slice(0, 7)))].sort();
-  if (!ms.length) return `<div class="card card-body card-body"><small>${t('none')}</small></div>`;
+  if (!ms.length) return `<div class="card card-body"><small>${t('none')}</small></div>`;
   HS.o = HS.o || {};
   const sc = HS.sc || 'd',
     dr = HS.dir || -1;
@@ -105,7 +105,7 @@ const V = {
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
     let h = mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
-    h += `<div class="card card-body card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
+    h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
     if (S.set.sb != null || S.tr.length || S.tx.some((x) => x.k == 'bar'))
       h += `<div style="margin-top:8px"><small>🏦 ${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>💵 ${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b> &nbsp; <small>🐷 ${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${S.set.sb != null ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
     h += '</div>';
@@ -116,31 +116,26 @@ const V = {
         c = Math.round((m.b + u - sq) * 100),
         rf = Math.floor(c / 100),
         pd = Math.floor(Math.floor(c / dl) / 100);
-      h += `<div class="card card-body card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`;
+      h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`;
     }
     if (n)
-      h += `<div class="card card-body card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
+      h += `<div class="card card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
 
     if (
       !S.set.hd &&
       !matchMedia('(display-mode:standalone)').matches &&
       (DP || /iphone|ipad/i.test(navigator.userAgent))
     )
-      h += `<div class="card card-body card-body"><small>${DP ? '' : t('inst')}</small><div class="seg d-flex gap-2 d-flex gap-2">${DP ? `<button class="btn btn-primary" onclick="DP.prompt()">${t('ins')}</button>` : ''}<button class="btn btn-secondary s" onclick="S.set.hd=1;P()">✕</button></div></div>`;
+      h += `<div class="card card-body"><small>${DP ? '' : t('inst')}</small><div class="seg d-flex gap-2">${DP ? `<button class="btn btn-primary" onclick="DP.prompt()">${t('ins')}</button>` : ''}<button class="btn btn-secondary s" onclick="S.set.hd=1;P()">✕</button></div></div>`;
     return (
       h +
-      '<div class="d-flex gap-2 mb-3"><button class="btn btn-secondary flex-fill" onclick="go(\'set\');SE.o=\'list\';rd();fx(\'list\')">📋 ' +
-      t('list') +
-      "</button><button class=\"btn btn-secondary flex-fill\" onclick=\"go('set');SE.o='stats';rd();fx('stats')\">📊 " +
-      t('stats') +
-      '</button></div>' +
       '</div><div class="col-12 col-lg-7">' +
       mlist() +
       '</div></div>'
     );
   },
   lb() {
-    return `${F.all ? '' : mn()}<input class="form-control" placeholder="${t('search')}" value="${esc(F.q)}" oninput="F.q=this.value;rs()"><select class="form-select" onchange="F.c=this.value;rs()"><option value="">${t('allc')}</option>${S.cats.map((c) => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><div class="card card-body card-body" id=res style=margin-top:10px>${rl()}</div>`;
+    return `${F.all ? '' : mn()}<input class="form-control" placeholder="${t('search')}" value="${esc(F.q)}" oninput="F.q=this.value;rs()"><select class="form-select" onchange="F.c=this.value;rs()"><option value="">${t('allc')}</option>${S.cats.map((c) => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><div class="card card-body" id=res style=margin-top:10px>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,
@@ -151,7 +146,7 @@ const V = {
     const a = Object.entries(by).sort((p, q) => q[1] - p[1]),
       tot = a.reduce((s, x) => s + x[1], 0);
     let cum = 0;
-    let h = `<div class="seg d-flex gap-2 d-flex gap-2"><button class="btn ${ST.t == 'e' ? '' : 's'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="btn ${ST.t == 'i' ? '' : 's'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class="seg d-flex gap-2 d-flex gap-2" style=margin:8px 0><button class="btn sm ${ST.p == 'm' ? '' : 's'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="btn sm ${ST.p == 'y' ? '' : 's'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body card-body">`;
+    let h = `<div class="seg d-flex gap-2"><button class="btn ${ST.t == 'e' ? '' : 's'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="btn ${ST.t == 'i' ? '' : 's'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class="seg d-flex gap-2" style=margin:8px 0><button class="btn sm ${ST.p == 'm' ? '' : 's'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="btn sm ${ST.p == 'y' ? '' : 's'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body">`;
     if (!tot) h += `<small>${t('none')}</small>`;
     else {
       h += `<svg viewBox="0 0 42 42" style="width:210px;display:block;margin:0 auto 10px">${a
@@ -171,7 +166,7 @@ const V = {
         })
         .join('');
     }
-    h += `</div><div class="card card-body card-body"><b>${t('trend')}</b><svg viewBox="0 0 300 120" style="width:100%">`;
+    h += `</div><div class="card card-body"><b>${t('trend')}</b><svg viewBox="0 0 300 120" style="width:100%">`;
     const ms = [];
     for (let k = 5; k >= 0; k--) {
       const [y, m] = ym.split('-'),
@@ -252,18 +247,19 @@ const V = {
             : '';
         };
         return (
+          (XD ? `<small class=hint>${t('newchint')}</small>` : '') +
           `<select class="form-select" aria-label="Sort" onchange="CT.s=this.value;rd()">${O(
             ['n', 'z', 'u'].map((k) => [k, t('o_' + k)]),
             CT.s || 'n',
           )}</select>` +
           grp('e', t('ex')) +
           grp('i', t('inn')) +
-          `<label class="form-label">${t('newc')}</label><div class="seg d-flex gap-2 d-flex gap-2"><select class="form-select" id=nt style=flex:.9>${O(
+          `<label class="form-label">${t('newc')}</label><div class="seg d-flex gap-2"><select class="form-select" id=nt style=flex:.9>${O(
             [
               ['e', t('e')],
               ['i', t('i')],
             ],
-            'e',
+            XD && XD.t == 'i' ? 'i' : 'e',
           )}</select><input class="form-control" id=nn placeholder="${t('name')}" autocomplete=off></div><label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NI ? 'on' : ''}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="document.querySelectorAll('.ip button').forEach(x=>x.classList.remove('on'))" autocomplete=off><button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="ac()">${t('save')}</button>`
         );
       },
@@ -312,9 +308,9 @@ const V = {
           'sb',
           `<input class="form-control" inputmode=decimal value="${s.sb == null ? '' : String(s.sb).replace('.', ',')}" onchange="const v=parseFloat(this.value.replace(',','.'));S.set.sb=isNaN(v)?null:v;P()">`,
         ) +
-        `<div class="seg d-flex gap-2 d-flex gap-2" style=margin-top:14px><button class="btn btn-secondary s" onclick="pn()">${s.pin ? t('pinoff') : t('pinon')}</button></div><small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
+        `<div class="seg d-flex gap-2" style=margin-top:14px><button class="btn btn-secondary s" onclick="pn()">${s.pin ? t('pinoff') : t('pinon')}</button></div><small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
       dat = () =>
-        `<div class="seg d-flex gap-2 d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">`;
+        `<div class="seg d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">`;
     return (
       `<h2>${t('set')}</h2>` +
       sec('list', '📋', t('list'), () => V.lb()) +
@@ -346,6 +342,7 @@ function se(k) {
   if (SE.o) fx(k);
 }
 function go(x) {
+  XD = null;
   tab = x;
   scrollTo(0, 0);
   rd();

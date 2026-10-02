@@ -53,6 +53,7 @@ function toast(m, f) {
 }
 /* Buchung erfassen / bearbeiten */
 function ot(id) {
+  XD = null;
   const x = id && allT().find((y) => y.id == id);
   X = x
     ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : x.k || 'bank' }
@@ -134,7 +135,7 @@ function ghtml() {
             `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${esc(t(c.n))}</span></button>`,
         )
         .join('')
-    : `<small class=nr>${t('nores')}</small>`;
+    : `<div class=nr><small>${t('nores')}</small><br><button type=button class="btn btn-secondary s mt-2" onclick="const d={...X};cl();go('set');XD=d;SE.o='cats';rd();fx('cats')">+ ${t('newc')}</button></div>`;
 }
 const fcat = () => {
   const g = $('#cg');
@@ -143,7 +144,7 @@ const fcat = () => {
 function op() {
   sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
 <input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control" id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
-<details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class="seg d-flex gap-2 d-flex gap-2"><button class="btn btn-secondary s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn btn-secondary s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input class="form-control" type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input class="form-control" id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${
+<details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class="seg d-flex gap-2"><button class="btn btn-secondary s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn btn-secondary s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input class="form-control" type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input class="form-control" id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${
     X.id || X.t == 'u'
       ? ''
       : `<label class="form-label">${t('rep')}</label><select class="form-select" onchange="X.f=this.value">${O(
@@ -156,7 +157,7 @@ function op() {
           X.f,
         )}</select>`
   }</details>
-<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class="seg d-flex gap-2 d-flex gap-2" style=margin-top:16px>${X.id ? `<button class="btn btn-danger d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`);
+<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class="seg d-flex gap-2" style=margin-top:16px>${X.id ? `<button class="btn btn-danger d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`);
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
@@ -290,7 +291,7 @@ function dsh() {
   }
   X.nc = 0;
   sheet(
-    `${hd('🔔 ' + t('due'))}${l.map((o) => `<div class="card card-body card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2 d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',1)">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
+    `${hd('🔔 ' + t('due'))}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',1)">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
 function cf(id, ask, skip) {
@@ -348,6 +349,8 @@ const ICONS = [
   '🧾',
   '🏷️',
 ];
+/* Buchungs-Entwurf, solange eine Kategorie aus der Buchung heraus angelegt wird */
+let XD = null;
 let NI = '🏷️',
   CT = {},
   RT = {};
@@ -372,9 +375,19 @@ function ac() {
     $('#nn').focus();
     return;
   }
-  S.cats.push({ id: uid(), t: $('#nt').value, n, i: gr($('#ni').value) || NI });
+  const c = { id: uid(), t: $('#nt').value, n, i: gr($('#ni').value) || NI };
+  S.cats.push(c);
   NI = '🏷️';
   P();
+  if (XD) {
+    const d = XD;
+    go('home');
+    X = d;
+    X.q = '';
+    X.ac = 0;
+    if (c.t == X.t) X.c = c.id;
+    op();
+  }
 }
 function ec(id) {
   const c = S.cats.find((x) => x.id == id),
@@ -449,7 +462,7 @@ function im(el) {
       if (!Array.isArray(d.tx) || !d.cats) throw 0;
       X = { imp: d, nc: 0 };
       sheet(
-        `${hd(t('imd'))}<div class="seg d-flex gap-2 d-flex gap-2"><button class="btn btn-danger d" onclick="ip(1)">${t('rpl')}</button><button class="btn btn-primary" onclick="ip(0)">${t('mrg')}</button></div>`,
+        `${hd(t('imd'))}<div class="seg d-flex gap-2"><button class="btn btn-danger d" onclick="ip(1)">${t('rpl')}</button><button class="btn btn-primary" onclick="ip(0)">${t('mrg')}</button></div>`,
       );
     } catch (e) {
       alert('Ungültige Datei / Invalid file');
@@ -503,7 +516,7 @@ function lk() {
   o.id = 'lk';
   o.className = 'ov';
   o.style.cssText = 'z-index:30;align-items:center;background:var(--ink)';
-  o.innerHTML = `<div class="card card-body card-body" style="width:280px;text-align:center"><h2>🔒 ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:1.4rem"><small></small></div>`;
+  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>🔒 ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:1.4rem"><small></small></div>`;
   document.body.append(o);
   const i = o.querySelector('input');
   i.focus();
@@ -564,13 +577,13 @@ addEventListener('focusin', (e) => {
 function bki() {
   X = {};
   sheet(
-    `${hd(t('bki'))}<div class="card card-body card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
+    `${hd(t('bki'))}<div class="card card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
   );
 }
 function ob() {
   X = { nc: 1 };
   sheet(
-    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><small>${t('wset')}</small><button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="od()">${t('go')}</button>`,
+    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><small>${t('wset')}</small><div class=cta><button class="btn btn-primary w-100" onclick="od()">${t('go')}</button></div>`,
   );
 }
 function od() {
