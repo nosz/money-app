@@ -1,8 +1,9 @@
 // Service Worker für MoneyApp
-// CACHE_VERSION bei jeder neuen Version hochzählen.
-const CACHE_VERSION = '1.12.11';
+// Die Version kommt aus der index.html (APP_VERSION) über ?v=... beim Registrieren.
+// Hier muss nichts mehr hochgezählt werden.
+const CACHE_VERSION = new URL(self.location.href).searchParams.get('v') || '0';
 const CACHE_NAME = 'moneyapp-' + CACHE_VERSION;
-const ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./img/house.svg','./img/settings.svg'];
+const ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME)
