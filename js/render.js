@@ -13,26 +13,28 @@ function mv(d) {
 const nmx = (x) => (x.t == 'u' ? t('tr') : t(cn(x.c).n));
 const trow = (x) => {
   const u = x.t == 'u',
-    c = u ? { i: '⇄', n: 'tr' } : cn(x.c);
-  return `<div class="li d-flex align-items-center gap-3 tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${esc(t(c.n))}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${esc(x.n)}</small>` : ''}${u ? `<br><small>${t('a_' + x.f)} → ${t('a_' + x.to)}</small>` : x.k == 'bar' ? ` <small>· ${t('a_bar')}</small>` : ''}</span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
+    c = u ? { i: '⇄', n: 'tr' } : cn(x.c),
+    ty = u ? 'u' : x.t,
+    kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
+    tm = hm(x);
+  return `<div class="li d-flex align-items-center gap-3 tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${esc(t(c.n))}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${esc(x.n)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
 const sortL = (l, sc, dr) => {
-  const key = { d: (x) => x.d, c: (x) => nmx(x).toLowerCase(), a: (x) => x.a }[sc];
-  return l.slice().sort((a, b) => {
-    const p = key(a),
-      q = key(b);
-    return (p < q ? -1 : p > q ? 1 : 0) * dr;
-  });
+  /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
+  const dk = (x) => x.d + String(x.ts || 0).padStart(14, '0'),
+    key = { d: dk, c: (x) => nmx(x).toLowerCase(), a: (x) => x.a, t: (x) => ({ e: 0, i: 1, u: 2 })[x.t] }[sc],
+    cmp = (p, q) => (p < q ? -1 : p > q ? 1 : 0);
+  return l.slice().sort((a, b) => cmp(key(a), key(b)) * dr || (sc != 'd' ? cmp(dk(b), dk(a)) : 0));
 };
-const hrow = (sc, dr, fn) => {
+const hrow = (sc, dr, fn, ty) => {
   const ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : '');
-  return `<div class="li d-flex align-items-center gap-3 hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g onclick="${fn}('c')">${t('cat1')}${ar('c')}</span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>`;
+  return `<div class="li d-flex align-items-center gap-3 hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g><i class=hs onclick="${fn}('c')">${t('cat1')}${ar('c')}</i>${ty ? `<i class=hs onclick="${fn}('t')">${t('typ')}${ar('t')}</i>` : ''}</span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>`;
 };
 function hsort(c) {
   if ((HS.sc || 'd') == c) HS.dir = -(HS.dir || -1);
   else {
     HS.sc = c;
-    HS.dir = c == 'c' ? 1 : -1;
+    HS.dir = c == 'c' || c == 't' ? 1 : -1;
   }
   rd();
 }
@@ -40,7 +42,7 @@ function fsort(c) {
   if ((F.sc || 'd') == c) F.dir = -(F.dir || -1);
   else {
     F.sc = c;
-    F.dir = c == 'c' ? 1 : -1;
+    F.dir = c == 'c' || c == 't' ? 1 : -1;
   }
   rs();
 }
@@ -62,7 +64,7 @@ const mlist = () => {
         ),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : m == cur;
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><b>${mlab(m)}</b> <small>· ${g.length} · <span class="${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></small></summary>${hrow(sc, dr, 'hsort')}${g.map(trow).join('')}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${hrow(sc, dr, 'hsort', true)}${g.map(trow).join('')}</details></div>`;
     })
     .join('');
 };
@@ -107,7 +109,7 @@ const V = {
     let h = mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
     h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
     if (hasSt() || S.tr.length || S.tx.some((x) => x.k == 'bar'))
-      h += `<div style="margin-top:8px"><small>${AI.bank} ${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>${AI.bar} ${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b><br><small>${SPI} ${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${hasSt() ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
+      h += `<div style="margin-top:8px"><small>${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b><br><small>${t('a_spar')}<span style="margin-left:.25em">${SPI}</span></small> <b>${fmt(bal('spar'))}</b>${hasSt() ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
     h += '</div>';
     if (cur) {
       const u = up(),
@@ -217,7 +219,7 @@ const V = {
                 l
                   .map(
                     (r) =>
-                      `<div class="li d-flex align-items-center gap-3 r${ty}"><span class=ic>${cn(r.c).i}</span><div class=g>${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)} · 📅 ${nx(r).split('-').reverse().join('.')} · <b class="${ty == 'i' ? 'pos' : 'neg'}">${sg(r.a, r.t)}</b></small></div><button class="btn btn-secondary s sm" aria-label="${t('del')}" onclick="rm('${r.id}')">✕</button></div>`,
+                      `<div class="li d-flex align-items-center gap-3 r${ty}" role=button tabindex=0 aria-label="${t('rec_e')}" onclick="er('${r.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();er('${r.id}')}"><span class=ic>${cn(r.c).i}</span><div class=g>${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)} · 📅 ${nx(r).split('-').reverse().join('.')} · <b class="${ty == 'i' ? 'pos' : 'neg'}">${sg(r.a, r.t)}</b></small></div><span class=chv aria-hidden=true>›</span></div>`,
                   )
                   .join('') +
                 '</details>'
@@ -313,11 +315,11 @@ const V = {
             const set = s[SK[k]] != null,
               b = bal(k);
             return bx(
-              `<label class="form-label">${k == 'spar' ? SPI : AI[k]} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp')}" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}">`,
+              `<label class="form-label">${k == 'spar' ? SPI : AI[k]} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="this.style.borderColor=''" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}">`,
             );
           })
           .join('') +
-        `<div class="seg d-flex gap-2" style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
+        `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
       dat = () =>
         `<div class="seg d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">` +
         bx(

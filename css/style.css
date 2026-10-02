@@ -751,3 +751,36 @@ nav .nb.on .nl { color: var(--gold) }
 
 /* Begrüssung: kompakter, damit der Button ohne Scrollen sichtbar ist */
 .wl{margin:6px 0}.wl li{padding:4px 0}.pv{margin:8px 0}
+
+/* ===== 1.17.0: Monatskopf, kompaktere Buchungsliste, Typ-Etikett, Konten-Speichern ===== */
+.mh.card-body{padding:2px 14px}
+.mh summary{display:flex;align-items:center;gap:8px;list-style:none;min-height:52px;padding:8px 0;font:1.1rem var(--fd);color:var(--text)}
+.mh summary::-webkit-details-marker{display:none}
+.mh summary::before{content:'›';flex:none;width:1rem;color:var(--m);font:1.6rem/1 var(--fd);transition:transform .2s}
+.mh details[open]>summary::before{transform:rotate(90deg)}
+.mh details[open]>summary{border-bottom:1px solid var(--b);margin-bottom:2px}
+.mh summary .mt{flex:1;min-width:0;font-weight:700}
+.mh summary .mb{flex:none;font:700 .92rem -apple-system,Roboto,sans-serif;padding:3px 11px;border-radius:999px;font-variant-numeric:tabular-nums}
+.mh summary .mb.pos{background:color-mix(in srgb,var(--sage) 22%,var(--surface))}
+.mh summary .mb.neg{background:color-mix(in srgb,var(--rust) 14%,var(--surface))}
+
+.li.tr{min-height:46px;padding:8px 0;gap:10px}
+.li.tr .g{line-height:1.25;font-size:.95rem}
+.li.tr small{font-size:.78rem;color:var(--m)}
+.li.tr .dc,.li.hd .dc{width:3.2rem;font-size:.82rem;white-space:nowrap}
+.li.tr b{font-size:.95rem}
+.tb{display:inline-block;font-style:normal;padding:0 7px;border-radius:6px;font-size:.72rem;font-weight:700;line-height:1.6;vertical-align:1px}
+.tb.e{background:color-mix(in srgb,var(--rust) 16%,var(--surface));color:var(--rust)}
+.tb.i{background:color-mix(in srgb,var(--sage) 22%,var(--surface));color:color-mix(in srgb,var(--sage) 70%,var(--text))}
+.tb.u{background:var(--s2);color:var(--m)}
+.hd{padding:6px 0 4px}
+.hd span,.hd .hs{font-size:.8rem}
+.hd .hs{font-style:normal;cursor:pointer;color:var(--m);font-weight:600;margin-right:14px;user-select:none}
+
+/* Wiederkehrende Buchungen: ganze Zeile antippbar */
+.li[role=button]{cursor:pointer}
+.li[role=button]:active{background:var(--s2)}
+.li .chv{flex:none;color:var(--m);font:1.5rem/1 var(--fd)}
+
+/* Konten: Speichern-Button bleibt über der Navigationsleiste sichtbar */
+.stk{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));z-index:2;margin-top:14px;padding:10px 0;background:var(--surface);box-shadow:0 -8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}

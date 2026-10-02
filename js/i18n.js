@@ -1,5 +1,26 @@
 /* MoneyApp – Texte (DE/EN) */
 const T = {
+  typ: ['Typ', 'Type'],
+  rec_e: ['Wiederkehrende Buchung bearbeiten', 'Edit recurring entry'],
+  recdt: ['Wiederkehrende Buchung löschen', 'Delete recurring entry'],
+  recdq: [
+    '„{n}“ wirklich löschen? Bereits gebuchte Einträge bleiben erhalten.',
+    'Really delete “{n}”? Entries already booked will be kept.',
+  ],
+  nextd: ['Nächste Fälligkeit', 'Next due date'],
+  e_num: ['Bitte eine gültige Zahl eingeben', 'Please enter a valid number'],
+  sbp0: ['0,00', '0.00'],
+  pinset: ['PIN festlegen', 'Set PIN'],
+  pinrule: ['4 bis 6 Ziffern.', '4 to 6 digits.'],
+  pin1: ['PIN', 'PIN'],
+  pin2: ['PIN wiederholen', 'Repeat PIN'],
+  e_pin: ['Die PIN muss aus 4 bis 6 Ziffern bestehen.', 'The PIN must have 4 to 6 digits.'],
+  e_pin2: ['Die beiden PINs stimmen nicht überein.', 'The two PINs do not match.'],
+  imerr: ['Datei nicht lesbar', 'File not readable'],
+  imerrt: [
+    'Das ist keine gültige MoneyApp-Sicherung. Bitte wähle eine JSON-Datei aus „Backup erstellen (JSON)“.',
+    'This is not a valid MoneyApp backup. Please choose a JSON file created with “Create backup (JSON)”.',
+  ],
   o_n: ['Name A–Z', 'Name A–Z'],
   o_z: ['Name Z–A', 'Name Z–A'],
   o_u: ['Meist genutzt', 'Most used'],

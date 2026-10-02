@@ -61,7 +61,7 @@ function ot(id) {
   op();
 }
 /* Betrag: nur Ziffern, ein Komma oder Punkt, max. 2 Nachkommastellen */
-function am(el) {
+function amc(el) {
   const o = el.value;
   let v = o.replace(/[^\d.,]/g, '');
   const m = v.search(/[.,]/);
@@ -79,7 +79,10 @@ function am(el) {
       el.setSelectionRange(p, p);
     } catch (e) {}
   }
-  X.a = v;
+  return v;
+}
+function am(el) {
+  X.a = amc(el);
   if ($('#ew')) $('#ew').hidden = true;
   fm();
 }
@@ -255,14 +258,14 @@ function sv(force) {
         S.tr.find((x) => x.id == X.id),
         o,
       );
-    else S.tr.push({ id: uid(), ...o });
+    else S.tr.push({ id: uid(), ts: Date.now(), ...o });
   } else if (X.id)
     Object.assign(
       S.tx.find((x) => x.id == X.id),
       { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' },
     );
   else {
-    S.tx.push({ id: uid(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
+    S.tx.push({ id: uid(), ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
     if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 });
   }
   cl();
@@ -291,26 +294,100 @@ function dsh() {
   }
   X.nc = 0;
   sheet(
-    `${hd('🔔 ' + t('due'))}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',1)">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
+    `${hd('🔔 ' + t('due'))}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
-function cf(id, ask, skip) {
+function cf(id, a, skip) {
+  /* a = geänderter Betrag (optional), skip = überspringen statt buchen */
   const r = S.rec.find((x) => x.id == id);
-  let a = r.a;
-  if (ask) {
-    const v = parseFloat((prompt(t('amt'), String(a).replace('.', ',')) || '').replace(',', '.'));
-    if (!(v > 0)) return;
-    a = v;
-  }
-  if (!skip) S.tx.push({ id: uid(), t: r.t, a, c: r.c, d: iso(dateK(r, r.k)), n: r.n, r: 1 });
+  if (!r) return;
+  if (!skip) S.tx.push({ id: uid(), ts: Date.now(), t: r.t, a: a || r.a, c: r.c, d: iso(dateK(r, r.k)), n: r.n, r: 1 });
   r.k++;
   P();
   dsh();
 }
+/* Betrag ändern (fällige Buchung): eigenes Fenster statt Browser-Dialog */
+function cfa(id) {
+  const r = S.rec.find((x) => x.id == id);
+  if (!r) return;
+  X.nc = 0;
+  sheet(
+    `${hd(t('chg'))}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${String(r.a).replace('.', ',')}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="cfs('${id}')">${t('ok')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="dsh()">${t('cancel')}</button></div>`,
+  );
+  $('.sh').dataset.t = r.t;
+  const e = $('#ca_a');
+  e.focus({ preventScroll: true });
+  e.select();
+}
+function cfs(id) {
+  const v = num($('#ca_a').value);
+  if (!(v > 0)) {
+    $('#ca_e').hidden = false;
+    return;
+  }
+  cf(id, Math.round(v * 100) / 100);
+}
+/* Wiederkehrende Buchung bearbeiten / löschen (Rückfrage) */
+let RE = {};
+function er(id) {
+  const r = S.rec.find((x) => x.id == id);
+  if (!r) return;
+  const d = iso(dateK(r, r.k));
+  X = {};
+  RE = { id, t: r.t, a: String(r.a).replace('.', ','), c: r.c, n: r.n || '', f: r.f, d, d0: d, f0: r.f };
+  erd();
+}
+function erd() {
+  const r = RE;
+  sheet(
+    `${hd(t('rec_e'))}<input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" onchange="RE.c=this.value">${O(
+      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
+      r.c,
+    )}</select><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
+      ['m', 'w', 'y'].map((k) => [k, t(k)]),
+      r.f,
+    )}</select><label class="form-label">${t('nextd')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn pr" style="width:100%;margin-top:16px" onclick="rsv()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button><button class="btn dlt" onclick="rdl()">🗑 ${t('del')}</button></div>`,
+  );
+  $('.sh').dataset.t = r.t;
+}
+function rsv() {
+  const r = S.rec.find((x) => x.id == RE.id),
+    a = num(RE.a);
+  if (!r) return cl();
+  if (!(a > 0)) {
+    const e = $('#rea');
+    e.hidden = false;
+    e.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    $('#ra').focus({ preventScroll: true });
+    return;
+  }
+  Object.assign(r, { a: Math.round(a * 100) / 100, c: RE.c, n: RE.n.trim(), f: RE.f });
+  /* Intervall oder Fälligkeit geändert: ab dem gewählten Datum neu zählen */
+  if (RE.d && (RE.d != RE.d0 || RE.f != RE.f0)) {
+    r.s = RE.d;
+    r.k = 0;
+  }
+  cl();
+  P();
+  toast(t('sav'));
+}
+function rdl() {
+  const r = S.rec.find((x) => x.id == RE.id);
+  if (!r) return cl();
+  sheet(
+    `${hd(t('recdt'))}<p style="margin:8px 0 14px">${t('recdq').replace('{n}', esc(r.n || t(cn(r.c).n)))}</p><div class="seg d-flex gap-2"><button class="btn btn-secondary s" onclick="erd()">${t('cancel')}</button><button class="btn dlt" onclick="rdo()">🗑 ${t('del')}</button></div>`,
+  );
+  $('.sh').dataset.t = r.t;
+}
+function rdo() {
+  const id = RE.id;
+  cl();
+  rm(id);
+}
 function ca() {
   dues().forEach((o) => {
     for (let g = 0; g < 500 && iso(dateK(o.r, o.r.k)) <= iso(D); g++) {
-      S.tx.push({ id: uid(), t: o.r.t, a: o.r.a, c: o.r.c, d: iso(dateK(o.r, o.r.k)), n: o.r.n, r: 1 });
+      S.tx.push({ id: uid(), ts: Date.now(), t: o.r.t, a: o.r.a, c: o.r.c, d: iso(dateK(o.r, o.r.k)), n: o.r.n, r: 1 });
       o.r.k++;
     }
   });
@@ -536,7 +613,10 @@ function im(el) {
         `${hd(t('imd'))}<div class="seg d-flex gap-2"><button class="btn btn-danger d" onclick="ip(1)">${t('rpl')}</button><button class="btn btn-primary" onclick="ip(0)">${t('mrg')}</button></div>`,
       );
     } catch (e) {
-      alert('Ungültige Datei / Invalid file');
+      X = {};
+      sheet(
+        `${hd(t('imerr'))}<p style="margin:8px 0 14px">${t('imerrt')}</p><button class="btn btn-primary" style="width:100%" onclick="cl()">${t('x')}</button>`,
+      );
     }
   });
   el.value = '';
@@ -574,11 +654,26 @@ function pn() {
     P();
     return;
   }
-  const p = prompt(t('pinon'));
-  if (p && /^\d{4,6}$/.test(p)) {
-    S.set.pin = hs(p);
-    P();
+  X = {};
+  sheet(
+    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><label class="form-label">${t('pin1')}</label><input id=pn1 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"><label class="form-label">${t('pin2')}</label><input id=pn2 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="pns()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button></div>`,
+  );
+  $('#pn1').focus({ preventScroll: true });
+}
+function pns() {
+  const a = $('#pn1').value,
+    b = $('#pn2').value,
+    m = !/^\d{4,6}$/.test(a) ? t('e_pin') : a != b ? t('e_pin2') : '';
+  if (m) {
+    const e = $('#pne');
+    e.textContent = '⚠ ' + m;
+    e.hidden = false;
+    return;
   }
+  S.set.pin = hs(a);
+  cl();
+  P();
+  toast(t('sav'));
 }
 function lk() {
   if (!S.set.pin || $('#lk')) return;
@@ -651,21 +746,17 @@ function bki() {
     `${hd(t('bki'))}<div class="card card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
   );
 }
-/* Konten-Bereich in den Einstellungen: alle ausgefüllten Felder speichern, leere bleiben unverändert */
+/* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert */
 function ktoSave() {
-  let n = 0,
-    bad = 0;
-  ['bank', 'bar', 'spar'].forEach((k) => {
-    const e = $('#st_' + k);
-    if (!e || !e.value.trim()) return;
-    const v = num(e.value);
-    if (v == null) bad++;
-    else {
-      setAcc(k, v);
-      n++;
-    }
+  const vs = ['bank', 'bar', 'spar'].map((k) => {
+    const e = $('#st_' + k),
+      s = e ? e.value.trim() : '',
+      v = s ? num(s) : 0;
+    if (v == null && e) e.style.borderColor = 'var(--rust)';
+    return [k, v];
   });
-  if (bad || !n) return toast(t('e_amt'));
+  if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
+  vs.forEach(([k, v]) => setAcc(k, v));
   P();
   toast(t('sav'));
 }
