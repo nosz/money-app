@@ -69,7 +69,8 @@ const T = {
   cancel: ['Abbrechen', 'Cancel'],
   look: ['Darstellung', 'Appearance'],
   gen: ['Allgemein', 'General'],
-  dat: ['Daten & Backup', 'Data & backup'],
+  dat: ['Daten & Sicherheit', 'Data & security'],
+  kto: ['Konten', 'Accounts'],
   ver: ['Version', 'Version'],
   f_s: ['Klein', 'Small'],
   f_n: ['Mittel', 'Medium'],
@@ -158,7 +159,38 @@ const T = {
   bkn0: ['Du hast noch kein Backup erstellt.', 'You have not made a backup yet.'],
   bkn: ['Dein letztes Backup ist älter als 30 Tage.', 'Your last backup is over 30 days old.'],
   hi: ['Willkommen bei MoneyApp', 'Welcome to MoneyApp'],
-  sb: ['Startguthaben (optional)', 'Starting balance (optional)'],
+  sb: ['Aktueller Kontostand (Bank)', 'Current balance (bank)'],
+  sbh: [
+    'Trage ein, was deine Banking-App jetzt anzeigt. Die App rechnet damit dein Tagesbudget und dein Gesamtguthaben.',
+    'Enter what your banking app shows right now. The app uses it for your daily budget and total balance.',
+  ],
+  pinh: [
+    'Die App fragt beim Öffnen und nach 5 Minuten im Hintergrund nach der PIN. Sie sperrt nur die Ansicht auf diesem Gerät und verschlüsselt keine Daten. Es gibt keine Zurücksetzung: Merke dir die PIN und sichere vorher ein Backup.',
+    'The app asks for the PIN when opened and after 5 minutes in the background. It only locks the view on this device and does not encrypt your data. There is no reset: remember your PIN and make a backup first.',
+  ],
+  ktoh: [
+    'Trage ein, wie viel Geld du auf jedem Konto gerade hast. Daraus rechnet die App dein Tagesbudget und dein Gesamtguthaben. Alles Weitere bucht die App selbst mit. Leere Felder lässt du einfach frei.',
+    'Enter how much money you currently have in each account. The app uses this for your daily budget and total balance and keeps track of everything after that. Simply leave empty fields blank.',
+  ],
+  kh_bank: [
+    'Dein Girokonto: Buchungen mit „Bank“ laufen hier. Trage ein, was deine Banking-App anzeigt. Zählt fürs Tagesbudget.',
+    'Your current account: entries paid with “Bank” go here. Enter what your banking app shows. Counts towards your daily budget.',
+  ],
+  kh_bar: [
+    'Bargeld im Portemonnaie oder zu Hause: Buchungen mit „Bar“ laufen hier. Zählt fürs Tagesbudget.',
+    'Cash in your wallet or at home: entries paid with “Cash” go here. Counts towards your daily budget.',
+  ],
+  kh_spar: [
+    'Geld, das du zur Seite gelegt hast, z. B. Sparkonto oder Rücklage. Es füllt sich über Umbuchungen. Zählt nicht fürs Tagesbudget, aber fürs Gesamtguthaben.',
+    'Money you have set aside, e.g. a savings account. It is filled via transfers. Does not count towards your daily budget, but does count towards your total balance.',
+  ],
+  sbm: [
+    'Bargeld und Gespart trägst du unter Einstellungen → Konten ein.',
+    'You can enter cash and savings under Settings → Accounts.',
+  ],
+  sbk: ['Kontostand eintragen', 'Enter your balance'],
+  sbl: ['Kannst du auch später eintragen.', 'You can also add this later.'],
+  sbp: ['z. B. 1.250,00', 'e.g. 1,250.00'],
   go: ['Los geht’s', 'Let’s go'],
   inst: [
     'Tipp: Zum Home-Bildschirm hinzufügen (iPhone: Teilen → „Zum Home-Bildschirm“).',
@@ -180,7 +212,7 @@ const T = {
   s_aa: ['Betrag: niedrig → hoch', 'Amount: low → high'],
   s_c: ['Kategorie A–Z', 'Category A–Z'],
   a_bank: ['Bank', 'Bank'],
-  a_spar: ['Sparen', 'Savings'],
+  a_spar: ['Gespart', 'Saved'],
   spabz: ['abzgl. Gespartes:', 'minus savings:'],
   a_bar: ['Bar', 'Cash'],
   tr: ['Umbuchung', 'Transfer'],

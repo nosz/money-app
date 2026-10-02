@@ -106,18 +106,21 @@ const V = {
       n = dues().length;
     let h = mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
     h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
-    if (S.set.sb != null || S.tr.length || S.tx.some((x) => x.k == 'bar'))
-      h += `<div style="margin-top:8px"><small>🏦 ${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>💵 ${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b> &nbsp; <small>🐷 ${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${S.set.sb != null ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
+    if (hasSt() || S.tr.length || S.tx.some((x) => x.k == 'bar'))
+      h += `<div style="margin-top:8px"><small>${AI.bank} ${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>${AI.bar} ${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b><br><small>${SPI} ${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${hasSt() ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
     h += '</div>';
     if (cur) {
       const u = up(),
         sq = svm(),
         dl = new Date(D.getFullYear(), D.getMonth() + 1, 0).getDate() - D.getDate() + 1,
-        c = Math.round((m.b + u - sq) * 100),
+        hs = hasSt(),
+        c = Math.round(((hs ? bal('bank') + bal('bar') : m.b - sq) + u) * 100),
         rf = Math.floor(c / 100),
         pd = Math.floor(Math.floor(c / dl) / 100);
-      h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`;
+      h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq && !hs ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`;
     }
+    if (!hasSt())
+      h += `<div class="card card-body"><b>🏦 ${t('sbk')}</b><small>${t('sbh')}</small><input id=hb_sb class="form-control" inputmode=decimal placeholder="${t('sbp')}" style="margin:8px 0"><button class="btn btn-primary" onclick="sbSave('hb_sb')">${t('save')}</button><small style="display:block;margin-top:8px">${t('sbm')}</small></div>`;
     if (n)
       h += `<div class="card card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
 
@@ -149,24 +152,29 @@ const V = {
     let h = `<div class="seg d-flex gap-2"><button class="btn ${ST.t == 'e' ? '' : 's'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="btn ${ST.t == 'i' ? '' : 's'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class="seg d-flex gap-2" style=margin:8px 0><button class="btn sm ${ST.p == 'm' ? '' : 's'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="btn sm ${ST.p == 'y' ? '' : 's'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body">`;
     if (!tot) h += `<small>${t('none')}</small>`;
     else {
-      h += `<svg viewBox="0 0 42 42" style="width:210px;display:block;margin:0 auto 10px">${a
+      const gap = a.length > 1 ? 0.6 : 0,
+        ft = fmt(tot);
+      h += `<svg viewBox="0 0 42 42" style="width:230px;max-width:80%;display:block;margin:4px auto 14px"><circle r=15.9155 cx=21 cy=21 fill=none stroke="rgba(128,128,128,.15)" stroke-width=5.5 />${a
         .map((x, i) => {
           const p = (x[1] / tot) * 100,
-            s = `<circle r=15.9155 cx=21 cy=21 fill=none stroke="${PAL[i % 8]}" stroke-width=7 stroke-dasharray="${p} ${100 - p}" stroke-dashoffset="${25 - cum}"/>`;
+            s = `<circle r=15.9155 cx=21 cy=21 fill=none stroke="${PAL[i % PAL.length]}" stroke-width=5.5 stroke-dasharray="${Math.max(p - gap, 0.01)} ${100 - p + gap}" stroke-dashoffset="${25 - cum}"/>`;
           cum += p;
           return s;
         })
         .join(
           '',
-        )}<text x=21 y=22 text-anchor=middle font-size=4 fill="currentColor">${fmt(tot)}</text></svg>`;
+        )}<text x=21 y=19.5 text-anchor=middle font-size=2.6 fill=currentColor opacity=.65>${t(ST.t == 'e' ? 'ex' : 'inn')}</text><text x=21 y=24.5 text-anchor=middle font-size=${ft.length > 8 ? 4 : 5} font-weight=700 fill=currentColor>${ft}</text></svg>`;
       h += a
         .map((x, i) => {
-          const c = cn(x[0]);
-          return `<div class=row onclick="gl('${x[0]}')"><span style="width:12px;height:12px;border-radius:50%;background:${PAL[i % 8]}"></span><span class=g>${c.i} ${esc(t(c.n))}</span><b>${fmt(x[1])}</b><small>${((x[1] / tot) * 100).toFixed(0)}%</small></div>`;
+          const c = cn(x[0]),
+            p = (x[1] / tot) * 100,
+            col = PAL[i % PAL.length];
+          return `<div onclick="gl('${x[0]}')" style="cursor:pointer;padding:9px 0;border-top:1px solid rgba(128,128,128,.18)"><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${col};flex:none"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.i} ${esc(t(c.n))}</span><small style="opacity:.7">${p.toFixed(0)} %</small><b style="min-width:4.6em;text-align:right">${fmt(x[1])}</b></div><div style="height:4px;border-radius:2px;background:rgba(128,128,128,.18);margin:6px 0 0 18px"><div style="width:${p}%;height:100%;border-radius:2px;background:${col}"></div></div></div>`;
         })
         .join('');
     }
-    h += `</div><div class="card card-body"><b>${t('trend')}</b><svg viewBox="0 0 300 120" style="width:100%">`;
+    const dot = (c) => `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:5px"></span>`;
+    h += `</div><div class="card card-body"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px"><b style="flex:1">${t('trend')}</b><small>${dot('var(--sage)')}${t('inn')}</small><small>${dot('var(--rust)')}${t('ex')}</small></div><svg viewBox="0 0 300 120" style="width:100%"><line x1=0 x2=300 y1=90 y2=90 stroke=currentColor opacity=.2 />`;
     const ms = [];
     for (let k = 5; k >= 0; k--) {
       const [y, m] = ym.split('-'),
@@ -174,12 +182,13 @@ const V = {
         p = d.getFullYear() + '-' + pad(d.getMonth() + 1);
       ms.push([d, mt(p)]);
     }
-    const mx = Math.max(1, ...ms.map((x) => Math.max(x[1].i, x[1].e)));
+    const mx = Math.max(1, ...ms.map((x) => Math.max(x[1].i, x[1].e))),
+      bh = (v) => (v > 0 ? Math.max((v / mx) * 80, 2) : 0);
     h += ms
       .map((x, k) => {
-        const hi = (x[1].i / mx) * 80,
-          he = (x[1].e / mx) * 80;
-        return `<rect x=${k * 50 + 6} y=${90 - hi} width=17 height=${hi} fill="var(--sage)"/><rect x=${k * 50 + 25} y=${90 - he} width=17 height=${he} fill="var(--rust)"/><text x=${k * 50 + 24} y=108 text-anchor=middle font-size=10 fill="currentColor">${x[0].toLocaleDateString(loc(), { month: 'short' })}</text>`;
+        const hi = bh(x[1].i),
+          he = bh(x[1].e);
+        return `<rect x=${k * 50 + 6} y=${90 - hi} width=17 height=${hi} rx=3 fill="var(--sage)"/><rect x=${k * 50 + 25} y=${90 - he} width=17 height=${he} rx=3 fill="var(--rust)"/><text x=${k * 50 + 24} y=106 text-anchor=middle font-size=11 ${k == 5 ? 'font-weight=700' : 'opacity=.75'} fill=currentColor>${x[0].toLocaleDateString(loc(), { month: 'short' })}</text>`;
       })
       .join('');
     return h + '</svg></div>';
@@ -187,6 +196,7 @@ const V = {
   set() {
     const s = S.set,
       lb = (k, h) => `<label class="form-label">${t(k)}</label>${h}`,
+      bx = (h) => `<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(128,128,128,.25)">${h}</div>`,
       sec = (k, ic, ti, fn) => {
         const o = SE.o == k;
         return `<div class="card card-body sec${o ? ' open' : ''}" id="s_${k}"><button aria-expanded="${o}" onclick="se('${k}')"><span class=ic>${ic}</span><span class=g>${ti}</span><span class=chev aria-hidden=true>›</span></button>${o ? `<div class=sb>${fn()}</div>` : ''}</div>`;
@@ -297,18 +307,33 @@ const V = {
             s.lang,
           )}</select>`,
         ) +
-        lb(
-          'sb',
-          `<input class="form-control" inputmode=decimal value="${s.sb == null ? '' : String(s.sb).replace('.', ',')}" onchange="const v=parseFloat(this.value.replace(',','.'));S.set.sb=isNaN(v)?null:v;P()">`,
-        ) +
-        `<div class="seg d-flex gap-2" style=margin-top:14px><button class="btn btn-secondary s" onclick="pn()">${s.pin ? t('pinoff') : t('pinon')}</button></div><small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
+        `<small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
+      kto = () =>
+        `<small style="display:block;margin-bottom:6px">${t('ktoh')}</small>` +
+        ['bank', 'bar', 'spar']
+          .map((k) => {
+            const set = s[SK[k]] != null,
+              b = bal(k);
+            return bx(
+              `<label class="form-label">${k == 'spar' ? SPI : AI[k]} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp')}" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}">`,
+            );
+          })
+          .join('') +
+        `<div class="seg d-flex gap-2" style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
       dat = () =>
-        `<div class="seg d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">`;
+        `<div class="seg d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">` +
+        bx(
+          lb(
+            'pin',
+            `<div class="seg d-flex gap-2"><button class="btn btn-secondary s w-100" onclick="pn()">${s.pin ? t('pinoff') : t('pinon')}</button></div><small style="display:block;margin-top:8px">${t('pinh')}</small>`,
+          ),
+        );
     return (
       `<h2>${t('set')}</h2>` +
       sec('list', '📋', t('list'), () => V.lb()) +
       sec('stats', '📊', t('stats'), () => V.sb()) +
       sec('rec', '🔁', t('recs'), rec) +
+      sec('kto', '🏦', t('kto'), kto) +
       sec('cats', '🏷️', t('cats'), cats) +
       sec('look', '🎨', t('look'), look) +
       sec('gen', '⚙️', t('gen'), gen) +

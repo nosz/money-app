@@ -651,14 +651,43 @@ function bki() {
     `${hd(t('bki'))}<div class="card card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
   );
 }
+/* Kontostand speichern (Startseite, Einstellungen) */
+function sbSave(id) {
+  const v = num($('#' + id).value);
+  if (v == null) return toast(t('e_amt'));
+  setBank(v);
+  P();
+  toast(t('sav'));
+}
+/* Konten-Bereich in den Einstellungen: alle ausgefüllten Felder speichern, leere bleiben unverändert */
+function ktoSave() {
+  let n = 0,
+    bad = 0;
+  ['bank', 'bar', 'spar'].forEach((k) => {
+    const e = $('#st_' + k);
+    if (!e || !e.value.trim()) return;
+    const v = num(e.value);
+    if (v == null) bad++;
+    else {
+      setAcc(k, v);
+      n++;
+    }
+  });
+  if (bad || !n) return toast(t('e_amt'));
+  P();
+  toast(t('sav'));
+}
 function ob() {
   X = { nc: 1 };
   sheet(
-    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><small>${t('wset')}</small><div class=cta><button class="btn btn-primary w-100" onclick="od()">${t('go')}</button></div>`,
+    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><label class="form-label">${t('sb')}</label><input id=ob_sb class="form-control" inputmode=decimal placeholder="${t('sbp')}"><small>${t('sbl')}</small><br><small>${t('wset')}</small><div class=cta><button class="btn btn-primary w-100" onclick="od()">${t('go')}</button></div>`,
   );
 }
 function od() {
+  const e = $('#ob_sb'),
+    v = e ? num(e.value) : null;
   S.ob = 1;
+  if (v != null) setBank(v);
   X = {};
   cl();
   P();

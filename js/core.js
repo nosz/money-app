@@ -20,7 +20,7 @@ const DC = [
   ['geschenk', 'i', '🎁'],
   ['sonst_i', 'i', '✨'],
 ];
-const PAL = ['#c98a2e', '#8a9a4f', '#c15a3f', '#4f8f8a', '#2f7fd1', '#b355d6', '#da7756', '#7c9560'];
+const PAL = ['#c98a2e', '#8a9a4f', '#c15a3f', '#4f8f8a', '#2f7fd1', '#b355d6', '#da7756', '#7c9560', '#d1a73a', '#6b7fd7', '#a65d7a', '#5f9ea0'];
 let S,
   ym = iso(D).slice(0, 7),
   tab = 'home',
@@ -43,8 +43,11 @@ const fmt = (a) =>
 const sg = (a, ty) => (ty ? (ty == 'i' ? '+' : '−') : a < 0 ? '−' : '+') + fmt(Math.abs(a));
 const cn = (id) => S.cats.find((c) => c.id == id) || { id: 'x', n: 'c_sonst_e', i: '📦' };
 const allT = () => S.tx.concat(S.tr.map((x) => ({ ...x, t: 'u', c: 'u' })));
+/* Startwerte je Konto in S.set: bank → sb, bar → sbr, spar → sbs (null = nicht eingetragen) */
+const SK = { bank: 'sb', bar: 'sbr', spar: 'sbs' };
+const hasSt = () => Object.values(SK).some((f) => S.set[f] != null);
 const bal = (k) =>
-  (k == 'bank' && S.set.sb != null ? S.set.sb : 0) +
+  (S.set[SK[k]] || 0) +
   S.tx.reduce((s, x) => ((x.k || 'bank') == k ? s + (x.t == 'i' ? x.a : -x.a) : s), 0) +
   S.tr.reduce((s, x) => s + (x.f == k ? -x.a : x.to == k ? x.a : 0), 0);
 const svm = () =>
@@ -55,7 +58,24 @@ const svm = () =>
         : s,
     0,
   );
-const AI = { bank: '🏦', bar: '💵', spar: '🐷' };
+/* Zahl aus Eingabe lesen (1.250,50 / 1250,5 / 1,250.50) – null bei ungültig */
+const num = (s) => {
+  s = String(s).trim().replace(/\s/g, '');
+  const c = s.lastIndexOf(','),
+    p = s.lastIndexOf('.');
+  s = c > p ? s.replace(/\./g, '').replace(',', '.') : c < 0 && /^-?\d{1,3}(\.\d{3})+$/.test(s) ? s.replace(/\./g, '') : s.replace(/,/g, '');
+  const v = parseFloat(s);
+  return isNaN(v) ? null : v;
+};
+/* Aktueller Bankstand eingegeben → Startguthaben (sb) zurückrechnen: Eingabe minus Summe aller Bank-Buchungen */
+const setAcc = (k, v) => {
+  const f = SK[k];
+  S.set[f] = Math.round((v - (bal(k) - (S.set[f] || 0))) * 100) / 100;
+};
+const setBank = (v) => setAcc('bank', v);
+const AI = { bank: '🏦', bar: '💵', spar: '❤️💰' };
+/* Symbol für „Gespart“ auf der Startseite: App-Icon als Bild (in Auswahlfeldern geht nur Text, dort bleibt AI.spar) */
+const SPI = '<img src="icon-192.png" alt="" style="height:1.7em;width:1.7em;vertical-align:-.5em;margin:-.3em 0">';
 const DIR = () => {
   const ss = (f) =>
     `<select class="form-select" onchange="X.${f}=this.value;op()">${O(
@@ -71,4 +91,4 @@ const dtxt = (n) =>
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.16.3'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.16.12'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
