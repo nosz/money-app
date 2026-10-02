@@ -54,7 +54,6 @@ function toast(m, f, l, k) {
 }
 /* Buchung erfassen / bearbeiten */
 function ot(id) {
-  XD = null;
   const x = id && allT().find((y) => y.id == id);
   X = x
     ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : x.k || 'bank' }
@@ -136,7 +135,7 @@ function ghtml() {
             `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${esc(t(c.n))}</span></button>`,
         )
         .join('')
-    : `<div class=nr><small>${t('nores')}</small><br><button type=button class="btn btn-secondary s mt-2" onclick="const d={...X};cl();go('set');XD=d;SE.o='cats';rd();fx('cats')">+ ${t('newc')}</button></div>`;
+    : `<div class=nr><small>${t('nores')}</small></div>`;
 }
 const fcat = () => {
   const g = $('#cg');
@@ -144,7 +143,7 @@ const fcat = () => {
 };
 function op() {
   sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
-<input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control" id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
+<input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control" id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><button type=button class="btn btn-secondary s nwc" onclick="ncs(1)">＋ ${t('newc')}</button><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
 <details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class="seg d-flex gap-2"><button class="btn btn-secondary s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn btn-secondary s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input class="form-control" type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input class="form-control" id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${
     X.id || X.t == 'u'
       ? ''
@@ -350,9 +349,7 @@ const ICONS = [
   '🧾',
   '🏷️',
 ];
-/* Buchungs-Entwurf, solange eine Kategorie aus der Buchung heraus angelegt wird */
-let XD = null;
-let NI = '🏷️',
+let NC = {},
   CT = {},
   RT = {};
 const gr = (v) => {
@@ -364,52 +361,122 @@ const gr = (v) => {
     return Array.from(v)[0];
   }
 };
+/* Kategorie anlegen / bearbeiten: eigene Dialoge (aus der Buchung heraus oder aus den Einstellungen).
+   NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet) } */
+const cnm = () =>
+  `<div class=cn><span class=cpi id=cpi>${NC.i}</span><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
+const cip = () =>
+  `<label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NC.i ? 'on' : ''}" aria-pressed="${i == NC.i}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="cpv(this.value)" autocomplete=off>`;
 function pi(i, b) {
-  NI = i;
+  NC.i = i;
   $('#ni').value = '';
-  document.querySelectorAll('.ip button').forEach((x) => x.classList.toggle('on', x == b));
+  $('#cpi').textContent = i;
+  document.querySelectorAll('.ip button').forEach((x) => {
+    x.classList.toggle('on', x == b);
+    x.setAttribute('aria-pressed', x == b);
+  });
 }
+function cpv(v) {
+  const g = gr(v);
+  $('#cpi').textContent = g || NC.i;
+  document.querySelectorAll('.ip button').forEach((x) => {
+    const on = !g && x.textContent == NC.i;
+    x.classList.toggle('on', on);
+    x.setAttribute('aria-pressed', on);
+  });
+}
+function cty(ty) {
+  NC.t = ty;
+  document.querySelectorAll('.ctp button').forEach((b) => {
+    const on = b.dataset.t == ty;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  $('#cth').textContent = t('h_' + ty);
+  const s = $('#o .sh');
+  if (s) s.dataset.t = ty;
+}
+function ncs(entry) {
+  NC = { t: entry && X.t == 'i' ? 'i' : 'e', n: entry ? (X.q || '').trim() : '', i: '🏷️', from: entry ? 1 : 0 };
+  const tb = (ty, sg, lb) =>
+    `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')"><i class=t${ty}>${sg}</i> ${lb}</button>`;
+  sheet(
+    `<div class=sht><h2>${t('newc')}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">✕</button></div>${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ac()">${t('save')}</button>`,
+  );
+  $('#o .sh').dataset.t = NC.t;
+  $('#nn').focus();
+}
+/* Abbrechen: zurück zur Buchung bzw. Dialog schließen */
+const ncx = () => (NC.from ? op() : cl());
 function ac() {
   const n = $('#nn').value.trim();
   if (!n) {
     $('#nn').style.borderColor = 'var(--rust)';
+    $('#en').hidden = false;
     $('#nn').focus();
     return;
   }
-  const c = { id: uid(), t: $('#nt').value, n, i: gr($('#ni').value) || NI };
+  const c = { id: uid(), t: NC.t, n, i: gr($('#ni').value) || NC.i };
   S.cats.push(c);
-  NI = '🏷️';
   P();
-  if (XD) {
-    const d = XD;
-    go('home');
-    X = d;
+  if (NC.from) {
     X.q = '';
     X.ac = 0;
-    if (c.t == X.t) X.c = c.id;
+    X.t = c.t;
+    X.c = c.id;
+    if (X.k == 'spar') X.k = 'bar';
     op();
+  } else {
+    cl();
+    toast(t('sav'));
   }
 }
-function ec(id) {
-  const c = S.cats.find((x) => x.id == id),
-    n = prompt(t('name'), t(c.n));
-  if (n == null) return;
-  const i = gr(prompt('Emoji', c.i));
-  if (n.trim()) c.n = n.trim();
-  if (i) c.i = i;
+function ecs(id) {
+  const c = S.cats.find((x) => x.id == id);
+  if (!c) return;
+  const n = S.tx.filter((x) => x.c == id).length;
+  NC = { id, t: c.t, n: t(c.n), i: c.i, from: 0 };
+  sheet(
+    `${hd(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${
+      id.startsWith('sonst')
+        ? ''
+        : `<button class="btn btn-danger" style="width:100%;margin-top:22px" onclick="dc('${id}')">🗑 ${t('del')}</button><small class=hint style="margin-top:6px">${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small>`
+    }`,
+  );
+  $('#o .sh').dataset.t = c.t;
+}
+function ecv() {
+  const c = S.cats.find((x) => x.id == NC.id),
+    n = $('#nn').value.trim();
+  if (!n) {
+    $('#nn').style.borderColor = 'var(--rust)';
+    $('#en').hidden = false;
+    $('#nn').focus();
+    return;
+  }
+  if (n != t(c.n)) c.n = n;
+  c.i = gr($('#ni').value) || NC.i;
+  cl();
   P();
+  toast(t('sav'));
 }
 function dc(id) {
   const c = S.cats.find((x) => x.id == id),
-    to = 'sonst_' + c.t;
-  S.tx.forEach((x) => {
-    if (x.c == id) x.c = to;
-  });
-  S.rec.forEach((x) => {
-    if (x.c == id) x.c = to;
-  });
-  S.cats = S.cats.filter((x) => x.id != id);
+    to = 'sonst_' + c.t,
+    ix = S.cats.indexOf(c),
+    tx = S.tx.filter((x) => x.c == id),
+    rc = S.rec.filter((x) => x.c == id);
+  tx.forEach((x) => (x.c = to));
+  rc.forEach((x) => (x.c = to));
+  S.cats.splice(ix, 1);
+  cl();
   P();
+  toast(t('gone'), () => {
+    S.cats.splice(Math.min(ix, S.cats.length), 0, c);
+    tx.forEach((x) => (x.c = id));
+    rc.forEach((x) => (x.c = id));
+    P();
+  });
 }
 /* Backup */
 function dlf(f) {

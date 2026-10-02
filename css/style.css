@@ -729,3 +729,14 @@ nav .nb.on .nl { color: var(--gold) }
 .ov .sh { min-height: 0 }
 .kb .sh { padding-bottom: 16px }
 .sh .amt { scroll-margin-top: 90px; scroll-margin-bottom: 20px }
+
+/* Kategorien: kompakte Zeilen, Dialog zum Anlegen und Bearbeiten */
+.cr{min-height:48px;padding:6px 4px;gap:10px}
+.cr .g{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cr small{color:var(--m);white-space:nowrap}
+.cr .chv{color:var(--m);font:1.5rem/1 var(--fd)}
+.cn{display:flex;align-items:center;gap:10px;margin:4px 0 8px}
+.cn .form-control{margin:0;font-size:1.15rem;font-weight:600}
+.cpi{flex:none;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;background:color-mix(in srgb,var(--tc,var(--gold)) 14%,var(--surface));border:2px solid var(--tc,var(--gold))}
+.nwc{width:100%;margin-top:8px;border-style:dashed}
+.sh[data-t] .ip button.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,var(--surface))}

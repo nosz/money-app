@@ -240,27 +240,20 @@ const V = {
                 l
                   .map(
                     (c) =>
-                      `<div class=row><span class=ic>${c.i}</span><div class=g>${esc(t(c.n))}<br><small>${cnt(c.id)} ${t('list')}</small></div><button class="btn btn-secondary s sm" aria-label="${t('name')}" onclick="ec('${c.id}')">✎</button>${c.id.startsWith('sonst') ? '' : `<button class="btn btn-secondary s sm" aria-label="${t('del')}" onclick="dc('${c.id}')">✕</button>`}</div>`,
+                      `<div class="li cr" role=button tabindex=0 onclick="ecs('${c.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ecs('${c.id}')}"><span class=ic>${c.i}</span><div class=g>${esc(t(c.n))}</div><small>${cnt(c.id)}</small><span class=chv aria-hidden=true>›</span></div>`,
                   )
                   .join('') +
                 '</details>'
             : '';
         };
         return (
-          (XD ? `<small class=hint>${t('newchint')}</small>` : '') +
+          `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="ncs(0)">＋ ${t('newc')}</button>` +
           `<select class="form-select" aria-label="Sort" onchange="CT.s=this.value;rd()">${O(
             ['n', 'z', 'u'].map((k) => [k, t('o_' + k)]),
             CT.s || 'n',
           )}</select>` +
           grp('e', t('ex')) +
-          grp('i', t('inn')) +
-          `<label class="form-label">${t('newc')}</label><div class="seg d-flex gap-2"><select class="form-select" id=nt style=flex:.9>${O(
-            [
-              ['e', t('e')],
-              ['i', t('i')],
-            ],
-            XD && XD.t == 'i' ? 'i' : 'e',
-          )}</select><input class="form-control" id=nn placeholder="${t('name')}" autocomplete=off></div><label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NI ? 'on' : ''}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="document.querySelectorAll('.ip button').forEach(x=>x.classList.remove('on'))" autocomplete=off><button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="ac()">${t('save')}</button>`
+          grp('i', t('inn'))
         );
       },
       look = () =>
@@ -342,7 +335,6 @@ function se(k) {
   if (SE.o) fx(k);
 }
 function go(x) {
-  XD = null;
   tab = x;
   scrollTo(0, 0);
   rd();
