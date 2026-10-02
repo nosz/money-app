@@ -3,7 +3,12 @@
 // Hier muss nichts mehr hochgezählt werden.
 const CACHE_VERSION = new URL(self.location.href).searchParams.get('v') || '0';
 const CACHE_NAME = 'moneyapp-' + CACHE_VERSION;
-const ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+const ASSETS = [
+  './', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
+  './css/bootstrap.min.css', './css/style.css',
+  './js/theme.js', './js/i18n.js', './js/core.js', './js/store.js', './js/render.js', './js/app.js',
+  './img/house.svg', './img/settings.svg'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME)
