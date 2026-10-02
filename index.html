@@ -316,6 +316,36 @@
             color: inherit
         }
 
+        .rh {
+            margin: 14px 0 2px;
+            font-weight: 700
+        }
+
+        .rh:first-child {
+            margin-top: 0
+        }
+
+        .rh.e {
+            color: var(--rust)
+        }
+
+        .rh.i {
+            color: color-mix(in srgb, var(--sage) 70%, var(--text))
+        }
+
+        .row.re,
+        .row.ri {
+            padding-left: 10px
+        }
+
+        .row.re {
+            box-shadow: inset 4px 0 0 var(--rust)
+        }
+
+        .row.ri {
+            box-shadow: inset 4px 0 0 color-mix(in srgb, var(--sage) 70%, var(--text))
+        }
+
         .hint {
             display: block;
             margin: 0 2px 8px;
@@ -685,12 +715,12 @@
         const bal = k => (k == 'bank' && S.set.sb != null ? S.set.sb : 0) + S.tx.reduce((s, x) => (x.k || 'bank') == k ? s + (x.t == 'i' ? x.a : -x.a) : s, 0) + S.tr.reduce((s, x) => s + (x.f == k ? -x.a : x.to == k ? x.a : 0), 0);
         const svm = () => S.tr.reduce((s, x) => x.d.startsWith(ym) ? s + (x.to == 'spar' && x.f != 'spar' ? x.a : x.f == 'spar' && x.to != 'spar' ? -x.a : 0) : s, 0);
         const AI = { bank: '🏦', bar: '💵', spar: '🐷' };
-        const DIR = () => { const ss = f => `<select onchange="X.${f}=this.value;op()">${O(['bank', 'bar', 'spar'].map(a => [a, AI[a] + ' ' + t('a_' + a)]), X[f])}</select>`; return `<div class=dir><div><label>${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label>${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}` };
-        const ACC = () => `<label>${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class=tp>${['bank', 'bar'].map(k => `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()">${AI[k]} ${t('a_' + k)}</button>`).join('')}</div>`;
+        const DIR = () => { const ss = f => `<select onchange="X.${f}=this.value;op()">${O(['bar', 'bank', 'spar'].map(a => [a, AI[a] + ' ' + t('a_' + a)]), X[f])}</select>`; return `<div class=dir><div><label>${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label>${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}` };
+        const ACC = () => `<label>${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class=tp>${['bar', 'bank'].map(k => `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()">${AI[k]} ${t('a_' + k)}</button>`).join('')}</div>`;
         const dtxt = n => S.set.lang == 'en' ? `${n} day${n == 1 ? '' : 's'} left` : `noch ${n} ${n == 1 ? 'Tag' : 'Tage'}`;
         const srt = (a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0;
         const O = (a, v) => a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-        const APP_VERSION = '1.12.10';
+        const APP_VERSION = '1.12.11';
         /* Speicher: IndexedDB */
         const DB = () => new Promise((r, j) => { const q = indexedDB.open('moneyapp', 1); q.onupgradeneeded = () => q.result.createObjectStore('k'); q.onsuccess = () => r(q.result); q.onerror = j });
         const dbGet = async () => { const d = await DB(); return new Promise(r => { const q = d.transaction('k').objectStore('k').get('s'); q.onsuccess = () => r(q.result); q.onerror = () => r() }) };
@@ -760,7 +790,7 @@
             set() {
                 const s = S.set, lb = (k, h) => `<label>${t(k)}</label>${h}`,
                 sec = (k, ic, ti, fn) => { const o = SE.o == k; return `<div class="card sec${o ? ' open' : ''}" id="s_${k}"><button aria-expanded="${o}" onclick="se('${k}')"><span class=ic>${ic}</span><span class=g>${ti}</span><span class=chev aria-hidden=true>›</span></button>${o ? `<div class=sb>${fn()}</div>` : ''}</div>` },
-                rec = () => S.rec.length ? S.rec.map(r => `<div class=row><span class=ic>${cn(r.c).i}</span><div class=g>${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)} · ${sg(r.a, r.t)}</small></div><button class="btn s sm" aria-label="${t('del')}" onclick="rm('${r.id}')">✕</button></div>`).join('') : `<small>${t('norec')}</small>`,
+                rec = () => { if (!S.rec.length) return `<small>${t('norec')}</small>`; const grp = (ty, ti) => { const l = S.rec.filter(r => r.t == ty); return l.length ? `<div class="rh ${ty}">${ti} (${l.length})</div>` + l.map(r => `<div class="row r${ty}"><span class=ic>${cn(r.c).i}</span><div class=g>${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)} · <b class="${ty == 'i' ? 'pos' : 'neg'}">${sg(r.a, r.t)}</b></small></div><button class="btn s sm" aria-label="${t('del')}" onclick="rm('${r.id}')">✕</button></div>`).join('') : '' }; return grp('e', t('ex')) + grp('i', t('inn')) },
                 cats = () => S.cats.map(c => `<div class=row><span class=ic>${c.i}</span><div class=g>${esc(t(c.n))}<br><small>${t(c.t)}</small></div><button class="btn s sm" aria-label="${t('name')}" onclick="ec('${c.id}')">✎</button>${c.id.startsWith('sonst') ? '' : `<button class="btn s sm" aria-label="${t('del')}" onclick="dc('${c.id}')">✕</button>`}</div>`).join('') + `<label>${t('newc')}</label><div class=seg><select id=nt style=flex:.9>${O([['e', t('e')], ['i', t('i')]], 'e')}</select><input id=ni value="🏷️" style=flex:.5><input id=nn placeholder="${t('name')}"></div><button class=btn style="width:100%;margin-top:10px" onclick="ac()">${t('save')}</button>`,
                 look = () => lb('font', `<select onchange="S.set.font=this.value;P()">${O([['s', t('f_s')], ['n', t('f_n')], ['l', t('f_l')]], s.font)}</select>`) + lb('theme', '<div>' + Object.keys(TH).map(k => `<button class=th title=${k} aria-label=${k} style="background:linear-gradient(135deg,${TH[k][0]} 50%,${TH[k][2]} 50%);${s.theme == k ? 'border-color:var(--gold)' : ''}" onclick="S.set.theme='${k}';P()"></button>`).join('') + '</div>'),
                 gen = () => lb('cur', `<select onchange="S.set.cur=this.value;P()">${O(['EUR', 'CHF', 'USD', 'GBP'].map(c => [c, c]), s.cur)}</select>`) + lb('lang', `<select onchange="S.set.lang=this.value;P()">${O([['de', 'Deutsch'], ['en', 'English']], s.lang)}</select>`) + lb('sb', `<input inputmode=decimal value="${s.sb == null ? '' : String(s.sb).replace('.', ',')}" onchange="const v=parseFloat(this.value.replace(',','.'));S.set.sb=isNaN(v)?null:v;P()">`) + `<div class=seg style=margin-top:14px><button class="btn s" onclick="pn()">${s.pin ? t('pinoff') : t('pinon')}</button></div><small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
@@ -782,7 +812,7 @@
         const hd = ti => `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">✕</button></div>`;
         function toast(m, f) { const e = $('#toast'); U = f; e.innerHTML = `${m}${f ? `<button onclick="U();U=0;$('#toast').style.display='none'">${t('undo')}</button>` : ''}`; e.style.display = 'flex'; clearTimeout(toast.i); toast.i = setTimeout(() => e.style.display = 'none', 5000) }
         /* Buchung erfassen / bearbeiten */
-        function ot(id) { const x = id && allT().find(y => y.id == id); X = x ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : (x.k || 'bank') } : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: 'bank' }; op() }
+        function ot(id) { const x = id && allT().find(y => y.id == id); X = x ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : (x.k || 'bank') } : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: 'bar' }; op() }
         /* Betrag: nur Ziffern, ein Komma oder Punkt, max. 2 Nachkommastellen */
         function am(el) {
             const o = el.value; let v = o.replace(/[^\d.,]/g, ''); const m = v.search(/[.,]/);
@@ -809,7 +839,7 @@
         }
         const fcat = () => { const g = $('#cg'); if (g) g.innerHTML = ghtml() };
         function op() {
-            sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bank':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bank':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
+            sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
 <input class=amt id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off>${X.t == 'u' ? DIR() : ACC() + `<input id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div>`}
 <details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class=seg><button class="btn s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${X.id || X.t == 'u' ? '' : `<label>${t('rep')}</label><select onchange="X.f=this.value">${O([['', t('nr')], ['m', t('m')], ['w', t('w')], ['y', t('y')]], X.f)}</select>`}</details>
 <div class=seg style=margin-top:16px>${X.id ? `<button class="btn d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn s ghost" onclick="cl()">${t('cancel')}</button>`); const shh = $('.sh'); if (shh) shh.dataset.t = X.t; if (!X.id && !X.a) setTimeout(() => $('#ia') && $('#ia').focus({ preventScroll: true }), 50)
