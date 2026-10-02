@@ -60,7 +60,7 @@ const ACC=()=>`<div class=seg style=margin-top:8px>${['bank','bar'].map(k=>`<but
 const dtxt=n=>S.set.lang=='en'?`${n} day${n==1?'':'s'} left`:`noch ${n} ${n==1?'Tag':'Tage'}`;
 const srt=(a,b)=>a.d<b.d?1:a.d>b.d?-1:0;
 const O=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'selected':''}>${l}</option>`).join('');
-const APP_VERSION='1.12.1';
+const APP_VERSION='1.12.2';
 /* Speicher: IndexedDB */
 const DB=()=>new Promise((r,j)=>{const q=indexedDB.open('moneyapp',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>r(q.result);q.onerror=j});
 const dbGet=async()=>{const d=await DB();return new Promise(r=>{const q=d.transaction('k').objectStore('k').get('s');q.onsuccess=()=>r(q.result);q.onerror=()=>r()})};
@@ -117,7 +117,7 @@ look=()=>lb('font',`<select onchange="S.set.font=this.value;P()">${O([['s',t('f_
 gen=()=>lb('cur',`<select onchange="S.set.cur=this.value;P()">${O(['EUR','CHF','USD','GBP'].map(c=>[c,c]),s.cur)}</select>`)+lb('lang',`<select onchange="S.set.lang=this.value;P()">${O([['de','Deutsch'],['en','English']],s.lang)}</select>`)+lb('sb',`<input inputmode=decimal value="${s.sb==null?'':String(s.sb).replace('.',',')}" onchange="const v=parseFloat(this.value.replace(',','.'));S.set.sb=isNaN(v)?null:v;P()">`)+`<div class=seg style=margin-top:14px><button class="btn s" onclick="pn()">${s.pin?t('pinoff'):t('pinon')}</button></div><small style="display:block;margin-top:16px">${t('ver')} ${APP_VERSION}</small>`,
 dat=()=>`<div class=seg><button class="btn s" onclick="bk('j')">${t('bk')}</button><button class="btn s" onclick="bk('c')">${t('csv')}</button></div><label>${t('imp')}</label><input type=file accept=".json,application/json" onchange="im(this)">`;
 return`<h2>${t('set')}</h2>`+sec('list','📋',t('list'),()=>V.lb())+sec('stats','📊',t('stats'),()=>V.sb())+sec('rec','🔁',t('recs'),rec)+sec('cats','🏷️',t('cats'),cats)+sec('look','🎨',t('look'),look)+sec('gen','⚙️',t('gen'),gen)+sec('dat','💾',t('dat'),dat)}};
-function rd(){$('#v').innerHTML=V[tab]();$('#nav').innerHTML=`<button class="nb${tab=='home'?' on':''}" ${tab=='home'?'aria-current=page ':''}onclick="go('home')" aria-label="${t('home')}"><img src="img/house.svg" alt=""></button><button id=fab onclick="ot()" aria-label="${t('new')}"><svg viewBox="0 0 24 24" width=36 height=36 aria-hidden=true><path d="M12 4.5v15M4.5 12h15" stroke="currentColor" stroke-width=3 stroke-linecap=round fill=none /></svg></button><button class="nb${tab=='set'?' on':''}" ${tab=='set'?'aria-current=page ':''}onclick="go('set')" aria-label="${t('set')}"><img src="img/settings.svg" alt=""></button>`}
+function rd(){$('#v').innerHTML=V[tab]();$('#nav').innerHTML=`<button class="nb${tab=='home'?' on':''}" ${tab=='home'?'aria-current=page ':''}onclick="go('home')" aria-label="${t('home')}"><img src="img/house.svg" alt=""></button>${tab=='set'?'<span></span>':`<button id=fab onclick="ot()" aria-label="${t('new')}"><svg viewBox="0 0 24 24" width=36 height=36 aria-hidden=true><path d="M12 4.5v15M4.5 12h15" stroke="currentColor" stroke-width=3 stroke-linecap=round fill=none /></svg></button>`}<button class="nb${tab=='set'?' on':''}" ${tab=='set'?'aria-current=page ':''}onclick="go('set')" aria-label="${t('set')}"><img src="img/settings.svg" alt=""></button>`}
 const fx=k=>{const e=$('#s_'+k);e&&e.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})};
 function se(k){SE.o=SE.o==k?null:k;rd();if(SE.o)fx(k)}
 function go(x){tab=x;scrollTo(0,0);rd()}

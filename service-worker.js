@@ -1,6 +1,6 @@
 // Service Worker für MoneyApp
 // CACHE_VERSION bei jeder neuen Version hochzählen.
-const CACHE_VERSION = '1.12.1';
+const CACHE_VERSION = '1.12.2';
 const CACHE_NAME = 'moneyapp-' + CACHE_VERSION;
 const ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./img/house.svg','./img/settings.svg'];
 
