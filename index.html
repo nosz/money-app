@@ -690,7 +690,7 @@
         const dtxt = n => S.set.lang == 'en' ? `${n} day${n == 1 ? '' : 's'} left` : `noch ${n} ${n == 1 ? 'Tag' : 'Tage'}`;
         const srt = (a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0;
         const O = (a, v) => a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-        const APP_VERSION = '1.12.4';
+        const APP_VERSION = '1.12.10';
         /* Speicher: IndexedDB */
         const DB = () => new Promise((r, j) => { const q = indexedDB.open('moneyapp', 1); q.onupgradeneeded = () => q.result.createObjectStore('k'); q.onsuccess = () => r(q.result); q.onerror = j });
         const dbGet = async () => { const d = await DB(); return new Promise(r => { const q = d.transaction('k').objectStore('k').get('s'); q.onsuccess = () => r(q.result); q.onerror = () => r() }) };
