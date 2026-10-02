@@ -119,8 +119,6 @@ const V = {
         pd = Math.floor(Math.floor(c / dl) / 100);
       h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq && !hs ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`;
     }
-    if (!hasSt())
-      h += `<div class="card card-body"><b>🏦 ${t('sbk')}</b><small>${t('sbh')}</small><input id=hb_sb class="form-control" inputmode=decimal placeholder="${t('sbp')}" style="margin:8px 0"><button class="btn btn-primary" onclick="sbSave('hb_sb')">${t('save')}</button><small style="display:block;margin-top:8px">${t('sbm')}</small></div>`;
     if (n)
       h += `<div class="card card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
 

@@ -651,14 +651,6 @@ function bki() {
     `${hd(t('bki'))}<div class="card card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
   );
 }
-/* Kontostand speichern (Startseite, Einstellungen) */
-function sbSave(id) {
-  const v = num($('#' + id).value);
-  if (v == null) return toast(t('e_amt'));
-  setBank(v);
-  P();
-  toast(t('sav'));
-}
 /* Konten-Bereich in den Einstellungen: alle ausgefüllten Felder speichern, leere bleiben unverändert */
 function ktoSave() {
   let n = 0,

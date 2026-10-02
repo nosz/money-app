@@ -160,10 +160,6 @@ const T = {
   bkn: ['Dein letztes Backup ist älter als 30 Tage.', 'Your last backup is over 30 days old.'],
   hi: ['Willkommen bei MoneyApp', 'Welcome to MoneyApp'],
   sb: ['Aktueller Kontostand (Bank)', 'Current balance (bank)'],
-  sbh: [
-    'Trage ein, was deine Banking-App jetzt anzeigt. Die App rechnet damit dein Tagesbudget und dein Gesamtguthaben.',
-    'Enter what your banking app shows right now. The app uses it for your daily budget and total balance.',
-  ],
   pinh: [
     'Die App fragt beim Öffnen und nach 5 Minuten im Hintergrund nach der PIN. Sie sperrt nur die Ansicht auf diesem Gerät und verschlüsselt keine Daten. Es gibt keine Zurücksetzung: Merke dir die PIN und sichere vorher ein Backup.',
     'The app asks for the PIN when opened and after 5 minutes in the background. It only locks the view on this device and does not encrypt your data. There is no reset: remember your PIN and make a backup first.',
@@ -184,11 +180,6 @@ const T = {
     'Geld, das du zur Seite gelegt hast, z. B. Sparkonto oder Rücklage. Es füllt sich über Umbuchungen. Zählt nicht fürs Tagesbudget, aber fürs Gesamtguthaben.',
     'Money you have set aside, e.g. a savings account. It is filled via transfers. Does not count towards your daily budget, but does count towards your total balance.',
   ],
-  sbm: [
-    'Bargeld und Gespart trägst du unter Einstellungen → Konten ein.',
-    'You can enter cash and savings under Settings → Accounts.',
-  ],
-  sbk: ['Kontostand eintragen', 'Enter your balance'],
   sbl: ['Kannst du auch später eintragen.', 'You can also add this later.'],
   sbp: ['z. B. 1.250,00', 'e.g. 1,250.00'],
   go: ['Los geht’s', 'Let’s go'],
