@@ -242,6 +242,9 @@
             width: 100%;
             max-width: 680px;
             max-height: 92%;
+            max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
+            overscroll-behavior: contain;
+            scroll-padding-top: 76px;
             overflow: auto;
             border-radius: 20px 20px 0 0;
             padding: 16px 14px calc(16px + env(safe-area-inset-bottom))
@@ -260,11 +263,132 @@
             flex: 2
         }
 
+        .tp {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            margin: 4px 0 10px;
+            background: var(--s2);
+            border: 1px solid var(--b);
+            border-radius: 14px
+        }
+
+        .tp button {
+            flex: 1;
+            min-height: 44px;
+            padding: 8px 6px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            font-size: .95rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer
+        }
+
+        .tp button.on {
+            background: var(--tc, var(--gold));
+            color: var(--tcx, var(--on, #fff));
+            box-shadow: 0 1px 3px #0003
+        }
+
+        .tp i {
+            font-style: normal;
+            font-weight: 800;
+            margin-right: 2px
+        }
+
+        .tp .te {
+            color: var(--rust)
+        }
+
+        .tp .ti {
+            color: color-mix(in srgb, var(--sage) 70%, var(--text))
+        }
+
+        .tp .tu {
+            color: var(--text)
+        }
+
+        .tp button.on i {
+            color: inherit
+        }
+
+        .hint {
+            display: block;
+            margin: 0 2px 8px;
+            color: var(--m);
+            line-height: 1.35
+        }
+
+        .sh[data-t] {
+            border-top: 5px solid var(--tc);
+            --tcx: #fff
+        }
+
+        .sh[data-t=e] {
+            --tc: var(--rust)
+        }
+
+        .sh[data-t=i] {
+            --tc: color-mix(in srgb, var(--sage) 70%, var(--text))
+        }
+
+        .sh[data-t=u] {
+            --tc: var(--text);
+            --tcx: var(--ink)
+        }
+
+        .sh[data-t] .amt {
+            color: var(--tc)
+        }
+
+        .sh[data-t] .btn.pr {
+            background: var(--tc);
+            color: var(--tcx)
+        }
+
+        .grid button.on {
+            border-color: var(--tc, var(--gold));
+            background: color-mix(in srgb, var(--tc, var(--gold)) 14%, var(--surface))
+        }
+
+        .dir {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin: 6px 0 10px
+        }
+
+        .dir>div {
+            flex: 1;
+            min-width: 0
+        }
+
+        .dir label {
+            margin-top: 0
+        }
+
+        .swp {
+            flex: none;
+            width: 44px;
+            height: 48px;
+            margin-bottom: 4px;
+            border: 1px solid var(--b);
+            border-radius: 10px;
+            background: var(--s2);
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: 1fr;
-            gap: 10px;
+            gap: 8px;
             margin: 12px 0;
             outline-offset: 6px;
             border-radius: 14px
@@ -275,16 +399,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            min-height: 88px;
-            padding: 10px 6px;
+            gap: 3px;
+            min-height: 72px;
+            padding: 8px 2px;
             background: var(--surface);
             border: 2px solid var(--b);
             border-radius: 14px;
             color: var(--text);
             font-family: inherit;
-            font-size: .9rem;
-            line-height: 1.2;
+            font-size: .78rem;
+            line-height: 1.15;
             text-align: center;
             overflow-wrap: break-word;
             hyphens: auto;
@@ -298,9 +422,16 @@
             font-weight: 700
         }
 
+        .grid .nr {
+            grid-column: 1 / -1;
+            padding: 14px 0;
+            text-align: center;
+            color: var(--m)
+        }
+
         .grid b {
             display: block;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             line-height: 1
         }
 
@@ -542,7 +673,7 @@
     <script>
         const $ = s => document.querySelector(s), D = new Date, pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), uid = () => Math.random().toString(36).slice(2, 9);
         const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-        const T = { home: ['Start', 'Home'], list: ['Buchungen', 'Entries'], stats: ['Auswertung', 'Stats'], more: ['Mehr', 'More'], set: ['Einstellungen', 'Settings'], new: ['Neue Buchung', 'New entry'], edit: ['Buchung bearbeiten', 'Edit entry'], cancel: ['Abbrechen', 'Cancel'], look: ['Darstellung', 'Appearance'], gen: ['Allgemein', 'General'], dat: ['Daten & Backup', 'Data & backup'], ver: ['Version', 'Version'], f_s: ['Klein', 'Small'], f_n: ['Mittel', 'Medium'], f_l: ['Groß', 'Large'], norec: ['Keine wiederkehrenden Buchungen. Du kannst sie beim Erfassen unter „Mehr Optionen“ → „Wiederholen“ anlegen.', 'No recurring entries. Create one when adding an entry under “More options” → “Repeat”.'], e: ['Ausgabe', 'Expense'], i: ['Einnahme', 'Income'], amt: ['Betrag', 'Amount'], date: ['Datum', 'Date'], today: ['Heute', 'Today'], yest: ['Gestern', 'Yesterday'], opts: ['Mehr Optionen', 'More options'], note: ['Notiz', 'Note'], rep: ['Wiederholen', 'Repeat'], nr: ['Nie', 'Never'], m: ['Monatlich', 'Monthly'], w: ['Wöchentlich', 'Weekly'], y: ['Jährlich', 'Yearly'], save: ['Speichern', 'Save'], del: ['Löschen', 'Delete'], undo: ['Rückgängig', 'Undo'], bal: ['Monatsbilanz', 'Month balance'], tot: ['Gesamtguthaben', 'Total balance'], left: ['Bleibt bis Monatsende', 'Left until month end'], pd: ['Pro Tag', 'Per day'], over: ['überzogen', 'overdrawn'], incl: ['inkl. noch fälliger Buchungen:', 'incl. pending items:'], due: ['fällig', 'due'], ok: ['Bestätigen', 'Confirm'], all: ['Alle bestätigen', 'Confirm all'], skip: ['Überspringen', 'Skip'], chg: ['Betrag ändern', 'Change amount'], none: ['Noch keine Buchungen. Tippe auf +', 'No entries yet. Tap +'], search: ['Suchen…', 'Search…'], allc: ['Alle Kategorien', 'All categories'], allm: ['Alle Monate', 'All months'], trend: ['Letzte 6 Monate', 'Last 6 months'], year: ['Jahr', 'Year'], month: ['Monat', 'Month'], cats: ['Kategorien', 'Categories'], newc: ['Kategorie hinzufügen', 'Add category'], name: ['Name', 'Name'], recs: ['Wiederkehrende Buchungen', 'Recurring entries'], cur: ['Währung', 'Currency'], lang: ['Sprache', 'Language'], theme: ['Farbschema', 'Color scheme'], font: ['Schriftgröße', 'Font size'], pin: ['PIN-Sperre', 'PIN lock'], pinon: ['PIN festlegen (4–6 Ziffern)', 'Set PIN (4–6 digits)'], pinoff: ['PIN entfernen', 'Remove PIN'], bk: ['Backup erstellen (JSON)', 'Create backup (JSON)'], csv: ['CSV exportieren', 'Export CSV'], imp: ['Backup importieren', 'Import backup'], rpl: ['Ersetzen', 'Replace'], mrg: ['Zusammenführen', 'Merge'], bkn0: ['Du hast noch kein Backup erstellt.', 'You have not made a backup yet.'], bkn: ['Dein letztes Backup ist älter als 30 Tage.', 'Your last backup is over 30 days old.'], hi: ['Willkommen bei MoneyApp', 'Welcome to MoneyApp'], sb: ['Startguthaben (optional)', 'Starting balance (optional)'], go: ['Los geht’s', 'Let’s go'], inst: ['Tipp: Zum Home-Bildschirm hinzufügen (iPhone: Teilen → „Zum Home-Bildschirm“).', 'Tip: add to home screen (iPhone: Share → “Add to Home Screen”).'], ins: ['Installieren', 'Install'], x: ['Schließen', 'Close'], pi: ['PIN eingeben', 'Enter PIN'], wr: ['Falsch – bitte warten', 'Wrong – please wait'], sav: ['Gespeichert', 'Saved'], gone: ['Gelöscht', 'Deleted'], ex: ['Ausgaben', 'Expenses'], inn: ['Einnahmen', 'Income'], imd: ['Backup gefunden. Wie importieren?', 'Backup found. How to import?'], cat1: ['Kategorie', 'Category'], s_dn: ['Datum: neu → alt', 'Date: new → old'], s_da: ['Datum: alt → neu', 'Date: old → new'], s_an: ['Betrag: hoch → niedrig', 'Amount: high → low'], s_aa: ['Betrag: niedrig → hoch', 'Amount: low → high'], s_c: ['Kategorie A–Z', 'Category A–Z'], a_bank: ['Bank', 'Bank'], a_spar: ['Sparen', 'Savings'], spabz: ['abzgl. Gespartes:', 'minus savings:'], a_bar: ['Bar', 'Cash'], tr: ['Umbuchung', 'Transfer'], c_wohnen: ['Wohnen', 'Housing'], c_lebensmittel: ['Lebensmittel', 'Groceries'], c_mobil: ['Mobilität', 'Mobility'], c_freizeit: ['Freizeit', 'Leisure'], c_gesund: ['Gesundheit', 'Health'], c_kleidung: ['Kleidung', 'Clothing'], c_abos: ['Abos', 'Subscriptions'], c_sonst_e: ['Sonstiges', 'Other'], c_gehalt: ['Gehalt', 'Salary'], c_neben: ['Nebenverdienst', 'Side income'], c_geschenk: ['Geschenk', 'Gift'], c_sonst_i: ['Sonstiges', 'Other'] };
+        const T = { home: ['Start', 'Home'], list: ['Buchungen', 'Entries'], stats: ['Auswertung', 'Stats'], more: ['Mehr', 'More'], set: ['Einstellungen', 'Settings'], new: ['Neue Buchung', 'New entry'], edit: ['Buchung bearbeiten', 'Edit entry'], cancel: ['Abbrechen', 'Cancel'], look: ['Darstellung', 'Appearance'], gen: ['Allgemein', 'General'], dat: ['Daten & Backup', 'Data & backup'], ver: ['Version', 'Version'], f_s: ['Klein', 'Small'], f_n: ['Mittel', 'Medium'], f_l: ['Groß', 'Large'], norec: ['Keine wiederkehrenden Buchungen. Du kannst sie beim Erfassen unter „Mehr Optionen“ → „Wiederholen“ anlegen.', 'No recurring entries. Create one when adding an entry under “More options” → “Repeat”.'], nores: ['Keine Kategorie gefunden', 'No category found'], nt_e: ['Neue Ausgabe', 'New expense'], nt_i: ['Neue Einnahme', 'New income'], nt_u: ['Neue Umbuchung', 'New transfer'], et_e: ['Ausgabe bearbeiten', 'Edit expense'], et_i: ['Einnahme bearbeiten', 'Edit income'], et_u: ['Umbuchung bearbeiten', 'Edit transfer'], h_e: ['Geld, das du ausgibst – z. B. Einkauf oder Miete.', 'Money you spend – e.g. groceries or rent.'], h_i: ['Geld, das du bekommst – z. B. Gehalt.', 'Money you receive – e.g. salary.'], h_u: ['Geld zwischen Bank, Bar und Sparen verschieben – zählt weder als Einnahme noch als Ausgabe.', 'Move money between bank, cash and savings – counts as neither income nor expense.'], acc_e: ['Bezahlt mit', 'Paid with'], acc_i: ['Eingang auf', 'Received on'], from: ['Von', 'From'], to: ['Nach', 'To'], swap: ['Tauschen', 'Swap'], same: ['Bitte zwei verschiedene Konten wählen.', 'Please choose two different accounts.'], e: ['Ausgabe', 'Expense'], i: ['Einnahme', 'Income'], amt: ['Betrag', 'Amount'], date: ['Datum', 'Date'], today: ['Heute', 'Today'], yest: ['Gestern', 'Yesterday'], opts: ['Mehr Optionen', 'More options'], note: ['Notiz', 'Note'], rep: ['Wiederholen', 'Repeat'], nr: ['Nie', 'Never'], m: ['Monatlich', 'Monthly'], w: ['Wöchentlich', 'Weekly'], y: ['Jährlich', 'Yearly'], save: ['Speichern', 'Save'], del: ['Löschen', 'Delete'], undo: ['Rückgängig', 'Undo'], bal: ['Monatsbilanz', 'Month balance'], tot: ['Gesamtguthaben', 'Total balance'], left: ['Bleibt bis Monatsende', 'Left until month end'], pd: ['Pro Tag', 'Per day'], over: ['überzogen', 'overdrawn'], incl: ['inkl. noch fälliger Buchungen:', 'incl. pending items:'], due: ['fällig', 'due'], ok: ['Bestätigen', 'Confirm'], all: ['Alle bestätigen', 'Confirm all'], skip: ['Überspringen', 'Skip'], chg: ['Betrag ändern', 'Change amount'], none: ['Noch keine Buchungen. Tippe auf +', 'No entries yet. Tap +'], search: ['Suchen…', 'Search…'], allc: ['Alle Kategorien', 'All categories'], allm: ['Alle Monate', 'All months'], trend: ['Letzte 6 Monate', 'Last 6 months'], year: ['Jahr', 'Year'], month: ['Monat', 'Month'], cats: ['Kategorien', 'Categories'], newc: ['Kategorie hinzufügen', 'Add category'], name: ['Name', 'Name'], recs: ['Wiederkehrende Buchungen', 'Recurring entries'], cur: ['Währung', 'Currency'], lang: ['Sprache', 'Language'], theme: ['Farbschema', 'Color scheme'], font: ['Schriftgröße', 'Font size'], pin: ['PIN-Sperre', 'PIN lock'], pinon: ['PIN festlegen (4–6 Ziffern)', 'Set PIN (4–6 digits)'], pinoff: ['PIN entfernen', 'Remove PIN'], bk: ['Backup erstellen (JSON)', 'Create backup (JSON)'], csv: ['CSV exportieren', 'Export CSV'], imp: ['Backup importieren', 'Import backup'], rpl: ['Ersetzen', 'Replace'], mrg: ['Zusammenführen', 'Merge'], bkn0: ['Du hast noch kein Backup erstellt.', 'You have not made a backup yet.'], bkn: ['Dein letztes Backup ist älter als 30 Tage.', 'Your last backup is over 30 days old.'], hi: ['Willkommen bei MoneyApp', 'Welcome to MoneyApp'], sb: ['Startguthaben (optional)', 'Starting balance (optional)'], go: ['Los geht’s', 'Let’s go'], inst: ['Tipp: Zum Home-Bildschirm hinzufügen (iPhone: Teilen → „Zum Home-Bildschirm“).', 'Tip: add to home screen (iPhone: Share → “Add to Home Screen”).'], ins: ['Installieren', 'Install'], x: ['Schließen', 'Close'], pi: ['PIN eingeben', 'Enter PIN'], wr: ['Falsch – bitte warten', 'Wrong – please wait'], sav: ['Gespeichert', 'Saved'], gone: ['Gelöscht', 'Deleted'], ex: ['Ausgaben', 'Expenses'], inn: ['Einnahmen', 'Income'], imd: ['Backup gefunden. Wie importieren?', 'Backup found. How to import?'], cat1: ['Kategorie', 'Category'], s_dn: ['Datum: neu → alt', 'Date: new → old'], s_da: ['Datum: alt → neu', 'Date: old → new'], s_an: ['Betrag: hoch → niedrig', 'Amount: high → low'], s_aa: ['Betrag: niedrig → hoch', 'Amount: low → high'], s_c: ['Kategorie A–Z', 'Category A–Z'], a_bank: ['Bank', 'Bank'], a_spar: ['Sparen', 'Savings'], spabz: ['abzgl. Gespartes:', 'minus savings:'], a_bar: ['Bar', 'Cash'], tr: ['Umbuchung', 'Transfer'], c_wohnen: ['Wohnen', 'Housing'], c_lebensmittel: ['Lebensmittel', 'Groceries'], c_mobil: ['Mobilität', 'Mobility'], c_freizeit: ['Freizeit', 'Leisure'], c_gesund: ['Gesundheit', 'Health'], c_kleidung: ['Kleidung', 'Clothing'], c_abos: ['Abos', 'Subscriptions'], c_sonst_e: ['Sonstiges', 'Other'], c_gehalt: ['Gehalt', 'Salary'], c_neben: ['Nebenverdienst', 'Side income'], c_geschenk: ['Geschenk', 'Gift'], c_sonst_i: ['Sonstiges', 'Other'] };
         const DC = [['wohnen', 'e', '🏠'], ['lebensmittel', 'e', '🛒'], ['mobil', 'e', '🚗'], ['freizeit', 'e', '🎉'], ['gesund', 'e', '💊'], ['kleidung', 'e', '👕'], ['abos', 'e', '🔁'], ['sonst_e', 'e', '📦'], ['gehalt', 'i', '💼'], ['neben', 'i', '💸'], ['geschenk', 'i', '🎁'], ['sonst_i', 'i', '✨']];
         const PAL = ['#c98a2e', '#8a9a4f', '#c15a3f', '#4f8f8a', '#2f7fd1', '#b355d6', '#da7756', '#7c9560'];
         let S, ym = iso(D).slice(0, 7), tab = 'home', F = { q: '', c: '', all: 0 }, ST = { t: 'e', p: 'm' }, HS = {}, X = {}, SE = { o: null }, DP, U;
@@ -553,8 +684,9 @@
         const allT = () => S.tx.concat(S.tr.map(x => ({ ...x, t: 'u', c: 'u' })));
         const bal = k => (k == 'bank' && S.set.sb != null ? S.set.sb : 0) + S.tx.reduce((s, x) => (x.k || 'bank') == k ? s + (x.t == 'i' ? x.a : -x.a) : s, 0) + S.tr.reduce((s, x) => s + (x.f == k ? -x.a : x.to == k ? x.a : 0), 0);
         const svm = () => S.tr.reduce((s, x) => x.d.startsWith(ym) ? s + (x.to == 'spar' && x.f != 'spar' ? x.a : x.f == 'spar' && x.to != 'spar' ? -x.a : 0) : s, 0);
-        const DIR = () => `<div class=seg style="margin:10px 0;align-items:center">${['k', 'to'].map(f => `<select onchange="X.${f}=this.value;op()">${O(['bank', 'bar', 'spar'].map(a => [a, t('a_' + a)]), X[f])}</select>`).join('<span>→</span>')}</div>`;
-        const ACC = () => `<div class=seg style=margin-top:8px>${['bank', 'bar'].map(k => `<button class="btn sm ${X.k == k ? '' : 's'}" onclick="X.k='${k}';op()">${t('a_' + k)}</button>`).join('')}</div>`;
+        const AI = { bank: '🏦', bar: '💵', spar: '🐷' };
+        const DIR = () => { const ss = f => `<select onchange="X.${f}=this.value;op()">${O(['bank', 'bar', 'spar'].map(a => [a, AI[a] + ' ' + t('a_' + a)]), X[f])}</select>`; return `<div class=dir><div><label>${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label>${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}` };
+        const ACC = () => `<label>${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class=tp>${['bank', 'bar'].map(k => `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()">${AI[k]} ${t('a_' + k)}</button>`).join('')}</div>`;
         const dtxt = n => S.set.lang == 'en' ? `${n} day${n == 1 ? '' : 's'} left` : `noch ${n} ${n == 1 ? 'Tag' : 'Tage'}`;
         const srt = (a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0;
         const O = (a, v) => a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
@@ -573,20 +705,24 @@
         const mlab = p => new Date(p + '-01T00:00').toLocaleDateString(loc(), { month: 'long', year: 'numeric' });
         const mn = () => `<div class=mn><button class="btn s" onclick="mv(-1)">‹</button><div class=g>${ST.p == 'y' && tab == 'set' && SE.o == 'stats' ? ym.slice(0, 4) : mlab(ym)}</div><button class="btn s" onclick="mv(1)">›</button></div>`;
         function mv(d) { const [y, m] = ym.split('-'), n = ST.p == 'y' && tab == 'set' && SE.o == 'stats' ? new Date(+y + d, +m - 1, 1) : new Date(+y, +m - 1 + d, 1); ym = n.getFullYear() + '-' + pad(n.getMonth() + 1); rd() }
-        const rows = l => l.map(x => { const u = x.t == 'u', c = u ? { i: '⇄', n: 'tr' } : cn(x.c); return `<div class=row onclick="ot('${x.id}')"><span class=ic>${c.i}</span><div class=g><b>${esc(t(c.n))}</b><br><small>${x.d.slice(8)}.${x.d.slice(5, 7)}.${x.n ? ' · ' + esc(x.n) : ''}${x.r ? ' ↻' : ''}${u ? ' · ' + t('a_' + x.f) + ' → ' + t('a_' + x.to) : x.k == 'bar' ? ' · ' + t('a_bar') : ''}</small></div><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>` }).join('');
+        const nmx = x => x.t == 'u' ? t('tr') : t(cn(x.c).n);
+        const trow = x => { const u = x.t == 'u', c = u ? { i: '⇄', n: 'tr' } : cn(x.c); return `<div class="row tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${esc(t(c.n))}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${esc(x.n)}</small>` : ''}${u ? `<br><small>${t('a_' + x.f)} → ${t('a_' + x.to)}</small>` : x.k == 'bar' ? ` <small>· ${t('a_bar')}</small>` : ''}</span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>` };
+        const sortL = (l, sc, dr) => { const key = { d: x => x.d, c: x => nmx(x).toLowerCase(), a: x => x.a }[sc]; return l.slice().sort((a, b) => { const p = key(a), q = key(b); return (p < q ? -1 : p > q ? 1 : 0) * dr }) };
+        const hrow = (sc, dr, fn) => { const ar = c => sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''; return `<div class="row hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g onclick="${fn}('c')">${t('cat1')}${ar('c')}</span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>` };
         function hsort(c) { if ((HS.sc || 'd') == c) HS.dir = -(HS.dir || -1); else { HS.sc = c; HS.dir = c == 'c' ? 1 : -1 } rd() }
+        function fsort(c) { if ((F.sc || 'd') == c) F.dir = -(F.dir || -1); else { F.sc = c; F.dir = c == 'c' ? 1 : -1 } rs() }
         const mlist = () => {
             const cur = iso(D).slice(0, 7), from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7), all = allT().filter(x => x.d.slice(0, 7) >= from && x.d.slice(0, 7) <= cur), ms = [...new Set(all.map(x => x.d.slice(0, 7)))].sort();
             if (!ms.length) return `<div class=card><small>${t('none')}</small></div>`; HS.o = HS.o || {};
-            const sc = HS.sc || 'd', dr = HS.dir || -1, nm = x => x.t == 'u' ? t('tr') : t(cn(x.c).n), key = { d: x => x.d, c: x => nm(x).toLowerCase(), a: x => x.a }[sc], ar = c => sc == c ? (dr > 0 ? ' ▲' : ' ▼') : '';
+            const sc = HS.sc || 'd', dr = HS.dir || -1;
             return ms.map(m => {
-                const g = all.filter(x => x.d.slice(0, 7) == m).sort((a, b) => { const p = key(a), q = key(b); return (p < q ? -1 : p > q ? 1 : 0) * dr }), b = mt(m).b, op = HS.o[m] != null ? HS.o[m] : m == cur;
-                return `<div class="card mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><b>${mlab(m)}</b> <small>· ${g.length} · <span class="${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></small></summary><div class="row hd"><span class=dc onclick="hsort('d')">${t('date')}${ar('d')}</span><span class=g onclick="hsort('c')">${t('cat1')}${ar('c')}</span><span onclick="hsort('a')">${t('amt')}${ar('a')}</span></div>${g.map(x => { const u = x.t == 'u', c = u ? { i: '⇄', n: 'tr' } : cn(x.c); return `<div class="row tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${esc(t(c.n))}${x.n ? `<br><small>${esc(x.n)}</small>` : ''}${u ? `<br><small>${t('a_' + x.f)} → ${t('a_' + x.to)}</small>` : x.k == 'bar' ? ` <small>· ${t('a_bar')}</small>` : ''}</span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>` }).join('')}</details></div>`
+                const g = sortL(all.filter(x => x.d.slice(0, 7) == m), sc, dr), b = mt(m).b, op = HS.o[m] != null ? HS.o[m] : m == cur;
+                return `<div class="card mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><b>${mlab(m)}</b> <small>· ${g.length} · <span class="${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></small></summary>${hrow(sc, dr, 'hsort')}${g.map(trow).join('')}</details></div>`
             }).join('')
         };
         const lst = (l, st, id) => {
-            st.cl = st.cl || {}; const nm = x => x.t == 'u' ? t('tr') : t(cn(x.c).n), SO = { dn: srt, da: (a, b) => srt(b, a), an: (a, b) => b.a - a.a, aa: (a, b) => a.a - b.a, c: (a, b) => nm(a).localeCompare(nm(b)) }[st.s || 'dn'];
-            return [['e', 'ex'], ['i', 'inn'], ['u', 'tr']].map(([k, n]) => { const g = l.filter(x => x.t == k).sort(SO); if (!g.length) return ''; return `<details ${st.cl[k] ? '' : 'open'} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${rows(g)}</details>` }).join('')
+            st.cl = st.cl || {}; const sc = st.sc || 'd', dr = st.dir || -1;
+            return [['e', 'ex'], ['i', 'inn'], ['u', 'tr']].map(([k, n]) => { const g = sortL(l.filter(x => x.t == k), sc, dr); if (!g.length) return ''; return `<details ${st.cl[k] ? '' : 'open'} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${hrow(sc, dr, 'fsort')}${g.map(trow).join('')}</details>` }).join('')
         };
         const rl = () => { const q = F.q.toLowerCase(), l = allT().filter(x => (F.all || x.d.startsWith(ym)) && (!F.c || x.c == F.c) && (!q || (x.n + ' ' + t(cn(x.c).n)).toLowerCase().includes(q))); if (!l.length) return `<small>${t('none')}</small>`; return lst(l, F, 'F') };
         const rs = () => $('#res').innerHTML = rl();
@@ -598,15 +734,15 @@
                 if (S.set.sb != null || S.tr.length || S.tx.some(x => x.k == 'bar')) h += `<div style="margin-top:8px"><small>🏦 ${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>💵 ${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b> &nbsp; <small>🐷 ${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${S.set.sb != null ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
                 h += '</div>';
                 if (cur) {
-                    const u = up(), sq = svm(), r = m.b + u - sq, dl = new Date(D.getFullYear(), D.getMonth() + 1, 0).getDate() - D.getDate() + 1;
-                    h += `<div class=card><small>${t('left')} (${dtxt(dl)})</small><div class="big ${r < 0 ? 'neg' : ''}">${fmt(r)}</div><small>${t('pd')}: <b class="${r < 0 ? 'neg' : ''}">${r < 0 ? t('over') : fmt(r / dl)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`
+                    const u = up(), sq = svm(), dl = new Date(D.getFullYear(), D.getMonth() + 1, 0).getDate() - D.getDate() + 1, c = Math.round((m.b + u - sq) * 100), rf = Math.floor(c / 100), pd = Math.floor(Math.floor(c / dl) / 100);
+                    h += `<div class=card><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}: <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small></div>`
                 }
                 if (n) h += `<div class=card onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
                 if (!S.set.lb || Date.now() - S.set.lb > 2592e6) { if (!(S.set.snz > Date.now())) h += `<div class=card><small>${S.set.lb ? t('bkn') : t('bkn0')}</small><div class=seg style=margin-top:8px><button class=btn onclick="bk('j')">${t('bk')}</button><button class="btn s" onclick="S.set.snz=Date.now()+6048e5;P()">✕</button></div></div>` }
                 if (!S.set.hd && !matchMedia('(display-mode:standalone)').matches && (DP || /iphone|ipad/i.test(navigator.userAgent))) h += `<div class=card><small>${DP ? '' : t('inst')}</small><div class=seg>${DP ? `<button class=btn onclick="DP.prompt()">${t('ins')}</button>` : ''}<button class="btn s" onclick="S.set.hd=1;P()">✕</button></div></div>`;
                 return h + mlist()
             },
-            lb() { return `${F.all ? '' : mn()}<input placeholder="${t('search')}" value="${esc(F.q)}" oninput="F.q=this.value;rs()"><select onchange="F.c=this.value;rs()"><option value="">${t('allc')}</option>${S.cats.map(c => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><select onchange="F.s=this.value;rs()">${O(['dn', 'da', 'an', 'aa', 'c'].map(k => [k, t('s_' + k)]), F.s || 'dn')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><div class=card id=res style=margin-top:10px>${rl()}</div>` },
+            lb() { return `${F.all ? '' : mn()}<input placeholder="${t('search')}" value="${esc(F.q)}" oninput="F.q=this.value;rs()"><select onchange="F.c=this.value;rs()"><option value="">${t('allc')}</option>${S.cats.map(c => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><div class=card id=res style=margin-top:10px>${rl()}</div>` },
             sb() {
                 const pre = ST.p == 'y' ? ym.slice(0, 4) : ym, by = {}; S.tx.forEach(x => { if (x.t == ST.t && x.d.startsWith(pre)) by[x.c] = (by[x.c] || 0) + x.a });
                 const a = Object.entries(by).sort((p, q) => q[1] - p[1]), tot = a.reduce((s, x) => s + x[1], 0); let cum = 0;
@@ -647,16 +783,40 @@
         function toast(m, f) { const e = $('#toast'); U = f; e.innerHTML = `${m}${f ? `<button onclick="U();U=0;$('#toast').style.display='none'">${t('undo')}</button>` : ''}`; e.style.display = 'flex'; clearTimeout(toast.i); toast.i = setTimeout(() => e.style.display = 'none', 5000) }
         /* Buchung erfassen / bearbeiten */
         function ot(id) { const x = id && allT().find(y => y.id == id); X = x ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : (x.k || 'bank') } : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: 'bank' }; op() }
+        /* Betrag: nur Ziffern, ein Komma oder Punkt, max. 2 Nachkommastellen */
+        function am(el) {
+            const o = el.value; let v = o.replace(/[^\d.,]/g, ''); const m = v.search(/[.,]/);
+            if (m >= 0) v = v.slice(0, m + 1) + v.slice(m + 1).replace(/[.,]/g, '').slice(0, 2);
+            if (v != o) { const p = Math.max(0, (el.selectionStart ?? o.length) - (o.length - v.length)); el.value = v; try { el.setSelectionRange(p, p) } catch (e) { } }
+            X.a = v; el.style.borderColor = ''
+        }
+        /* Kategorie-Vorschlag aus früheren Buchungen mit gleicher/ähnlicher Notiz */
+        function ns(v) {
+            X.n = v; if (X.id || X.t == 'u' || (X.c && !X.ac)) return;
+            const q = v.trim().toLowerCase(); let m = null;
+            if (q.length >= 2) for (let i = S.tx.length - 1; i >= 0; i--) { const x = S.tx[i], n = String(x.n || '').trim().toLowerCase(); if (x.t == X.t && n && (n == q || n.startsWith(q)) && S.cats.some(c => c.id == x.c)) { m = x.c; break } }
+            if (m) { X.c = m; X.ac = 1 } else if (X.ac) { X.c = null; X.ac = 0 } else return;
+            const g = $('.grid'); if (g && g.style.outline) g.style.outline = '';
+            const bs = document.querySelectorAll('.grid button[data-c]');
+            bs.forEach(b => { const on = b.dataset.c == X.c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on) })
+        }
+        /* Kategorie-Kacheln: alle anzeigen, bei Suche nach Name oder früheren Notizen filtern */
+        function ghtml() {
+            const cnt = c => S.tx.slice(-80).filter(x => x.c == c.id).length, q = (X.q || '').trim().toLowerCase();
+            let cs = S.cats.filter(c => c.t == X.t); cs.sort((a, b) => cnt(b) - cnt(a));
+            if (q) { const nt = {}; S.tx.forEach(x => { if (x.n && x.t == X.t) nt[x.c] = (nt[x.c] || '') + '\n' + String(x.n).toLowerCase() }); cs = cs.filter(c => t(c.n).toLowerCase().includes(q) || (nt[c.id] || '').includes(q)) }
+            return cs.length ? cs.map(c => `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${esc(t(c.n))}</span></button>`).join('') : `<small class=nr>${t('nores')}</small>`
+        }
+        const fcat = () => { const g = $('#cg'); if (g) g.innerHTML = ghtml() };
         function op() {
-            const cs = S.cats.filter(c => c.t == X.t), cnt = c => S.tx.slice(-80).filter(x => x.c == c.id).length; cs.sort((a, b) => cnt(b) - cnt(a));
-            sheet(`${hd(X.id ? t('edit') : t('new'))}<div class=seg>${X.id && X.t == 'u' ? '' : `<button class="btn ${X.t == 'e' ? '' : 's'}" onclick="X.t='e';X.c=null;X.k=X.k=='spar'?'bank':X.k;op()">${t('e')}</button><button class="btn ${X.t == 'i' ? '' : 's'}" onclick="X.t='i';X.c=null;X.k=X.k=='spar'?'bank':X.k;op()">${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="btn ${X.t == 'u' ? '' : 's'}" onclick="X.t='u';X.c=null;X.to=X.k=='bank'?'bar':'bank';op()">⇄ ${t('tr')}</button>`}</div>
-<input class=amt id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="X.a=this.value">${X.t == 'u' ? DIR() : ACC() + `<div class=grid>${cs.map(c => `<button class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';op()"><b>${c.i}</b><span>${esc(t(c.n))}</span></button>`).join('')}</div>`}
-<details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class=seg><button class="btn s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input placeholder="${t('note')}" value="${esc(X.n)}" oninput="X.n=this.value">${X.id || X.t == 'u' ? '' : `<label>${t('rep')}</label><select onchange="X.f=this.value">${O([['', t('nr')], ['m', t('m')], ['w', t('w')], ['y', t('y')]], X.f)}</select>`}</details>
-<div class=seg style=margin-top:16px>${X.id ? `<button class="btn d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn s ghost" onclick="cl()">${t('cancel')}</button>`); if (!X.id && !X.a) setTimeout(() => $('#ia') && $('#ia').focus(), 50)
+            sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bank':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bank':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
+<input class=amt id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off>${X.t == 'u' ? DIR() : ACC() + `<input id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div>`}
+<details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class=seg><button class="btn s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${X.id || X.t == 'u' ? '' : `<label>${t('rep')}</label><select onchange="X.f=this.value">${O([['', t('nr')], ['m', t('m')], ['w', t('w')], ['y', t('y')]], X.f)}</select>`}</details>
+<div class=seg style=margin-top:16px>${X.id ? `<button class="btn d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn s ghost" onclick="cl()">${t('cancel')}</button>`); const shh = $('.sh'); if (shh) shh.dataset.t = X.t; if (!X.id && !X.a) setTimeout(() => $('#ia') && $('#ia').focus({ preventScroll: true }), 50)
         }
         function sv() {
             const a = parseFloat(String(X.a).replace(',', '.')); if (!(a > 0) || (X.t != 'u' && !X.c)) { if (!(a > 0)) $('#ia').style.borderColor = 'var(--rust)'; const g = $('.grid'); if (g && !X.c) g.style.outline = '3px solid var(--rust)'; return } const d = X.d || iso(D);
-            if (X.t == 'u') { if (X.k == X.to) return; const o = { d, a, f: X.k, to: X.to, n: X.n || '' }; if (X.id) Object.assign(S.tr.find(x => x.id == X.id), o); else S.tr.push({ id: uid(), ...o }) } else if (X.id) Object.assign(S.tx.find(x => x.id == X.id), { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' }); else { S.tx.push({ id: uid(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 }); if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 }) }
+            if (X.t == 'u') { if (X.k == X.to) { op(); return } const o = { d, a, f: X.k, to: X.to, n: X.n || '' }; if (X.id) Object.assign(S.tr.find(x => x.id == X.id), o); else S.tr.push({ id: uid(), ...o }) } else if (X.id) Object.assign(S.tx.find(x => x.id == X.id), { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' }); else { S.tx.push({ id: uid(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 }); if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 }) }
             cl(); P(); toast(t('sav'))
         }
         function dl() { const L = X.t == 'u' ? S.tr : S.tx, i = L.findIndex(x => x.id == X.id), o = L[i]; L.splice(i, 1); cl(); P(); toast(t('gone'), () => { L.push(o); P() }) }
