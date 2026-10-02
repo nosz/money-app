@@ -1,7 +1,8 @@
 // Service Worker für MoneyApp
-// Die Version kommt aus der index.html (APP_VERSION) über ?v=... beim Registrieren.
-// Hier muss nichts mehr hochgezählt werden.
-const CACHE_VERSION = new URL(self.location.href).searchParams.get('v') || '0';
+//
+// RELEASE: CACHE_VERSION bei JEDEM Release hochzählen (zusammen mit APP_VERSION in js/core.js).
+// Die geänderte Datei löst beim Browser das Update aus. Ohne neue Version kommt kein Update an.
+const CACHE_VERSION = '1.16.0';
 const CACHE_NAME = 'moneyapp-' + CACHE_VERSION;
 const ASSETS = [
   './', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
@@ -11,8 +12,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
+  // cache:'reload' umgeht den HTTP-Cache (GitHub Pages: max-age=600), damit nie alte Dateien im neuen Paket landen.
   e.waitUntil(caches.open(CACHE_NAME)
-    .then(c => Promise.allSettled(ASSETS.map(u => c.add(u))))
+    .then(c => Promise.allSettled(ASSETS.map(u => c.add(new Request(u, { cache: 'reload' })))))
+    // ÜBERGANG (nur Release 1.16.0): Bestehende Installationen kennen die Update-Logik noch nicht und
+    // würden sonst ewig auf einen wartenden Worker warten. Im NÄCHSTEN Release die folgende Zeile ENTFERNEN,
+    // dann wartet der neue Worker, bis die App ihn per 'SKIP_WAITING' aktiviert (siehe upd() in js/app.js).
     .then(() => self.skipWaiting()));
 });
 
@@ -22,16 +27,17 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
-// HTML: Netz zuerst (neueste Version), offline aus dem Cache.
-// Sonstiges: Cache zuerst mit Aktualisierung im Hintergrund.
+// Die App aktiviert einen wartenden Worker erst, wenn kein Dialog offen ist (oder der Nutzer „Neu laden“ tippt).
+self.addEventListener('message', e => { if (e.data === 'SKIP_WAITING') self.skipWaiting(); });
+
+// Alles (auch HTML) kommt zuerst aus dem Cache der eigenen Version: eine Version = ein geschlossenes Paket.
+// Nur der eigene Cache wird gefragt, nicht die Pakete anderer Versionen.
 self.addEventListener('fetch', e => {
   const r = e.request;
   if (r.method !== 'GET' || !r.url.startsWith('http')) return;
-  const html = r.mode === 'navigate' || (r.headers.get('accept') || '').includes('text/html');
+  const nav = r.mode === 'navigate';
   const store = res => { if (res && res.ok) { const c = res.clone(); caches.open(CACHE_NAME).then(ch => ch.put(r, c)); } return res; };
-  if (html) {
-    e.respondWith(fetch(r).then(store).catch(() => caches.match(r).then(c => c || caches.match('./index.html'))));
-    return;
-  }
-  e.respondWith(caches.match(r).then(c => c || fetch(r).then(store)));
+  e.respondWith(caches.open(CACHE_NAME)
+    .then(ch => ch.match(r, { ignoreSearch: nav }))
+    .then(c => c || fetch(r).then(store).catch(() => nav ? caches.open(CACHE_NAME).then(ch => ch.match('./index.html')) : Response.error())));
 });

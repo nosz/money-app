@@ -43,13 +43,14 @@ addEventListener('keydown', (e) => {
 });
 const hd = (ti) =>
   `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">✕</button></div>`;
-function toast(m, f) {
+function toast(m, f, l, k) {
+  /* l = Beschriftung des Knopfes (Standard: Rückgängig), k = Toast bleibt stehen */
   const e = $('#toast');
   U = f;
-  e.innerHTML = `${m}${f ? `<button onclick="U();U=0;$('#toast').style.display='none'">${t('undo')}</button>` : ''}`;
+  e.innerHTML = `${m}${f ? `<button onclick="U();U=0;$('#toast').style.display='none'">${l || t('undo')}</button>` : ''}`;
   e.style.display = 'flex';
   clearTimeout(toast.i);
-  toast.i = setTimeout(() => (e.style.display = 'none'), 5000);
+  if (!k) toast.i = setTimeout(() => (e.style.display = 'none'), 5000);
 }
 /* Buchung erfassen / bearbeiten */
 function ot(id) {
@@ -616,6 +617,53 @@ addEventListener('beforeinstallprompt', (e) => {
   if (!S.ob) ob();
   lk();
   navigator.storage && navigator.storage.persist && navigator.storage.persist();
-  if ('serviceWorker' in navigator)
-    navigator.serviceWorker.register('./service-worker.js?v=' + APP_VERSION).catch(() => {});
+  upd();
 })();
+/* Updates: Der neue Service Worker wartet (siehe service-worker.js). Er wird aktiviert, sobald kein
+   Dialog offen ist, danach lädt die Seite neu. Ist ein Dialog offen, erscheint ein Hinweis mit „Neu laden“. */
+function upd() {
+  if (!('serviceWorker' in navigator)) return;
+  const sw = navigator.serviceWorker,
+    had = !!sw.controller; /* false = erste Installation: nie neu laden */
+  let reg,
+    go = 0,
+    rl = 0;
+  const safe = () => !$('#o'),
+    reload = () => {
+      if (!rl) {
+        rl = 1;
+        location.reload();
+      }
+    },
+    act = () => {
+      go = 1;
+      reg && reg.waiting && reg.waiting.postMessage('SKIP_WAITING');
+    },
+    check = () => {
+      if (!had || !reg || !reg.waiting) return;
+      if (safe()) act();
+      else if (!$('#toast').style.display || $('#toast').style.display == 'none') toast(t('upd'), act, t('updb'), 1);
+    };
+  sw.addEventListener('controllerchange', () => {
+    if (!had) return;
+    if (go || safe()) reload();
+    else toast(t('upd'), reload, t('updb'), 1);
+  });
+  sw.register('./service-worker.js')
+    .then((r) => {
+      reg = r;
+      r.addEventListener('updatefound', () => {
+        const n = r.installing;
+        n && n.addEventListener('statechange', () => n.state == 'installed' && check());
+      });
+      check();
+    })
+    .catch(() => {});
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && reg) {
+      reg.update().catch(() => {});
+      check();
+    }
+  });
+  setInterval(check, 20000);
+}

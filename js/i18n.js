@@ -113,6 +113,8 @@ const T = {
   save: ['Speichern', 'Save'],
   del: ['Löschen', 'Delete'],
   undo: ['Rückgängig', 'Undo'],
+  upd: ['Neue Version verfügbar', 'New version available'],
+  updb: ['Neu laden', 'Reload'],
   bal: ['Monatsbilanz', 'Month balance'],
   tot: ['Gesamtguthaben', 'Total balance'],
   left: ['Bleibt bis Monatsende', 'Left until month end'],
