@@ -740,3 +740,14 @@ nav .nb.on .nl { color: var(--gold) }
 .cpi{flex:none;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;background:color-mix(in srgb,var(--tc,var(--gold)) 14%,var(--surface));border:2px solid var(--tc,var(--gold))}
 .nwc{width:100%;margin-top:8px;border-style:dashed}
 .sh[data-t] .ip button.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,var(--surface))}
+
+/* Dialoge zum Anlegen/Bearbeiten: Kopf scrollt mit, deckt das Eingabefeld nie ab */
+.sht.ns{position:static;margin:0 0 8px;padding:0}
+.sh input{scroll-margin-top:16px}
+/* Löschen: nie in der Typ-Farbe von Speichern, sondern neutral mit roter Kontur */
+.sc{margin-top:10px}
+.btn.dlt{background:transparent;color:var(--rust);border:2px solid var(--rust)}
+.btn.dlt:hover,.btn.dlt:active,.btn.dlt:focus-visible{background:color-mix(in srgb,var(--rust) 12%,transparent);color:var(--rust);border-color:var(--rust)}
+
+/* Begrüssung: kompakter, damit der Button ohne Scrollen sichtbar ist */
+.wl{margin:6px 0}.wl li{padding:4px 0}.pv{margin:8px 0}

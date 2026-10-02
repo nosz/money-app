@@ -157,7 +157,7 @@ function op() {
           X.f,
         )}</select>`
   }</details>
-<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class="seg d-flex gap-2" style=margin-top:16px>${X.id ? `<button class="btn btn-danger d" onclick="dl()">${t('del')}</button>` : ''}<button class="btn pr" onclick="sv()">${t('save')}</button></div><button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`);
+<div class="em warn alert alert-warning" id=ew hidden role=alert></div><button class="btn pr" style="width:100%;margin-top:16px" onclick="sv()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button>${X.id ? `<button class="btn dlt" onclick="dl()">🗑 ${t('del')}</button>` : ''}</div>`);
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
@@ -363,6 +363,8 @@ const gr = (v) => {
 };
 /* Kategorie anlegen / bearbeiten: eigene Dialoge (aus der Buchung heraus oder aus den Einstellungen).
    NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet) } */
+const hdc = (ti) =>
+  `<div class="sht ns"><h2>${ti}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">✕</button></div>`;
 const cnm = () =>
   `<div class=cn><span class=cpi id=cpi>${NC.i}</span><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
 const cip = () =>
@@ -401,10 +403,11 @@ function ncs(entry) {
   const tb = (ty, sg, lb) =>
     `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')"><i class=t${ty}>${sg}</i> ${lb}</button>`;
   sheet(
-    `<div class=sht><h2>${t('newc')}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">✕</button></div>${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ac()">${t('save')}</button>`,
+    `${hdc(t('newc'))}${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ac()">${t('save')}</button><button class="btn btn-secondary s ghost" onclick="ncx()">${t('cancel')}</button>`,
   );
   $('#o .sh').dataset.t = NC.t;
-  $('#nn').focus();
+  $('#o .sh').scrollTop = 0;
+  $('#nn').focus({ preventScroll: true });
 }
 /* Abbrechen: zurück zur Buchung bzw. Dialog schließen */
 const ncx = () => (NC.from ? op() : cl());
@@ -437,10 +440,10 @@ function ecs(id) {
   const n = S.tx.filter((x) => x.c == id).length;
   NC = { id, t: c.t, n: t(c.n), i: c.i, from: 0 };
   sheet(
-    `${hd(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${
+    `${hdc(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${
       id.startsWith('sonst')
-        ? ''
-        : `<button class="btn btn-danger" style="width:100%;margin-top:22px" onclick="dc('${id}')">🗑 ${t('del')}</button><small class=hint style="margin-top:6px">${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small>`
+        ? `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`
+        : `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button><button class="btn dlt" style="width:100%;margin-top:18px" onclick="dc('${id}')">🗑 ${t('del')}</button><small class=hint style="margin-top:6px">${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small>`
     }`,
   );
   $('#o .sh').dataset.t = c.t;
@@ -660,6 +663,21 @@ function od() {
   cl();
   P();
 }
+/* Installations-Hinweis: nach dem Tippen auf „Installieren“ (oder nach erfolgter Installation) nie wieder anzeigen */
+function ins() {
+  const p = DP;
+  p && p.prompt();
+  DP = null;
+  S.set.hd = 1;
+  P();
+}
+addEventListener('appinstalled', () => {
+  DP = null;
+  if (S) {
+    S.set.hd = 1;
+    P();
+  }
+});
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   DP = e;
