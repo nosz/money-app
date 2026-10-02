@@ -71,4 +71,4 @@ const dtxt = (n) =>
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.15.0'; /* EINZIGE Stelle für die Versionsnummer: bei jeder Änderung hier hochzählen */
+const APP_VERSION = '1.15.2'; /* EINZIGE Stelle für die Versionsnummer: bei jeder Änderung hier hochzählen */

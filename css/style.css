@@ -227,8 +227,7 @@
             background: var(--ink);
             width: 100%;
             max-width: 680px;
-            max-height: 92%;
-            max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
+            max-height: 100%;
             overscroll-behavior: contain;
             scroll-padding-top: 76px;
             overflow: auto;
@@ -709,8 +708,8 @@ nav .nb.on .nl { color: var(--gold) }
 /* ===== Tablet / Desktop ===== */
 @media (min-width: 768px) {
     .w { max-width: 760px }
-    .ov { align-items: center }
-    .sh { border-radius: 20px; max-height: calc(100dvh - 48px); max-width: 560px }
+    .ov { align-items: center; padding: 24px }
+    .sh { border-radius: 20px; max-width: 560px }
     .grid { grid-template-columns: repeat(6, 1fr) }
     nav { left: 50%; right: auto; width: min(100%, 520px); transform: translateX(-50%); border: 1px solid var(--b); border-bottom: 0; border-radius: 18px 18px 0 0 }
     #toast { bottom: calc(100px + env(safe-area-inset-bottom)) }
@@ -721,3 +720,12 @@ nav .nb.on .nl { color: var(--gold) }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important }
 }
+
+/* ===== Eingabe-Sheet und Tastatur =====
+   Das Overlay (#o) wird per JS (vvf) auf den sichtbaren Bereich gesetzt.
+   Das Sheet darf nie höher sein als das Overlay (100% statt 100dvh, das die
+   Tastatur nicht berücksichtigt), damit es scrollt und das fokussierte Feld sichtbar bleibt. */
+.ov { padding-top: calc(env(safe-area-inset-top) + 8px); overflow: hidden }
+.ov .sh { min-height: 0 }
+.kb .sh { padding-bottom: 16px }
+.sh .amt { scroll-margin-top: 90px; scroll-margin-bottom: 20px }
