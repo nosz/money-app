@@ -690,6 +690,7 @@
     .em{color:var(--rust);font-size:.85rem;font-weight:600;margin:4px 2px 0}.em[hidden]{display:none}.em.warn{background:color-mix(in srgb,var(--gold) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 45%,var(--surface));color:var(--text);border-radius:10px;padding:10px 12px;margin:12px 0 0}.em.warn button{margin-top:8px}
 .amt.bad{border-color:var(--rust)!important;animation:sk .3s}.grid.bad{outline:2px solid var(--rust);outline-offset:3px;border-radius:12px}details.gx>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}details.gx>summary::-webkit-details-marker{display:none}details.gx>summary::after{content:'›';transform:rotate(90deg);transition:.2s}details.gx:not([open])>summary::after{transform:none}details.gx+details.gx{margin-top:10px}
 .ip{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.ip button{font-size:1.4rem;width:44px;height:44px;border-radius:10px;border:2px solid var(--b);background:var(--surface)}.ip button.on{border-color:var(--gold)}
+.ov .sh{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.kb #nav{display:none}.kb .sh .hint{display:none}
 @keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}.wl{list-style:none;padding:0;margin:10px 0}.wl li{display:flex;gap:12px;align-items:flex-start;padding:8px 0}.wl i{font-style:normal;font-size:1.4rem;width:2rem;text-align:center;flex:none}.pv{background:color-mix(in srgb,var(--sage) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--sage) 40%,var(--surface));border-radius:12px;padding:12px 14px;margin:10px 0}.pv span{font-size:.9rem}
 </style>
     <script>
@@ -724,7 +725,7 @@
         const dtxt = n => S.set.lang == 'en' ? `${n} day${n == 1 ? '' : 's'} left` : `noch ${n} ${n == 1 ? 'Tag' : 'Tage'}`;
         const srt = (a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0;
         const O = (a, v) => a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-        const APP_VERSION = '1.14.0'; /* EINZIGE Stelle für die Versionsnummer: bei jeder Änderung hier hochzählen */
+        const APP_VERSION = '1.14.1'; /* EINZIGE Stelle für die Versionsnummer: bei jeder Änderung hier hochzählen */
         /* Speicher: IndexedDB */
         const DB = () => new Promise((r, j) => { const q = indexedDB.open('moneyapp', 1); q.onupgradeneeded = () => q.result.createObjectStore('k'); q.onsuccess = () => r(q.result); q.onerror = j });
         const dbGet = async () => { const d = await DB(); return new Promise(r => { const q = d.transaction('k').objectStore('k').get('s'); q.onsuccess = () => r(q.result); q.onerror = () => r() }) };
@@ -819,7 +820,7 @@
         function gl(id) { F = { q: '', c: id, all: 0 }; tab = 'set'; SE.o = 'list'; rd(); fx('list') }
         /* Sheets & Toast */
         let HP = 0;
-        function sheet(h) { let o = $('#o'); if (!o) { o = document.createElement('div'); o.id = 'o'; o.className = 'ov'; o.onclick = e => { if (e.target == o && !X.nc) cl() }; document.body.append(o); if (!X.nc) { try { history.pushState({ sh: 1 }, ''); HP = 1 } catch (e) { } } } o.innerHTML = `<div class=sh role=dialog aria-modal=true>${h}</div>` }
+        function sheet(h) { let o = $('#o'); if (!o) { o = document.createElement('div'); o.id = 'o'; o.className = 'ov'; o.onclick = e => { if (e.target == o && !X.nc) cl() }; document.body.append(o); if (!X.nc) { try { history.pushState({ sh: 1 }, ''); HP = 1 } catch (e) { } } } o.innerHTML = `<div class=sh role=dialog aria-modal=true>${h}</div>`; vvf() }
         const cl = () => { const o = $('#o'); if (o) { o.remove(); if (HP) { HP = 0; history.back() } } };
         addEventListener('popstate', () => { const o = $('#o'); if (o && HP) { HP = 0; o.remove() } });
         addEventListener('keydown', e => { if (e.key == 'Escape' && $('#o') && !X.nc) cl() });
@@ -909,6 +910,12 @@
         }
         document.addEventListener('visibilitychange', () => { if (document.hidden) window.hid = Date.now(); else if (S && Date.now() - (window.hid || 0) > 3e5) lk() });
         /* Start */
+        /* Tastatur: Fenster an den sichtbaren Bereich anpassen, damit nichts verdeckt wird */
+        let KB0 = 0;
+        function vvf() { const v = window.visualViewport; if (!v) return; KB0 = Math.max(KB0, v.height); document.body.classList.toggle('kb', v.height < KB0 - 120); const o = $('#o'); if (o) { o.style.bottom = 'auto'; o.style.top = v.offsetTop + 'px'; o.style.height = v.height + 'px' } }
+        if (window.visualViewport) { visualViewport.addEventListener('resize', vvf); visualViewport.addEventListener('scroll', vvf); vvf() }
+        addEventListener('orientationchange', () => { KB0 = 0 });
+        addEventListener('focusin', e => { const el = e.target; if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return; setTimeout(() => { try { el.scrollIntoView({ block: el.id == 'csi' ? 'start' : 'center', behavior: 'smooth' }) } catch (x) { } }, 320) });
         function bki() { X = {}; sheet(`${hd(t('bki'))}<div class=card><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class=card><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class=btn style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`) }
         function ob() { X = { nc: 1 }; sheet(`<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><small>${t('wset')}</small><button class=btn style="width:100%;margin-top:14px" onclick="od()">${t('go')}</button>`) }
         function od() { S.ob = 1; X = {}; cl(); P() }
