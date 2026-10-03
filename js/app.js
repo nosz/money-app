@@ -240,6 +240,10 @@ function dpk(v) {
   if (i && i.value != cd) i.value = cd;
 }
 
+/* 1.34.0: Einheitliche Knopfzeile unten in einer Zeile: Abbrechen (schmal, schlicht) links, Speichern (groß) rechts.
+   sx = Speichern-Aktion, cx = Abbrechen-Aktion (wie das ✕ oben), lb = Beschriftung des Hauptknopfs (Standard: Speichern) */
+const svb = (sx, cx, lb) =>
+  `<div class=stkb><div class=sbr><button type=button class=\"btn ghost cb\" onclick=\"${cx}\">${t('cancel')}</button><button type=button class=\"btn btn-primary pr sb\" onclick=\"${sx}\">${lb || t('save')}</button></div></div>`;
 /* Löschen als dezenter Textlink in Rost am Ende der Maske (nur beim Bearbeiten) */
 const acts2 = (dx, h) =>
   `<div class=acts2>${h ? `<small class=dh2>${h}</small>` : ''}<button type=button class=lnk onclick="${dx}">${bi('trash')} ${t('del')}</button></div>`;
@@ -278,7 +282,7 @@ function op() {
             X.f,
           )}</select></div></details>`;
   sheet(
-    `${hd(t(X.id ? 'et_' + X.t : 'bk_nt'))}${typ}<small class=hint>${t('bk_h_' + X.t)}</small>${betrag}${konto}${kat}${dat}${mehr}<div class="em warn alert alert-warning" id=ew hidden role=alert></div>${X.id ? acts2('dl()') : ''}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="sv()">${t('save')}</button></div>`,
+    `${hd(t(X.id ? 'et_' + X.t : 'bk_nt'))}${typ}<small class=hint>${t('bk_h_' + X.t)}</small>${betrag}${konto}${kat}${dat}${mehr}<div class="em warn alert alert-warning" id=ew hidden role=alert></div>${X.id ? acts2('dl()') : ''}${svb('sv()', 'cl()')}`,
     'fs',
   );
   const shh = $('.sh');
@@ -500,7 +504,7 @@ function cfa(id) {
   if (!r) return;
   X.nc = 0;
   sheet(
-    `${hd(t('chg'))}${bstrip([r.ka || 'bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="caLive('${id}',this)" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><div class=stkb><button class="btn btn-primary pr" onclick="cfs('${id}')">${t('ok')}</button></div>${acts('dsh()')}`,
+    `${hd(t('chg'))}${bstrip([r.ka || 'bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="caLive('${id}',this)" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div>${svb(`cfs('${id}')`, 'dsh()', t('ok'))}`,
   );
   $('.sh').dataset.t = r.t;
   const e = $('#ca_a');
@@ -559,7 +563,7 @@ function rfm(r, nw) {
 function erd() {
   const r = RE;
   sheet(
-    `${hd(t('rec_e'))}<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(r.t)}</div></div>${rfm(r, 0)}${acts2('rdl()')}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="rsv()">${t('save')}</button></div>`,
+    `${hd(t('rec_e'))}<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(r.t)}</div></div>${rfm(r, 0)}${acts2('rdl()')}${svb('rsv()', 'cl()')}`,
     'fs',
   );
   $('.sh').dataset.t = r.t;
@@ -605,7 +609,7 @@ function nrd() {
   const r = RE,
     tb = (k, lb) => `<button type=button class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}" onclick="nrt('${k}')">${lb}</button>`;
   sheet(
-    `${hd(t('rec_n'))}<div class=fld><div class="tp typ" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div></div>${rfm(r, 1)}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="nrs()">${t('save')}</button></div>`,
+    `${hd(t('rec_n'))}<div class=fld><div class="tp typ" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div></div>${rfm(r, 1)}${svb('nrs()', 'cl()')}`,
     'fs',
   );
   $('.sh').dataset.t = r.t;
@@ -721,7 +725,7 @@ function ncm() {
     nm = `<div class=fld><label class=fl for=nn>${t('cat_nm')}</label><input class="form-control" id=nn value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done oninput="NC.n=this.value;this.style.borderColor='';$('#en').hidden=true" onkeydown="if(event.key=='Enter')${save}"><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div></div>`,
     sy = `<div class=fld><span class=fl>${t('sym')}</span><button type=button class=sel id=cpi aria-haspopup=dialog onclick="ipk()"><span class=ckv><span class=cvp id=cpg>${ci(NC)}</span>${t('sym_chg')}</span></button></div>`;
   sheet(
-    `${hdc(t(ed ? 'ced' : 'cat_new'))}${art}${nm}${sy}${ed && !NC.nodel ? acts2(`dc('${NC.id}')`, NC.dh) : ''}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="${save}">${t('save')}</button></div>`,
+    `${hdc(t(ed ? 'ced' : 'cat_new'))}${art}${nm}${sy}${ed && !NC.nodel ? acts2(`dc('${NC.id}')`, NC.dh) : ''}${svb(save, 'ncx()')}`,
     'fs fsk',
   );
   const s = $('#o .sh');
@@ -1033,7 +1037,7 @@ function pn() {
   }
   X = {};
   sheet(
-    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><div class=fld><label class=fl for=pn1>${t('pin1')}</label><input id=pn1 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"></div><div class=fld><label class=fl for=pn2>${t('pin2')}</label><input id=pn2 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div></div><div class=stkb><button class="btn btn-primary pr" onclick="pns()">${t('save')}</button></div>${acts('cl()')}`,
+    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><div class=fld><label class=fl for=pn1>${t('pin1')}</label><input id=pn1 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"></div><div class=fld><label class=fl for=pn2>${t('pin2')}</label><input id=pn2 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div></div>${svb('pns()', 'cl()')}`,
   );
   $('#pn1').focus({ preventScroll: true });
 }

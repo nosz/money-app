@@ -177,7 +177,7 @@ const T = {
   undo: ['Rückgängig', 'Undo'],
   upd: ['Neue Version verfügbar', 'New version available'],
   e_name: ['Bitte einen Namen eingeben', 'Please enter a name'],
-  e_catdup: ['Diese Kategorie gibt es schon. Bitte einen anderen Namen wählen.', 'This category already exists. Please choose a different name.'],
+  e_catdup: ['Diese Kategorie gibt es schon', 'This category already exists'], /* 1.33.1: bewusst einzeilig, sonst verdeckt die Handy-Tastatur die zweite Zeile */
   ced: ['Kategorie bearbeiten', 'Edit category'],
   cty: ['Art', 'Type'],
   cdh: ['{n} Buchungen wechseln zu „Sonstiges“.', '{n} entries will move to “Other”.'],

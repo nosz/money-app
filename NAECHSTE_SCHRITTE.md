@@ -1,14 +1,27 @@
-# MoneyApp – Nächste Schritte (Stand 1.33.0)
+# MoneyApp – Nächste Schritte (Stand 1.34.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.33.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.34.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **Knopfzeile „Abbrechen | Speichern“ (1.34.0):** Neue Hilfsfunktion `svb(sx, cx, lb)` in `js/app.js` (direkt vor `acts2`) baut
+  die feste Knopfzeile unten in EINER Zeile: links „Abbrechen“ (`.cb`, Ghost, flex 1), rechts Hauptknopf (`.sb`, flex 2,
+  mindestens 52 px hoch). „Abbrechen“ macht dasselbe wie das ✕ oben und verwirft die Eingaben. Eingesetzt in: `op()` (Buchung inkl.
+  Umbuchung, `cl()`), `erd()` / `nrd()` (wiederkehrende Buchung, `cl()`), `ncm()` (Kategorie, `ncx()`, also aus der Buchung zurück
+  zur Buchung), `cfa()` (Betrag ändern, `dsh()`, Hauptknopf „OK“; die frühere separate `acts('dsh()')`-Zeile entfällt),
+  `pn()` (PIN setzen, `cl()`; frühere `acts('cl()')`-Zeile entfällt). CSS am Ende von `css/style.css` (Abschnitt „1.34.0“).
+  Nicht geändert: Rückfragen zum Löschen (`cdel()`), Import-Dialoge (`ip()`/`im()`, dort liegt „Ersetzen“ neben dem Abbruch),
+  Willkommen (`ob()`, eigene Knöpfe „Los“/„Später“), Löschen-Textlink, alle Prüfungen und das Datenformat. Keine neuen Texte
+  (`cancel` vorhanden). Skill-Regel „Kein Abbrechen“ ist entfallen (Skill-Abschnitt 5 und 10 angepasst).
+- **Korrektur 1.33.1:** Der Text `e_catdup` in `js/i18n.js` ist auf eine Zeile gekürzt („Diese Kategorie gibt es schon“ /
+  „This category already exists“). Grund: Am Handy verdeckte die Tastatur die zweite Zeile der längeren Meldung.
+  Geändert: `js/i18n.js`, `js/core.js` (nur `APP_VERSION`), `service-worker.js` (nur `CACHE_VERSION`). Logik unverändert.
+  Neue Meldungen am Namensfeld bitte einzeilig halten.
 - **Doppelte Kategorienamen verhindert (1.33.0):** Geändert: `js/app.js`, `js/i18n.js`, `js/core.js` (nur `APP_VERSION`),
   `service-worker.js` (nur `CACHE_VERSION`). Neue Hilfsfunktionen in `js/app.js`: `cdup(n, ty, id)` (Name in derselben Art
   schon vergeben? Vergleich ohne Groß-/Kleinschreibung und ohne Randleerzeichen, mit dem angezeigten Namen `t(c.n)`, die
@@ -25,7 +38,7 @@ Fertig:
 - **Wiederkehrende Buchung (1.31.0):** `nrd()` (neu) und `erd()` (bearbeiten) in `js/app.js` im Banking-Look, gemeinsamer
   Aufbau über neue Hilfsfunktion `rfm(r, nw)`. Vollbild (`'fs'`) mit Titel und ✕, Beschriftungen oben (`.fld .fl`),
   Betrag mit Währungssymbol (`.amw`), Kategorie als normales Auswahlfeld (kein `cpk()`), Notiz, Wiederholen, Fälligkeit,
-  Speichern fest unten, kein „Abbrechen“. Neu: Typ-Leiste Ausgabe/Einnahme ohne Plus/Minus. Bearbeiten: Art nur als Anzeige
+  Speichern fest unten (seit 1.34.0 mit „Abbrechen“ in einer Zeile). Neu: Typ-Leiste Ausgabe/Einnahme ohne Plus/Minus. Bearbeiten: Art nur als Anzeige
   (`.ro`), Löschen als Textlink (`acts2('rdl()')`) mit unveränderter Rückfrage. Die Kontostand-Leiste (`bstrip()`) oben
   in beiden Masken entfällt. Keine Konto-Leiste (Entscheidung), `nrs()`, `rsv()`, `rdl()`, `rdo()` und Datenformat unverändert.
   Keine neuen CSS-Regeln und keine neuen Texte nötig.
@@ -37,7 +50,7 @@ Fertig:
   CSS am Ende von `css/style.css` (Abschnitt „1.30.0“). Keine neuen Texte nötig (`from`, `bk_to`, `swap`, `same` vorhanden).
 - Buchungsmaske `op()` im Banking-Look (seit 1.28.0), in 1.30.0 nur in der Umbuchung geändert (`DIR()`).
 - **Neue Kategorie** und **Kategorie bearbeiten** im Banking-Look: `ncm()` in `js/app.js`.
-  - Felder: Art, Bezeichnung, Symbol (mit Live-Vorschau). Kein „Abbrechen“-Knopf, Speichern fest unten.
+  - Felder: Art, Bezeichnung, Symbol (mit Live-Vorschau). Seit 1.34.0: Knopfzeile „Abbrechen | Speichern“ fest unten (früher kein „Abbrechen“).
   - Art: nur beim Anlegen aus den Einstellungen wählbar (Typ-Leiste). Aus der Buchung heraus und beim
     Bearbeiten nur Anzeige (`.ro`) mit Hinweis.
   - Löschen beim Bearbeiten als Textlink in Rost mit Hinweiszeile (Anzahl betroffener Buchungen); nicht bei `sonst_*`.
@@ -76,6 +89,10 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
   ohne Randleerzeichen; Meldung am Feld, Speichern bleibt gesperrt, kein Knopf „Vorhandene verwenden“; bestehende Dubletten bleiben
   in den Daten und sind weiter bearbeitbar, solange der Name unverändert bleibt (Prüfung nur beim Speichern, nie gegen sich selbst).
 
+- Knopfzeile (1.34.0): „Abbrechen“ links (schmal) und „Speichern“ rechts (größer) in einer Zeile, in allen Eingabe-Masken inkl. Betrag ändern
+  und PIN setzen; „Abbrechen“ verwirft wie das ✕. Löschen-Rückfragen und Import-Dialoge behalten gestapelte Knöpfe (Sicherheit).
+- Fehlermeldungen in Masken sind einzeilig (Entscheidung 1.33.1), statt eine Scroll-Logik für die Tastatur einzubauen.
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### Schritt 1 – Tastatur-Test auf echten Geräten [Punkt D]
@@ -85,7 +102,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 4. Offene Punkte und optionales Aufräumen
 
-- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.33.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
+- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.34.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
 - Optional (eigene Version, nur Aufräumen): nicht mehr benutzte CSS-Regeln entfernen: `.dir`, `.dir>div`, `.dir label`, `.sh .dir .form-label` (alte Von/Auf-Auswahlfelder) sowie die der alten Kategorie-Maske:
   `.cn`, `.cpi`, `.cpe`, `.cpp`, `.ip` (in `css/style.css`) sowie die zugehörigen `.sht.ns`-Regeln. Vorher per Suche
   prüfen, dass nichts anderes sie benutzt.
@@ -97,8 +114,9 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 5. Prüfliste nach jeder Lieferung
 
-- [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit Meldung abgelehnt, in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
-- [ ] Alle Masken gleicher Aufbau (Titel + ✕, Beschriftungen oben, Speichern fest unten, kein „Abbrechen“)?
+- [ ] Knopfzeile am Handy (Buchung, Umbuchung, Kategorie neu/bearbeiten, wiederkehrende Buchung neu/bearbeiten, Betrag ändern, PIN setzen): „Abbrechen“ und „Speichern“ in einer Zeile, beide gut treffbar, Texte auf Deutsch und Englisch ohne Umbruch, Tastatur verdeckt die Zeile nicht, „Abbrechen“ schließt ohne Speichern (Kategorie aus der Buchung: zurück in die Buchung)?
+- [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit einzeiliger Meldung abgelehnt (bei geöffneter Tastatur voll sichtbar), in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
+- [ ] Alle Masken gleicher Aufbau (Titel + ✕, Beschriftungen oben, Knopfzeile „Abbrechen | Speichern“ in einer Zeile fest unten)?
 - [ ] Texte in Deutsch und Englisch?
 - [ ] Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?
 - [ ] Alte Backups weiter importierbar (Datenformat unverändert)?

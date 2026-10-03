@@ -80,7 +80,8 @@ Symbole in Dialogen sind immer Bootstrap Icons, keine Emojis oder Sonderzeichen.
 # 5. Für alle Masken
 
 - Handy: Vollbild mit Titel und „✕“ oben. Tablet/Desktop: zentriertes Fenster.
-- Speichern-Knopf fest unten, volle Breite. Kein „Abbrechen“-Knopf.
+- Knopfzeile fest unten, in EINER Zeile (Hilfsfunktion `svb()` in `js/app.js`): links „Abbrechen“ (schmal, schlicht, Ghost mit feinem Rahmen), rechts „Speichern“ (Hauptknopf, doppelt so breit, mindestens 52 px hoch). „Abbrechen“ schließt wie das ✕ oben und verwirft die Eingaben (in der Kategorie-Maske aus einer Buchung heraus: zurück zur Buchung, `ncx()`). Gilt für alle Eingabe-Masken (Buchung, Kategorie, wiederkehrende Buchung, Betrag ändern, PIN setzen). Löschen bleibt der Textlink über der Knopfzeile.
+- Rückfragen zum Löschen und Import-Dialoge behalten ihre gestapelten Knöpfe (Hauptaktion, darunter „Abbrechen“), damit die gefährliche Aktion nicht neben „Abbrechen“ liegt.
 - Felder: kleine graue Beschriftung oben, feiner Rahmen, dezent runde Ecken.
 - Sachliche Wortwahl: „Betrag“, „Konto“, „Kategorie“, „Buchungsdatum“, „Notiz“. Hinweistexte sagen, was zu tun ist.
 - Gilt für alle Eingabe-Masken. Rückfragen, Backup und PIN bleiben kleine Dialoge, nur in angepasster Optik.
@@ -125,7 +126,7 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 
 # 10. Abschlussprüfung nach jeder Lieferung
 
-- Haben alle Masken denselben Aufbau?
+- Haben alle Masken denselben Aufbau (Titel + ✕, Beschriftungen oben, Knopfzeile „Abbrechen | Speichern“ in einer Zeile)?
 - Sind alle Texte in Deutsch und Englisch vorhanden?
 - Ist der Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?
 - Sind alte Backups weiter importierbar?
