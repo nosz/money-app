@@ -962,3 +962,32 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .grid button{min-width:0;padding-left:0;padding-right:0;font-size:min(var(--fs-s),3.2vw);overflow-wrap:normal}
 .btn.btn-link{--bs-btn-bg:transparent;--bs-btn-hover-bg:transparent;--bs-btn-active-bg:transparent;--bs-btn-color:var(--m);--bs-btn-hover-color:var(--text);--bs-btn-border-color:transparent;background:transparent;color:var(--m);font-weight:600;text-decoration:underline}
 .btn.btn-link:hover,.btn.btn-link:active{background:transparent;color:var(--text)}
+
+/* 1.21.21: Kontostände (Kontoleiste, Auswahlknöpfe, Vorschau) */
+.bstrip{display:flex;gap:8px;margin:2px 0 12px}
+.bc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;background:var(--surface);border:1px solid var(--b);border-radius:var(--r-m);text-align:center}
+.bc.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.bcn{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-s);color:var(--m);white-space:nowrap}
+.bcn .ai{width:14px;height:14px}
+.bc b{font-size:min(var(--fs-m),4.1vw);white-space:nowrap;font-variant-numeric:tabular-nums}
+.bc small{font-size:var(--fs-s);color:var(--m);font-variant-numeric:tabular-nums}
+.btot{margin-top:8px;display:flex;justify-content:space-between;align-items:baseline}
+.tp.acct button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.2;min-height:56px}
+.tp.acct .al{display:inline-flex;align-items:center;gap:4px}
+.tp.acct .bl{display:block;font-size:var(--fs-s);font-weight:500;opacity:.9;font-variant-numeric:tabular-nums}
+.bn1{display:block;margin:-2px 0 8px 2px;color:var(--m)}
+.bn1 b{color:var(--text)}
+.bn1 b.neg{color:var(--rust)}
+.bn2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 10px}
+.bn2:empty{display:none}
+.bc small.neg,.bc b.neg{color:var(--rust)}
+.tp.acct .bl{color:inherit}
+.tp.acct button:not(.on) .bl{color:var(--m)}
+/* 1.21.21: Abstand unter dem Dialogkopf, Fälligkeitskarten */
+.sh .sht+.bstrip{margin-top:22px}
+.sh .card .row{display:flex;flex-wrap:nowrap;align-items:center;gap:12px;margin:0 0 12px}
+.sh .card .row>*{padding:0;width:auto;max-width:none;margin:0}
+.sh .card .row .g{flex:1;min-width:0}
+.sh .card .row .ic{font-size:26px;line-height:1}
+.sh .card .seg .btn.sm{min-width:0;padding:8px 4px;font-size:min(var(--fs-s),3.5vw);line-height:1.15}
+.stkb .btn.pr,.stkb .btn.btn-primary{width:100%}

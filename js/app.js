@@ -97,6 +97,7 @@ function amc(el) {
 }
 function am(el) {
   X.a = amc(el);
+  bnu();
   if ($('#ew')) $('#ew').hidden = true;
   fm();
 }
@@ -182,6 +183,7 @@ function op() {
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
+  bnu();
   if (!X.id && !X.a) setTimeout(() => $('#ia') && $('#ia').focus({ preventScroll: true }), 50);
 }
 function msgs() {
@@ -303,7 +305,7 @@ function sv(force) {
     if (HS.ty && HS.ty != X.t) HS.ty = '';
   }
   P();
-  toast(t('sav'));
+  toast(balOn() ? `${t('sav')} · ${(X.t == 'u' ? [X.k, X.to] : [X.k || 'bank']).map((k) => t('a_' + k) + ' ' + fmt(bal(k))).join(' · ')}` : t('sav'));
   if (jmp) shw(nid);
 }
 /* 1.21.18: Zur neuen Buchung scrollen und die Zeile kurz aufleuchten lassen. Kurze Verzögerung, weil cl() per history.back() eine Scroll-Wiederherstellung auslösen kann. */
@@ -341,7 +343,7 @@ function dsh() {
   }
   X.nc = 0;
   sheet(
-    `${hd('🔔 ' + t('due'))}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
+    `${hd('🔔 ' + t('due'))}${bstrip(['bank'])}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
 function cf(id, a, skip) {
@@ -359,7 +361,7 @@ function cfa(id) {
   if (!r) return;
   X.nc = 0;
   sheet(
-    `${hd(t('chg'))}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><div class=stkb><button class="btn btn-primary pr" onclick="cfs('${id}')">${t('ok')}</button></div>${acts('dsh()')}`,
+    `${hd(t('chg'))}${bstrip(['bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><div class=stkb><button class="btn btn-primary pr" onclick="cfs('${id}')">${t('ok')}</button></div>${acts('dsh()')}`,
   );
   $('.sh').dataset.t = r.t;
   const e = $('#ca_a');
@@ -387,7 +389,7 @@ function er(id) {
 function erd() {
   const r = RE;
   sheet(
-    `${hd(t('rec_e'))}<input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" onchange="RE.c=this.value">${O(
+    `${hd(t('rec_e'))}${bstrip()}<input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" onchange="RE.c=this.value">${O(
       S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
       r.c,
     )}</select><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
@@ -438,7 +440,7 @@ function nrd() {
   const r = RE,
     on = (k) => `class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}"`;
   sheet(
-    `${hd(t('rec_n'))}<div class=tp><button ${on('e')} onclick="nrt('e')">${t('ex')}</button><button ${on('i')} onclick="nrt('i')">${t('inn')}</button></div><input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec').hidden=true">${O(
+    `${hd(t('rec_n'))}${bstrip()}<div class=tp><button ${on('e')} onclick="nrt('e')">${t('ex')}</button><button ${on('i')} onclick="nrt('i')">${t('inn')}</button></div><input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec').hidden=true">${O(
       S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
       r.c,
     )}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(

@@ -199,8 +199,8 @@ const V = {
     if (!S.tx.length)
       h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
     h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
-    if (hasSt() || S.tr.length || S.tx.some((x) => x.k == 'bar'))
-      h += `<div style="margin-top:8px"><small>${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b><br><small>${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${hasSt() ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
+    if (balOn())
+      h += `<div style="margin-top:10px">${bstrip()}${hasSt() ? `<div class=btot><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b></div>` : ''}</div>`;
     h += '</div>';
     if (cur) {
       const u = up(),

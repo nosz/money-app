@@ -109,16 +109,63 @@ const AP = {
   info: `<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>`,
 };
 const AV = (k) => `<svg class=ai viewBox="0 0 16 16" fill=currentColor aria-hidden=true focusable=false>${AP[k]}</svg>`;
+/* Kontostände: nur zeigen, wenn sie aussagekräftig sind (Startwert eingetragen, Umbuchung oder Bar-Buchung vorhanden) */
+const balOn = () => hasSt() || S.tr.length > 0 || S.tx.some((x) => x.k == 'bar');
+/* Kontoleiste für Geld-Dialoge und Startseite; hi = hervorgehobene Konten */
+const bstrip = (hi) => {
+  if (!balOn()) return '';
+  const ks = ['bar', 'bank'].concat(S.set[SK.spar] != null || Math.abs(bal('spar')) > 0.004 ? ['spar'] : []);
+  return `<div class=bstrip role=group aria-label="${t('kto')}">${ks
+    .map(
+      (k) =>
+        `<div class="bc${(hi || []).includes(k) ? ' on' : ''}"><span class=bcn>${AV(k)} ${t('a_' + k)}</span><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></div>`,
+    )
+    .join('')}</div>`;
+};
 const DIR = () => {
   const ss = (f) =>
     `<select class="form-select" onchange="X.${f}=this.value;op()">${O(
       ['bar', 'bank', 'spar'].map((a) => [a, t('a_' + a)]),
       X[f],
     )}</select>`;
-  return `<div class=dir><div><label class="form-label">${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label class="form-label">${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}`;
+  return `<div class=dir><div><label class="form-label">${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label class="form-label">${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}<div id=bn class=bn2></div>`;
 };
 const ACC = () =>
-  `<label class="form-label">${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class=tp>${['bar', 'bank'].map((k) => `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()">${AV(k)} ${t('a_' + k)}</button>`).join('')}</div>`;
+  `<label class="form-label">${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class="tp acct">${['bar', 'bank']
+    .map(
+      (k) =>
+        `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()"><span class=al>${AV(k)} ${t('a_' + k)}</span>${balOn() ? `<small class=bl>${fmt(bal(k))}</small>` : ''}</button>`,
+    )
+    .join('')}</div><small id=bn class=bn1 hidden></small>`;
+/* Live-Vorschau: Kontostand jetzt und nach dieser Buchung (beim Bearbeiten ohne die alte Buchung gerechnet) */
+function bnu() {
+  const e = $('#bn');
+  if (!e || !balOn()) return e && (e.hidden = true);
+  const a = num(X.a) > 0 ? num(X.a) : 0,
+    o = X.id && (X.t == 'u' ? S.tr : S.tx).find((x) => x.id == X.id),
+    eff = (k) => {
+      let d = 0;
+      if (o) d -= X.t == 'u' ? (o.f == k ? -o.a : o.to == k ? o.a : 0) : (o.k || 'bank') == k ? (o.t == 'i' ? o.a : -o.a) : 0;
+      if (X.t == 'u') d += X.k == X.to ? 0 : X.k == k ? -a : X.to == k ? a : 0;
+      else d += (X.k || 'bank') == k ? (X.t == 'i' ? a : -a) : 0;
+      return d;
+    },
+    c = (v) => (v < -0.004 ? 'neg' : '');
+  if (X.t == 'u') {
+    e.innerHTML = [X.k, X.to]
+      .map((k) => {
+        const n = bal(k) + eff(k);
+        return `<div class=bc><span class=bcn>${AV(k)} ${t('a_' + k)}</span><b>${fmt(bal(k))}</b>${a ? `<small class="${c(n)}">→ ${fmt(n)}</small>` : ''}</div>`;
+      })
+      .join('');
+    e.hidden = false;
+    return;
+  }
+  const k = X.k || 'bank',
+    n = bal(k) + eff(k);
+  e.hidden = !a;
+  e.innerHTML = a ? `${t('after')}: ${t('a_' + k)} <b class="${c(n)}">${fmt(n)}</b>` : '';
+}
 const dtxt = (n) =>
   S.set.lang == 'en' ? `${n} day${n == 1 ? '' : 's'} left` : `noch ${n} ${n == 1 ? 'Tag' : 'Tage'}`;
 /* Erfassungszeit einer Buchung (hh:mm) – nur wenn ein Zeitstempel vorhanden ist */
@@ -126,4 +173,4 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.21.20'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.21.21'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

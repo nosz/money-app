@@ -234,6 +234,7 @@ const T = {
   wr: ['Falsch – bitte warten', 'Wrong – please wait'],
   sav: ['Gespeichert', 'Saved'],
   gone: ['Gelöscht', 'Deleted'],
+  after: ['Danach', 'After'],
   delt: ['Buchung löschen?', 'Delete entry?'],
   delm: ['Diese Buchung wird endgültig gelöscht.', 'This entry will be permanently deleted.'],
   delct: ['Kategorie löschen?', 'Delete category?'],
