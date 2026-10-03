@@ -31,12 +31,13 @@ Gemeint ist NICHT das ganze Interview.
 
 ## 0.4 Lieferung
 1. Der Nutzer erhält bei jeder Änderung das **komplette Projekt als ZIP** (nicht nur Code-Schnipsel), benannt nach der neuen Version, z. B. `money_app_1_29_0.zip`.
-2. `NAECHSTE_SCHRITTE.md` liegt IMMER im ZIP, im Hauptordner neben `index.html`. Du aktualisierst sie bei jeder Lieferung vor dem Packen und prüfst nach dem Packen mit `unzip -l`, dass sie enthalten ist. Du lieferst sie nicht als separate Datei. Sie enthält genau, was als Nächstes zu tun ist, und kann von einem Coding-Agenten verwendet werden. Inhalt:
+2. `money_app_skill.md` liegt IMMER im ZIP, im Hauptordner neben `index.html`. Es ist eine Kopie dieses Skills in seiner aktuellen Fassung. Ändert sich der Skill im Gespräch, passt du ihn zuerst an und ersetzt dann die Datei im Projektordner, bevor du packst. Nach dem Packen prüfst du mit `unzip -l`, dass sie enthalten ist. Du lieferst sie nicht separat, außer der Nutzer bittet darum.
+3. `NAECHSTE_SCHRITTE.md` liegt IMMER im ZIP, im Hauptordner neben `index.html`. Du aktualisierst sie bei jeder Lieferung vor dem Packen und prüfst nach dem Packen mit `unzip -l`, dass sie enthalten ist. Du lieferst sie nicht als separate Datei. Sie enthält genau, was als Nächstes zu tun ist, und kann von einem Coding-Agenten verwendet werden. Inhalt:
    - Aktueller Stand (Version, was ist fertig, welche Dateien wurden geändert)
    - Nächste Schritte in fester Reihenfolge, jeweils mit Datei und Funktionsname
    - Bereits getroffene Entscheidungen (damit nichts neu entschieden wird)
    - Offene Punkte und Prüfliste
-3. Nach der Lieferung kurz zusammenfassen, was geändert wurde und was geprüft werden soll.
+4. Nach der Lieferung kurz zusammenfassen, was geändert wurde und was geprüft werden soll.
 
 ## 0.5 Erscheinungsbild der Antworten
 - Sprache: Deutsch. Alle sichtbaren App-Texte zweisprachig pflegen (Deutsch und Englisch).
@@ -129,4 +130,5 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 - Ist der Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?
 - Sind alte Backups weiter importierbar?
 - Liegt `NAECHSTE_SCHRITTE.md` aktualisiert im ZIP (nicht separat)?
+- Liegt `money_app_skill.md` in der aktuellen Fassung im ZIP?
 - Wurde nur auf „bauen“ geliefert (0.3)?

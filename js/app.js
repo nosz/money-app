@@ -545,16 +545,22 @@ function er(id) {
   RE = { id, t: r.t, a: af(r.a), c: r.c, n: r.n || '', f: r.f, d, d0: d, f0: r.f };
   erd();
 }
+/* 1.31.0: Wiederkehrende Buchung im Banking-Look (gleiche Klassen wie die Buchungsmaske: .fld .fl .amw .sel-Optik .acts2); Logik unverändert */
+function rfm(r, nw) {
+  const cats = O(
+    S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
+    r.c,
+  );
+  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><label class=fl for=rc>${t('bk_cat')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec')&&($('#rec').hidden=true)">${cats}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off></div><div class=fld><label class=fl for=rr>${t('rep')}</label><select class="form-select" id=rr onchange="RE.f=this.value">${O(
+    ['m', 'w', 'y'].map((k) => [k, t(k)]),
+    r.f,
+  )}</select></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date value="${r.d}" onchange="RE.d=this.value"></div>`;
+}
 function erd() {
   const r = RE;
   sheet(
-    `${hd(t('rec_e'))}${bstrip()}<input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" onchange="RE.c=this.value">${O(
-      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
-      r.c,
-    )}</select><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
-      ['m', 'w', 'y'].map((k) => [k, t(k)]),
-      r.f,
-    )}</select><label class="form-label">${t('nextd')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><div class=stkb><button class="btn btn-primary pr" onclick="rsv()">${t('save')}</button></div>${acts('cl()', 'rdl()')}`,
+    `${hd(t('rec_e'))}<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(r.t)}</div></div>${rfm(r, 0)}${acts2('rdl()')}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="rsv()">${t('save')}</button></div>`,
+    'fs',
   );
   $('.sh').dataset.t = r.t;
 }
@@ -597,15 +603,10 @@ function nrt(ty) {
 }
 function nrd() {
   const r = RE,
-    on = (k) => `class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}"`;
+    tb = (k, lb) => `<button type=button class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}" onclick="nrt('${k}')">${lb}</button>`;
   sheet(
-    `${hd(t('rec_n'))}${bstrip()}<div class=tp><button ${on('e')} onclick="nrt('e')">${t('ex')}</button><button ${on('i')} onclick="nrt('i')">${t('inn')}</button></div><input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec').hidden=true">${O(
-      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
-      r.c,
-    )}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
-      ['m', 'w', 'y'].map((k) => [k, t(k)]),
-      r.f,
-    )}</select><label class="form-label">${t('rec_f1')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><div class=stkb><button class="btn btn-primary pr" onclick="nrs()">${t('save')}</button></div>${acts('cl()')}`,
+    `${hd(t('rec_n'))}<div class=fld><div class="tp typ" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div></div>${rfm(r, 1)}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="nrs()">${t('save')}</button></div>`,
+    'fs',
   );
   $('.sh').dataset.t = r.t;
 }
@@ -1026,7 +1027,7 @@ function pn() {
   }
   X = {};
   sheet(
-    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><label class="form-label">${t('pin1')}</label><input id=pn1 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"><label class="form-label">${t('pin2')}</label><input id=pn2 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div><div class=stkb><button class="btn btn-primary pr" onclick="pns()">${t('save')}</button></div>${acts('cl()')}`,
+    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><div class=fld><label class=fl for=pn1>${t('pin1')}</label><input id=pn1 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"></div><div class=fld><label class=fl for=pn2>${t('pin2')}</label><input id=pn2 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div></div><div class=stkb><button class="btn btn-primary pr" onclick="pns()">${t('save')}</button></div>${acts('cl()')}`,
   );
   $('#pn1').focus({ preventScroll: true });
 }
@@ -1052,7 +1053,7 @@ function lk() {
   o.id = 'lk';
   o.className = 'ov';
   o.style.cssText = 'z-index:30;align-items:center;background:var(--ink)';
-  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>${AV('lock')} ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:var(--fs-l)"><small></small></div>`;
+  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>${AV('lock')} ${t('pi')}</h2><input class="form-control pin" type=password inputmode=numeric maxlength=6 aria-label="${t('pi')}"><small></small></div>`;
   document.body.append(o);
   const i = o.querySelector('input');
   i.focus();

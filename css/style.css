@@ -1127,3 +1127,25 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 /* Kategorie-Masken (Klasse fsk): Speichern-Knopf sitzt auch bei kurzem Inhalt fest am unteren Rand (Handy-Vollbild).
    Die Buchungsmaske bleibt unverändert. */
 @media (max-width:767px){.ov .sh.fsk{display:flex;flex-direction:column;padding-bottom:0}.ov .sh.fsk>*{flex:none}.ov .sh.fsk>.stkb{margin-top:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}}
+
+/* ===== 1.30.0: Umbuchung – Von/Auf als Konto-Leisten untereinander, Tauschen-Knopf dazwischen ===== */
+.sh .swr{display:flex;justify-content:center;margin:-8px 0 8px}
+.sh .swr .swp{margin:0;width:44px;height:44px}
+.sh .swr .swp .bi{transform:rotate(90deg)}
+.sh .swp+.fld{margin-top:0}
+.sh .fld+small.neg{display:block;margin:-8px 2px 12px}
+
+/* ===== 1.32.0: Kleine Dialoge (Rückfragen, Sperrmeldungen, Import, PIN, Backup-Karte) in der Optik der großen Masken ===== */
+.sh .cdm{margin:6px 2px 18px}
+.sh .cdy,.sh .btn.pr,.sh .acts .btn,.bkc .btn{min-height:48px;border-radius:var(--r-s)}
+.sh .acts .btn.ghost,.bkc .btn.ghost{margin-top:0;background:transparent;border:1px solid var(--b);color:var(--text)}
+.sh .acts .btn.dlt{border-width:1px}
+.sh .em.blk{border-radius:var(--r-s)}
+.pin{text-align:center;font-size:var(--fs-l);letter-spacing:.3em;min-height:52px;border-radius:var(--r-s)}
+.sh .pin::placeholder{letter-spacing:normal}
+#lk .card{border-radius:var(--r-m)}
+#lk h2{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+.bkc{border-radius:var(--r-m)}
+.bkc b{display:flex;align-items:center;gap:8px}
+.bkc .bi{width:1.15em;height:1.15em;flex:none}
+.bkc .seg .btn{flex:1}

@@ -53,6 +53,7 @@ let S,
   U;
 /* 1.27.0: Symbole in Dialogen = Bootstrap Icons 1.13.1 (Quelldateien in img/), inline, damit sie Farbe und Größe des Textes annehmen. Neue Symbole: SVG aus icons.getbootstrap.com nach img/ legen und den Pfad hier eintragen. */
 const BIP = {
+  download: '<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>', /* download */
   x: '<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>', /* x-lg */
   warn: '<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>', /* exclamation-triangle-fill */
   trash: '<path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>', /* trash3 */
@@ -177,13 +178,16 @@ const bstrip = (hi, nav) => {
     )
     .join('')}</div>`;
 };
+/* 1.30.0: Umbuchung – „Von“ und „Auf“ als Konto-Leisten (Bank, Bar, Sparen) untereinander, Tauschen-Knopf dazwischen */
 const DIR = () => {
-  const ss = (f) =>
-    `<select class="form-select" onchange="X.${f}=this.value;op()">${O(
-      ['bar', 'bank', 'spar'].map((a) => [a, t('a_' + a)]),
-      X[f],
-    )}</select>`;
-  return `<div class=dir><div><label class="form-label">${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">${bi('swap')}</button><div><label class="form-label">${t('bk_to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}<div id=bn class=bn2></div><div class="em blk" id=eb hidden role=alert></div>`;
+  const bar = (f, lb) =>
+    `<div class=fld><label class=\"form-label\">${lb}</label><div class=\"tp acct\" role=group aria-label=\"${lb}\">${['bank', 'bar', 'spar']
+      .map(
+        (k) =>
+          `<button type=button class=\"${X[f] == k ? 'on' : ''}\" aria-pressed=\"${X[f] == k}\" onclick=\"X.${f}='${k}';op()\"><span class=al>${AV(k)} ${t('a_' + k)}</span>${balOn() ? `<small class=bl>${fmt(bal(k))}</small>` : ''}</button>`,
+      )
+      .join('')}</div></div>`;
+  return `${bar('k', t('from'))}<div class=swr><button type=button class=swp aria-label=\"${t('swap')}\" title=\"${t('swap')}\" onclick=\"[X.k,X.to]=[X.to,X.k];op()\">${bi('swap')}</button></div>${bar('to', t('bk_to'))}${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}<div id=bn class=bn2></div><div class=\"em blk\" id=eb hidden role=alert></div>`;
 };
 const ACC = () =>
   `<label class="form-label">${t('bk_acc')}</label><div class="tp acct">${['bar', 'bank']
@@ -256,7 +260,7 @@ const brCard = () => {
   BKS = brShow();
   if (!BKS) return '';
   const d = S.set.lb ? t('bkc_d').replace('{n}', Math.floor((Date.now() - S.set.lb) / 864e5)) : t('bkn0');
-  return `<div class="card card-body bkc" role=status><b>💾 ${t('bkc_t')}</b><small>${d}</small><div class="seg d-flex gap-2"><button class="btn btn-primary" onclick="bk('j')">${t('bkc_go')}</button><button class="btn btn-secondary s" onclick="bkl()">${t('bkc_later')}</button></div></div>`;
+  return `<div class="card card-body bkc" role=status><b>${bi('download')} ${t('bkc_t')}</b><small>${d}</small><div class="seg d-flex gap-2"><button class="btn btn-primary" onclick="bk('j')">${t('bkc_go')}</button><button class="btn btn-secondary s ghost" onclick="bkl()">${t('bkc_later')}</button></div></div>`;
 };
 const brDate = (x) => new Date(x).toLocaleDateString(loc(), { day: '2-digit', month: '2-digit', year: 'numeric' });
 const brStatus = () => {
@@ -265,4 +269,4 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.29.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.32.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

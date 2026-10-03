@@ -1,15 +1,34 @@
-# MoneyApp – Nächste Schritte (Stand 1.29.0)
+# MoneyApp – Nächste Schritte (Stand 1.32.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.29.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.32.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
-- Buchungsmaske `op()` im Banking-Look (seit 1.28.0), in 1.29.0 unverändert.
+- **Kleine Dialoge (1.32.0):** nur Optik, Logik unverändert. Umfang: Rückfragen (`cdel()`, Sperrmeldungen in `dl()`,
+  `ip()`, `im()`), PIN-Maske `pn()` und Sperrbild `lk()`, Backup-Karte `brCard()` in `js/core.js`. Willkommen (`ob()`, `ob2()`),
+  Kontostände beim Start und Starthinweis `negHint()` bewusst unverändert. „Abbrechen“ bleibt (Entscheidung), Knöpfe,
+  Rahmen und Radien wie in den großen Masken (`.sh .acts .btn.ghost` mit Rahmen, 48 px Höhe). PIN-Felder in `.fld`/`.fl` mit
+  Klasse `.pin` (zentriert, Ziffernabstand). Backup-Karte: Emoji 💾 durch Bootstrap Icon `download` ersetzt (neu in `BIP`),
+  „Später“ als Ghost-Knopf. CSS am Ende von `css/style.css` (Abschnitt „1.32.0“). Backup, Import, Datenformat unverändert.
+- **Wiederkehrende Buchung (1.31.0):** `nrd()` (neu) und `erd()` (bearbeiten) in `js/app.js` im Banking-Look, gemeinsamer
+  Aufbau über neue Hilfsfunktion `rfm(r, nw)`. Vollbild (`'fs'`) mit Titel und ✕, Beschriftungen oben (`.fld .fl`),
+  Betrag mit Währungssymbol (`.amw`), Kategorie als normales Auswahlfeld (kein `cpk()`), Notiz, Wiederholen, Fälligkeit,
+  Speichern fest unten, kein „Abbrechen“. Neu: Typ-Leiste Ausgabe/Einnahme ohne Plus/Minus. Bearbeiten: Art nur als Anzeige
+  (`.ro`), Löschen als Textlink (`acts2('rdl()')`) mit unveränderter Rückfrage. Die Kontostand-Leiste (`bstrip()`) oben
+  in beiden Masken entfällt. Keine Konto-Leiste (Entscheidung), `nrs()`, `rsv()`, `rdl()`, `rdo()` und Datenformat unverändert.
+  Keine neuen CSS-Regeln und keine neuen Texte nötig.
+- **Umbuchung (1.30.0):** `DIR()` in `js/core.js` baut „Von“ und „Auf“ als zwei Konto-Leisten (Bank, Bar, Gespart)
+  untereinander, mit Tauschen-Knopf (`.swr` / `.swp`, Pfeil um 90° gedreht) dazwischen. Gleiche Klassen wie `ACC()`
+  (`.tp.acct`, `.al`, `.bl`), Kontostände an jedem Knopf, Knopfhöhe 56 px. Bei gleichem Konto in beiden Leisten
+  bleibt alles wählbar, Meldung `same` erscheint unter „Auf“, Speichern bleibt über `msgs()` gesperrt (Prüfung unverändert).
+  Nur Darstellung geändert: `op()`, `sv()`, `msgs()`, `warns()`, `bnu()` und das Datenformat sind unangetastet.
+  CSS am Ende von `css/style.css` (Abschnitt „1.30.0“). Keine neuen Texte nötig (`from`, `bk_to`, `swap`, `same` vorhanden).
+- Buchungsmaske `op()` im Banking-Look (seit 1.28.0), in 1.30.0 nur in der Umbuchung geändert (`DIR()`).
 - **Neue Kategorie** und **Kategorie bearbeiten** im Banking-Look: `ncm()` in `js/app.js`.
   - Felder: Art, Bezeichnung, Symbol (mit Live-Vorschau). Kein „Abbrechen“-Knopf, Speichern fest unten.
   - Art: nur beim Anlegen aus den Einstellungen wählbar (Typ-Leiste). Aus der Buchung heraus und beim
@@ -42,35 +61,21 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
   ausgeliefert werden soll.
 - Symbole in Dialogen sind Bootstrap Icons, keine Emojis oder Sonderzeichen.
 - Alle sichtbaren Texte in Deutsch und Englisch.
+- Kleine Dialoge: nur Rückfragen, Backup und PIN; „Abbrechen“ bleibt; Willkommen, Kontostände beim Start und Starthinweis unverändert.
+- Wiederkehrende Buchung: nur Optik, keine Konto-Leiste (Konto bleibt wie bisher, neu angelegte laufen über Bank), Kategorie als normales Auswahlfeld im neuen Stil, keine Vollbild-Kategorieliste.
+- Umbuchung: Von/Auf als zwei Konto-Leisten untereinander (nicht nebeneinander), Reihenfolge Bank, Bar, Gespart, Tauschen-Knopf dazwischen. Gleiches Konto bleibt wählbar, Meldung wie bisher.
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
-### Schritt 1 – Version 1.30.0: Umbuchung („Von“ / „Auf“ als Konto-Leisten) [Punkt C]
-- Ort: `DIR()` in `js/core.js`, Aufruf in `op()` (`konto`) in `js/app.js`.
-- Ziel: „Von“ und „Auf“ als Konto-Leisten (Bank, Bar, Sparen) wie bei normalen Buchungen statt Auswahlfelder.
-- Prüfungen unverändert lassen: gleiches Konto, Konto-Minus, Betrag 0, mögliche Doppelbuchung.
-- Vor dem Umbau `DIR()`, `ACC()`, `msgs()`, `warns()`, `mut()`, `sv()` lesen. Fehlermeldung `#eu` beibehalten.
-
-### Schritt 2 – Version 1.31.0: Wiederkehrende Buchung [Punkt E, Teil 1]
-- Orte: `nrc()`, `nrt()`, `nrd()`, `nrs()`, `rsv()`, `rdl()`, `rdo()`, `er()`, `erd()` in `js/app.js`.
-  (Funktionsnamen aus der Funktionsliste. Code vor dem Umbau vollständig lesen.)
-- Ziel: gleicher Aufbau wie die Buchungsmaske: Vollbild mit Titel und ✕, Typ-Leiste ohne Plus/Minus,
-  Beschriftungen oben, Kategorie als Auswahlfeld, Speichern fest unten, kein „Abbrechen“, Löschen als Textlink.
-
-### Schritt 3 – Version 1.32.0: Kleine Dialoge [Punkt E, Teil 2]
-- Rückfragen (`cdel()`), Backup, PIN: bleiben kleine Dialoge, nur in angepasster Optik
-  (Beschriftungen, Rahmen, Radien, Knöpfe wie in den großen Masken).
-- Backup, Import und Datenformat nicht verändern.
-
-### Schritt 4 – Tastatur-Test auf echten Geräten [Punkt D]
+### Schritt 1 – Tastatur-Test auf echten Geräten [Punkt D]
 - iOS und Android: Der Speichern-Knopf (`.stkb`) darf in allen Masken nicht von der Tastatur verdeckt werden.
 - Besonders prüfen: Bezeichnung (Kategorie), Betrag und Notiz (Buchung), Suchfelder der Auswahl-Ansichten.
 - Ergebnis als Rückmeldung an den Nutzer. Nur bei Mängeln eine Korrekturversion bauen.
 
 ## 4. Offene Punkte und optionales Aufräumen
 
-- Nach Rückmeldung des Nutzers zu 1.29.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
-- Optional (eigene Version, nur Aufräumen): nicht mehr benutzte CSS-Regeln der alten Kategorie-Maske entfernen:
+- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.32.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
+- Optional (eigene Version, nur Aufräumen): nicht mehr benutzte CSS-Regeln entfernen: `.dir`, `.dir>div`, `.dir label`, `.sh .dir .form-label` (alte Von/Auf-Auswahlfelder) sowie die der alten Kategorie-Maske:
   `.cn`, `.cpi`, `.cpe`, `.cpp`, `.ip` (in `css/style.css`) sowie die zugehörigen `.sht.ns`-Regeln. Vorher per Suche
   prüfen, dass nichts anderes sie benutzt.
 - Bekannte Eigenheit: Wählt der Nutzer für eine Standardkategorie im Emoji-Reiter genau ihr Standard-Emoji,
@@ -87,3 +92,6 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 - [ ] Alte Backups weiter importierbar (Datenformat unverändert)?
 - [ ] Bestehende Prüfungen unverändert (Betrag 0, gleiches Konto, Konto-Minus, Doppelbuchung)?
 - [ ] Buchungsmaske unverändert, falls nicht Teil der Aufgabe?
+- [ ] Wiederkehrende Buchung am Handy: neu anlegen, bearbeiten, löschen, Fehlermeldungen bei leerem Betrag, Speichern nicht von Tastatur verdeckt?
+- [ ] Kleine Dialoge am Handy: Löschen-Rückfrage, PIN setzen und eingeben, Backup-Karte (Symbol, „Später“), Import-Dialog?
+- [ ] Umbuchung am Handy: sechs Knöpfe gut treffbar, Tauschen, gleiches Konto, Warnung bei Minus, Speichern nicht von Tastatur verdeckt?
