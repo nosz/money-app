@@ -312,33 +312,41 @@ const V = {
       kz = tot
         ? `<div class=kz><div><small>${t('au_n')}</small><b>${L.length}</b></div><div><small>${t('au_avg')}</small><b>${fmt(tot / L.length)}</b></div><div><small>${t('au_max')}</small><b>${fmt(big.a)}</b><small>${cname(big.c)} · ${big.d.slice(8)}.${big.d.slice(5, 7)}.</small></div><div><small>${fl(t('au_vgl'), { v: vw })}</small>${pct == null ? '<b>–</b>' : `<b class="${cls(df)}">${sn}${fmt(Math.abs(df))}</b><small>${sn}${Math.abs(pct).toFixed(0)} %</small>`}</div></div>${live && pct != null ? `<small class=kn>${t('au_bis')}</small>` : ''}`
         : '';
-    let h = `<div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" data-ty=e aria-pressed="${ST.t == 'e'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" data-ty=i aria-pressed="${ST.t == 'i'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}${bl}${hn}<div class="card card-body">`;
+    /* 1.21.16: Umschalter Ausgaben/Einnahmen bleibt beim Scrollen oben (sticky, #tps). Reihenfolge: alles, was vom Umschalter abhängt, steht oben (Donut, Hinweise, Kennzahlen, Kategorieliste); danach Bilanz und Trend. Kategorien unter 3 % werden im Donut zu „Sonstiges“ gebündelt. */
+    const sm3 = a.filter((x) => (x[1] / tot) * 100 < 3),
+      bu = sm3.length >= 2 && sm3.length < a.length,
+      GR = 'rgba(128,128,128,.55)',
+      ds = bu ? [...a.slice(0, a.length - sm3.length), [null, sm3.reduce((q, x) => q + x[1], 0)]] : a;
+    let h = `<div class=tps id=tps><div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" data-ty=e aria-pressed="${ST.t == 'e'}" onclick="stt('e')">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" data-ty=i aria-pressed="${ST.t == 'i'}" onclick="stt('i')">${t('inn')}</button></div></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body" id=dn>`;
     if (!tot) h += `<small>${t('none')}</small>`;
     else {
-      h += kz;
-      const gap = a.length > 1 ? 0.6 : 0,
+      const gap = ds.length > 1 ? 0.6 : 0,
         ft = fmt(tot);
-      h += `<svg viewBox="0 0 42 42" style="width:230px;max-width:80%;display:block;margin:4px auto 14px"><circle r=15.9155 cx=21 cy=21 fill=none stroke="rgba(128,128,128,.15)" stroke-width=5.5 />${a
+      h += `<svg viewBox="0 0 42 42" style="width:230px;max-width:80%;display:block;margin:4px auto 14px"><circle r=15.9155 cx=21 cy=21 fill=none stroke="rgba(128,128,128,.15)" stroke-width=5.5 />${ds
         .map((x, i) => {
           const p = (x[1] / tot) * 100,
-            s = `<circle r=15.9155 cx=21 cy=21 fill=none stroke="${PAL[i % PAL.length]}" stroke-width=5.5 stroke-dasharray="${Math.max(p - gap, 0.01)} ${100 - p + gap}" stroke-dashoffset="${25 - cum}"/>`;
+            s = `<circle r=15.9155 cx=21 cy=21 fill=none stroke="${bu && i == ds.length - 1 ? GR : PAL[i % PAL.length]}" stroke-width=5.5 stroke-dasharray="${Math.max(p - gap, 0.01)} ${100 - p + gap}" stroke-dashoffset="${25 - cum}"/>`;
           cum += p;
           return s;
         })
         .join(
           '',
         )}<text x=21 y=19.5 text-anchor=middle font-size=2.6 fill=currentColor opacity=.65>${t(ST.t == 'e' ? 'ex' : 'inn')}</text><text x=21 y=24.5 text-anchor=middle font-size=${ft.length > 8 ? 4 : 5} font-weight=700 fill=currentColor>${ft}</text></svg>`;
-      h += a
+      if (bu)
+        h += `<small style="display:block;text-align:center;margin:-6px 0 2px;opacity:.75"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GR};margin-right:5px"></span>${t('au_oth')}</small>`;
+    }
+    h += `</div>${hn}`;
+    if (tot)
+      h += `<div class="card card-body">${kz}${a
         .map((x, i) => {
           const c = cn(x[0]),
             p = (x[1] / tot) * 100,
-            col = PAL[i % PAL.length];
+            col = bu && i >= a.length - sm3.length ? GR : PAL[i % PAL.length];
           return `<div onclick="gl('${x[0]}')" style="cursor:pointer;padding:9px 0;border-top:1px solid rgba(128,128,128,.18)"><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${col};flex:none"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.i} ${esc(t(c.n))}</span><small style="opacity:.7">${p.toFixed(0)} %</small><b style="min-width:4.6em;text-align:right">${fmt(x[1])}</b></div><div style="height:4px;border-radius:2px;background:rgba(128,128,128,.18);margin:6px 0 0 18px"><div style="width:${p}%;height:100%;border-radius:2px;background:${col}"></div></div></div>`;
         })
-        .join('');
-    }
+        .join('')}</div>`;
     const dot = (c) => `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:5px"></span>`;
-    h += `</div><div class="card card-body"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px"><b style="flex:1">${t('trend')}</b><small>${dot('var(--sage)')}${t('inn')}</small><small>${dot('var(--rust)')}${t('ex')}</small></div><svg viewBox="0 0 300 120" style="width:100%"><line x1=0 x2=300 y1=90 y2=90 stroke=currentColor opacity=.2 />`;
+    h += `${bl}<div class="card card-body"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px"><b style="flex:1">${t('trend')}</b><small>${dot('var(--sage)')}${t('inn')}</small><small>${dot('var(--rust)')}${t('ex')}</small></div><svg viewBox="0 0 300 120" style="width:100%"><line x1=0 x2=300 y1=90 y2=90 stroke=currentColor opacity=.2 />`;
     const ms = [];
     for (let k = 5; k >= 0; k--) {
       const [y, m] = ym.split('-'),
@@ -516,6 +524,21 @@ const fx = (k) => {
       behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
     });
 };
+/* 1.21.16: Umschalten Ausgaben/Einnahmen in der Auswertung. Steht der Donut dabei nicht (ganz) im Bild, scrollt die Ansicht sanft zu ihm; sonst bleibt die Position. */
+function stt(k) {
+  ST.t = k;
+  rd();
+  const e = $('#dn'),
+    b = $('#tps');
+  if (!e) return;
+  const r = e.getBoundingClientRect(),
+    top = b ? b.getBoundingClientRect().bottom : 0;
+  if (r.top < top || r.bottom > innerHeight)
+    scrollBy({
+      top: r.top - top - 8,
+      behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+    });
+}
 function se(k) {
   SE.o = SE.o == k ? null : k;
   rd();

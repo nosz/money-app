@@ -202,6 +202,7 @@ const T = {
   au_b1: ['Buchung', 'entry'],
   au_bn: ['Buchungen', 'entries'],
   au_hin: ['Hinweise', 'Notes'],
+  au_oth: ['Sonstiges: Kategorien unter 3 %', 'Other: categories under 3 %'],
   au_n: ['Anzahl Buchungen', 'Number of entries'],
   au_avg: ['Durchschnitt pro Buchung', 'Average per entry'],
   au_max: ['Größte Buchung', 'Largest entry'],
