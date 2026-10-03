@@ -528,6 +528,7 @@ function cfs(id) {
   if (!(v > 0)) {
     e.textContent = t('e_amt0');
     e.hidden = false;
+    evis(e);
     return;
   }
   const r = S.rec.find((x) => x.id == id),
@@ -535,6 +536,7 @@ function cfs(id) {
   if (m) {
     wm(e, m);
     e.hidden = false;
+    evis(e);
     return;
   }
   cf(id, Math.round(v * 100) / 100);
@@ -814,13 +816,27 @@ function ncs(entry) {
 }
 /* Zurück: zur Buchung bzw. Maske schließen */
 const ncx = () => (NC.from ? op() : cl());
+/* 1.35.1: Fehlermeldung ganz sichtbar machen: über der festen Knopfzeile (.stkb) halten. Der Abstand wird aus deren Höhe berechnet.
+   Zweiter Aufruf nach 380 ms, weil das Fokus-Zentrieren des Eingabefelds (focusin, 320 ms) sonst wieder verschiebt. */
+function evis(e) {
+  const f = () => {
+    const b = $('#o .stkb');
+    e.style.scrollMarginBottom = (b ? b.offsetHeight + 12 : 12) + 'px';
+    try {
+      e.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } catch (x) {}
+  };
+  f();
+  setTimeout(f, 380);
+}
 /* 1.33.0: Fehler direkt am Namensfeld zeigen (leer oder doppelt) */
 function cerr(k) {
   $('#nn').style.borderColor = 'var(--rust)';
   const e = $('#en');
   e.textContent = t(k);
   e.hidden = false;
-  $('#nn').focus();
+  $('#nn').focus({ preventScroll: true });
+  evis(e);
 }
 /* 1.33.0: Name in derselben Art schon vergeben? Groß-/Kleinschreibung und Randleerzeichen egal; die Kategorie selbst (id) zählt nicht */
 const cdup = (n, ty, id) => {
@@ -1049,6 +1065,7 @@ function pns() {
     const e = $('#pne');
     wm(e, m);
     e.hidden = false;
+    evis(e);
     return;
   }
   S.set.pin = hs(a);

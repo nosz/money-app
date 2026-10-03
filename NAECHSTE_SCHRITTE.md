@@ -1,14 +1,21 @@
-# MoneyApp – Nächste Schritte (Stand 1.35.0)
+# MoneyApp – Nächste Schritte (Stand 1.35.1)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.35.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.35.1** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **Korrektur 1.35.1 (Fehlermeldung ganz sichtbar):** Am Handy war die Meldung unter dem Namensfeld nur zu etwa drei Vierteln
+  sichtbar, weil die feste Knopfzeile (`.stkb`, seit 1.34.0 höher) ihren unteren Rand verdeckte. Neue Hilfsfunktion `evis(e)` in
+  `js/app.js` (vor `cerr()`): setzt `scroll-margin-bottom` = Höhe der Knopfzeile + 12 px und ruft `scrollIntoView({block:'nearest'})`
+  auf, ein zweites Mal nach 380 ms (das Fokus-Zentrieren in `focusin` läuft nach 320 ms und würde sonst wieder verschieben).
+  Eingesetzt in `cerr()` (Kategorie leer/doppelt; Fokus dort jetzt mit `preventScroll`), `cfs()` (Betrag ändern, beide Meldungen)
+  und `pns()` (PIN). Die Fehleranzeigen in Buchung (`sv()`) und wiederkehrender Buchung (`rsv()`, `nrs()`) zentrieren das Element
+  schon selbst (`block:'center'`) und blieben bewusst unverändert. Keine CSS-, Text- oder Datenänderung.
 - **CSS-Aufräumen (1.35.0):** Nur `css/style.css` (plus Versionen). Entfernt wurden ungenutzte Regeln: `.dir`, `.dir>div`, `.dir label`,
   `.sh .dir .form-label` (alte Von/Auf-Felder), `.cn`, `.cn .form-control`, beide `.cpi`-Blöcke samt `.cpi #cpg` (es gibt nur noch
   eine `id=cpi`, keine Klasse), `.cpe`, `.cpe .bi`, `.cpp`, `.ip`, `.ip button`, `.ip button.on`, `.sh[data-t] .ip button.on`, `.sht.ns`.
@@ -100,6 +107,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Knopfzeile (1.34.0): „Abbrechen“ links (schmal) und „Speichern“ rechts (größer) in einer Zeile, in allen Eingabe-Masken inkl. Betrag ändern
   und PIN setzen; „Abbrechen“ verwirft wie das ✕. Löschen-Rückfragen und Import-Dialoge behalten gestapelte Knöpfe (Sicherheit).
+- Fehlermeldungen bleiben unter dem Feld und werden nach dem Fehler automatisch über die feste Knopfzeile gescrollt (`evis()`, Entscheidung 1.35.1); eine Meldung über dem Feld wurde verworfen.
 - Fehlermeldungen in Masken sind einzeilig (Entscheidung 1.33.1), statt eine Scroll-Logik für die Tastatur einzubauen.
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
@@ -111,7 +119,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 4. Offene Punkte und optionales Aufräumen
 
-- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.35.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
+- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.35.1 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
 - Bekannte Eigenheit: Wählt der Nutzer für eine Standardkategorie im Emoji-Reiter genau ihr Standard-Emoji,
   wird in der Anzeige weiterhin das Linien-Icon gezeigt. Falls das stört: `CATD`-Zuordnung zusätzlich an ein
   Merkmal knüpfen (z. B. nur anwenden, wenn die Kategorie nie bearbeitet wurde).
@@ -120,6 +128,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] Fehlermeldungen am Handy mit offener Tastatur: Kategorie (Name leer, Name doppelt), Betrag ändern (0), PIN (zu kurz) – Meldung ganz sichtbar über der Knopfzeile, ohne selbst zu scrollen? Auch auf kleinen Handys und im Querformat.
 - [ ] Nach dem CSS-Aufräumen (1.35.0) am Handy kurz alle Masken ansehen: Buchung, Umbuchung, Kategorie neu/bearbeiten, Symbol-Auswahl (Symbole und Emoji), wiederkehrende Buchung, PIN, Löschen-Rückfrage – sieht alles aus wie in 1.34.0?
 - [ ] Knopfzeile am Handy (Buchung, Umbuchung, Kategorie neu/bearbeiten, wiederkehrende Buchung neu/bearbeiten, Betrag ändern, PIN setzen): „Abbrechen“ und „Speichern“ in einer Zeile, beide gut treffbar, Texte auf Deutsch und Englisch ohne Umbruch, Tastatur verdeckt die Zeile nicht, „Abbrechen“ schließt ohne Speichern (Kategorie aus der Buchung: zurück in die Buchung)?
 - [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit einzeiliger Meldung abgelehnt (bei geöffneter Tastatur voll sichtbar), in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
