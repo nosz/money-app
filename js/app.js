@@ -1,7 +1,7 @@
 /* MoneyApp – Eingabe-Sheets, Kategorien, Backup, PIN, Start */
 /* Sheets & Toast */
 let HP = 0;
-function sheet(h) {
+function sheet(h, cls) {
   let o = $('#o');
   if (!o) {
     o = document.createElement('div');
@@ -18,7 +18,7 @@ function sheet(h) {
       } catch (e) {}
     }
   }
-  o.innerHTML = `<div class=sh role=dialog aria-modal=true>${h}</div>`;
+  o.innerHTML = `<div class="sh${cls ? ' ' + cls : ''}" role=dialog aria-modal=true>${h}</div>`;
   vvf();
 }
 const cl = () => {
@@ -126,60 +126,161 @@ function ns(v) {
     X.ac = 0;
   } else return;
   fm();
-  const bs = document.querySelectorAll('.grid button[data-c]');
-  bs.forEach((b) => {
-    const on = b.dataset.c == X.c;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on);
-  });
+  ckf();
 }
-/* Kategorie-Kacheln: alle anzeigen, bei Suche nach Name oder früheren Notizen filtern */
-function ghtml() {
-  const cnt = (c) => S.tx.slice(-80).filter((x) => x.c == c.id).length,
-    q = (X.q || '').trim().toLowerCase(),
-    hn = {};
-  let cs = S.cats.filter((c) => c.t == X.t);
-  cs.sort((a, b) => cnt(b) - cnt(a));
+/* ============================================================================
+   1.28.0 – BUCHUNGSMASKE IM BANKING-LOOK (1.29.0: Neue Kategorie / Kategorie bearbeiten / Symbol-Auswahl erledigt, siehe ncm(), ipk())
+   Konzept: Skill „banking-eingabemasken“. Aufbau von oben nach unten:
+   Typ-Leiste → Betrag → Konto → Kategorie (Auswahlfeld) → Buchungsdatum → Notiz
+   → Weitere Angaben (Wiederholung) → Löschen (nur beim Bearbeiten) → Speichern (fest unten)
+
+   WEITER MACHEN (offene Punkte, in dieser Reihenfolge):
+   [C] DIR() in js/core.js: „Von“/„Auf“ bei Umbuchung als Konto-Leisten statt Auswahlfelder.
+   [D] Tastatur-Test auf echten Geräten (iOS/Android): Speichern-Knopf (.stkb) darf nicht verdeckt werden.
+   [E] Weitere Masken (Wiederkehrende Buchung, Rückfragen, Backup, PIN) in gleicher Optik.
+   ============================================================================ */
+
+/* Währungssymbol aus der Einstellung (z. B. € für EUR); Rückfall: Währungscode */
+const curSym = () => {
+  try {
+    return (0)
+      .toLocaleString(loc(), { style: 'currency', currency: S.set.cur, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .replace(/[\d\s.,\u00a0\u202f]/g, '');
+  } catch (e) {
+    return S.set.cur || '';
+  }
+};
+
+/* Inhalt des Kategorie-Auswahlfelds (#ck): gewählte Kategorie oder Hinweis „Kategorie wählen“ */
+const ckin = () => {
+  const c = S.cats.find((x) => x.id == X.c);
+  return `<span class=ckv>${c ? `<b>${ci(c)}</b> ${esc(t(c.n))}` : `<em>${t('bk_catsel')}</em>`}</span>`;
+};
+const ckf = () => {
+  const b = $('#ck');
+  if (b) b.innerHTML = ckin();
+};
+
+/* Kategorie-Auswahl: eigene Ansicht über der Maske. X bleibt erhalten, Rückkehr immer mit op(). */
+function cpk() {
+  X.q = '';
+  sheet(
+    `<div class=sht><h2>${t('bk_cat')}</h2><button class=x onclick="op()" aria-label="${t('x')}">${bi('x')}</button></div><input class="form-control" id=csi type=search placeholder="${t('search')}" aria-label="${t('search')}" oninput="X.q=this.value;cfil()" autocomplete=off enterkeyhint=search><div class=cpl id=cpl>${clist()}</div>`,
+    'fs',
+  );
+  const sh = $('.sh');
+  if (sh) {
+    sh.dataset.t = X.t;
+    sh.scrollTop = 0;
+  }
+}
+/* Liste neu zeichnen (beim Tippen im Suchfeld) */
+function cfil() {
+  const l = $('#cpl'),
+    q = $('#csi');
+  if (l) l.innerHTML = clist();
+  if (q) q.classList.toggle('fon', !!X.q);
+}
+function cpick(id) {
+  X.c = id;
+  X.ac = 0;
+  X.q = '';
+  op();
+}
+/* Liste: oben „Zuletzt benutzt“ (max. 4 Kategorien aus den letzten Buchungen gleicher Art), darunter alle,
+   nach Häufigkeit sortiert. Bei Suche: Treffer nach Name oder früherer Notiz (Notiz als Zusatzzeile). */
+function clist() {
+  const q = (X.q || '').trim().toLowerCase(),
+    hn = {},
+    cnt = (c) => S.tx.slice(-80).filter((x) => x.c == c.id).length;
+  let cs = S.cats.filter((c) => c.t == X.t).sort((a, b) => cnt(b) - cnt(a));
+  const row = (c, sub) =>
+    `<button type=button class="pk${X.c == c.id ? ' on' : ''}" aria-pressed="${X.c == c.id}" onclick="cpick('${c.id}')"><b>${ci(c)}</b><span>${hl(t(c.n), q)}${sub || ''}</span></button>`;
+  const add = `<button type=button class="pk pn" onclick="ncs(1)">${bi('plus')}<span>${t('newc')}</span></button>`;
   if (q) {
-    /* jüngste passende Notiz je Kategorie merken, um sie unter der Kachel zu zeigen */
     [...S.tx].reverse().forEach((x) => {
       if (x.n && x.t == X.t && !hn[x.c] && String(x.n).toLowerCase().includes(q)) hn[x.c] = String(x.n);
     });
     cs = cs.filter((c) => t(c.n).toLowerCase().includes(q) || hn[c.id]);
+    return (
+      (cs.length
+        ? `<div class=pl>${cs
+            .map((c) => {
+              const nameHit = t(c.n).toLowerCase().includes(q);
+              return row(c, !nameHit && hn[c.id] ? `<small class=hn>${bi('note')} ${hl(exc(hn[c.id], q), q)}</small>` : '');
+            })
+            .join('')}</div>`
+        : `<div class=nr><small>${t('nores')}</small></div>`) + add
+    );
   }
-  return cs.length
-    ? cs
-        .map((c) => {
-          const nameHit = !q || t(c.n).toLowerCase().includes(q),
-            sub = !nameHit && hn[c.id] ? `<small class=hn>${bi('note')} ${hl(exc(hn[c.id], q), q)}</small>` : '';
-          return `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${hl(t(c.n), q)}</span>${sub}</button>`;
-        })
-        .join('')
-    : `<div class=nr><small>${t('nores')}</small></div>`;
+  const rec = [];
+  for (let k = S.tx.length - 1; k >= 0 && rec.length < 4; k--) {
+    const x = S.tx[k];
+    if (x.t == X.t && !rec.includes(x.c) && cs.some((c) => c.id == x.c)) rec.push(x.c);
+  }
+  return (
+    (rec.length
+      ? `<h3 class=ph>${t('bk_rec')}</h3><div class=pl>${rec.map((id) => row(cs.find((c) => c.id == id))).join('')}</div>`
+      : '') +
+    `<h3 class=ph>${t('bk_all')}</h3><div class=pl>${cs.map((c) => row(c)).join('')}</div>` +
+    add
+  );
 }
-const fcat = () => {
-  const g = $('#cg');
-  if (g) g.innerHTML = ghtml();
-  const q = $('#csi');
-  if (q) q.classList.toggle('fon', !!X.q);
-};
+
+/* Buchungsdatum: Kurzwahl Heute/Gestern und Datumsfeld bleiben synchron, ohne die Maske neu zu zeichnen */
+function dpk(v) {
+  X.d = v || '';
+  const cd = X.d || iso(D);
+  document.querySelectorAll('.dq .dqb').forEach((b) => {
+    const on = b.dataset.d == cd;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  const i = $('#idd');
+  if (i && i.value != cd) i.value = cd;
+}
+
+/* Löschen als dezenter Textlink in Rost am Ende der Maske (nur beim Bearbeiten) */
+const acts2 = (dx, h) =>
+  `<div class=acts2>${h ? `<small class=dh2>${h}</small>` : ''}<button type=button class=lnk onclick="${dx}">${bi('trash')} ${t('del')}</button></div>`;
+
 function op() {
-  sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>${bi('swap')}</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
-<input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control${X.q ? ' fon' : ''}" id=csi type=search placeholder="${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><button type=button class="btn btn-secondary s nwc" onclick="ncs(1)">＋ ${t('newc')}</button><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
-<details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class="seg d-flex gap-2"><button class="btn btn-secondary s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn btn-secondary s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input class="form-control" type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input class="form-control" id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${
-    X.id || X.t == 'u'
+  const isU = X.t == 'u',
+    td = iso(D),
+    yd = iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1)),
+    cd = X.d || td,
+    /* Typ-Leiste: ohne Plus-/Minus-Zeichen. Beim Bearbeiten nur der eigene Typ-Bereich (Buchung ↔ Umbuchung nicht mischbar). */
+    tb = (ty, lb, js) =>
+      `<button type=button class="${X.t == ty ? 'on' : ''}" aria-pressed="${X.t == ty}" onclick="${js}">${lb}</button>`,
+    ei = `X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()`,
+    typ = `<div class="tp typ" role=group aria-label="${t('bk_nt')}">${
+      X.id && isU ? '' : tb('e', t('e'), `X.t='e';${ei}`) + tb('i', t('i'), `X.t='i';${ei}`)
+    }${X.id && !isU ? '' : tb('u', t('tr'), `X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()`)}</div>`,
+    betrag = `<div class=fld><label class=fl for=ia>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=ea hidden role=alert></div></div>`,
+    /* Konto: Bar/Bank (ACC in js/core.js, Label „Konto“); bei Umbuchung Von/Auf (DIR, siehe TODO [C]) */
+    konto = isU ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : `<div class=fld>${ACC()}</div>`,
+    kat = isU
       ? ''
-      : `<label class="form-label">${t('rep')}</label><select class="form-select" onchange="X.f=this.value">${O(
-          [
-            ['', t('nr')],
-            ['m', t('m')],
-            ['w', t('w')],
-            ['y', t('y')],
-          ],
-          X.f,
-        )}</select>`
-  }</details>
-<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="sv()">${t('save')}</button></div>${acts('cl()', X.id ? 'dl()' : '')}`);
+      : `<div class=fld><label class=fl for=ck>${t('bk_cat')}</label><button type=button class=sel id=ck aria-haspopup=dialog onclick="cpk()">${ckin()}</button><div class="em invalid-feedback" id=ec hidden role=alert></div></div>`,
+    /* Datum und Notiz sind immer sichtbar (nicht mehr eingeklappt) */
+    dat = `<div class=fld><label class=fl for=idd>${t('bk_date')}</label><div class=dq><button type=button class="dqb${cd == td ? ' on' : ''}" data-d="${td}" aria-pressed="${cd == td}" onclick="dpk('${td}')">${t('today')}</button><button type=button class="dqb${cd == yd ? ' on' : ''}" data-d="${yd}" aria-pressed="${cd == yd}" onclick="dpk('${yd}')">${t('yest')}</button><input class="form-control" id=idd type=date value="${cd}" onchange="dpk(this.value)"></div></div><div class=fld><label class=fl for=ino>${t('note')}</label><input class="form-control" id=ino value="${esc(X.n)}" oninput="ns(this.value)" autocomplete=off></div>`,
+    /* Weitere Angaben: eingeklappt, enthält die Wiederholung (nur bei neuer Buchung, nicht bei Umbuchung) */
+    mehr =
+      X.id || isU
+        ? ''
+        : `<details class=more ${X.f ? 'open' : ''}><summary>${t('bk_more')}</summary><div class=fld><label class=fl for=irp>${t('rep')}</label><select class="form-select" id=irp onchange="X.f=this.value">${O(
+            [
+              ['', t('nr')],
+              ['m', t('m')],
+              ['w', t('w')],
+              ['y', t('y')],
+            ],
+            X.f,
+          )}</select></div></details>`;
+  sheet(
+    `${hd(t(X.id ? 'et_' + X.t : 'bk_nt'))}${typ}<small class=hint>${t('bk_h_' + X.t)}</small>${betrag}${konto}${kat}${dat}${mehr}<div class="em warn alert alert-warning" id=ew hidden role=alert></div>${X.id ? acts2('dl()') : ''}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="sv()">${t('save')}</button></div>`,
+    'fs',
+  );
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
@@ -210,7 +311,7 @@ function fm() {
   });
   const i = $('#ia');
   if (i) i.classList.toggle('bad', !!m.a);
-  const g = $('#cg');
+  const g = $('#ck');
   if (g) g.classList.toggle('bad', !!m.c);
 }
 function warns(a, d) {
@@ -277,7 +378,7 @@ function sv(force) {
   if (Object.keys(m).length) {
     X.tried = 1;
     fm();
-    const e = m.a ? $('#ia') : m.c ? $('#cg') : $('#eu');
+    const e = m.a ? $('#ia') : m.c ? $('#ck') : $('#eu');
     if (e) {
       e.scrollIntoView({ block: 'center', behavior: 'smooth' });
       if (m.a) e.focus({ preventScroll: true });
@@ -370,7 +471,7 @@ function dsh() {
   sheet(
     `${hd(bi('bell') + ' ' + t('due'))}${bstrip([...new Set(l.map((o) => o.r.ka || 'bank'))])}${l.map((o) => {
       const bm = recBlk(o.r);
-      return `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div>${bm ? `<div class="em blk" role=alert>${bi('warn')} ${esc(bm)}</div>` : ''}<div class="seg d-flex gap-2"><button class="btn sm" ${bm ? 'disabled' : ''} onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`;
+      return `<div class="card card-body"><div class=row style=border:0><span class=ic>${ci(cn(o.r.c))}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div>${bm ? `<div class="em blk" role=alert>${bi('warn')} ${esc(bm)}</div>` : ''}<div class="seg d-flex gap-2"><button class="btn sm" ${bm ? 'disabled' : ''} onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`;
     }).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
@@ -448,7 +549,7 @@ function erd() {
   const r = RE;
   sheet(
     `${hd(t('rec_e'))}${bstrip()}<input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" onchange="RE.c=this.value">${O(
-      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
+      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
       r.c,
     )}</select><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
       ['m', 'w', 'y'].map((k) => [k, t(k)]),
@@ -499,7 +600,7 @@ function nrd() {
     on = (k) => `class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}"`;
   sheet(
     `${hd(t('rec_n'))}${bstrip()}<div class=tp><button ${on('e')} onclick="nrt('e')">${t('ex')}</button><button ${on('i')} onclick="nrt('i')">${t('inn')}</button></div><input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec').hidden=true">${O(
-      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
+      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
       r.c,
     )}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
       ['m', 'w', 'y'].map((k) => [k, t(k)]),
@@ -599,41 +700,96 @@ const gr = (v) => {
     return Array.from(v)[0];
   }
 };
-/* Kategorie anlegen / bearbeiten: eigene Dialoge (aus der Buchung heraus oder aus den Einstellungen).
-   NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet) } */
-const hdc = (ti) =>
-  `<div class="sht ns"><h2>${ti}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">${bi('x')}</button></div>`;
-const cnm = () =>
-  `<div class=cn><button type=button class=cpi id=cpi aria-expanded=false aria-controls=cpp aria-label="${t('ico')}" onclick="ipt()"><span id=cpg>${NC.i}</span><i class=cpe aria-hidden=true>${bi('pencil')}</i></button><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
-const cip = () =>
-  `<div id=cpp class=cpp hidden><label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NC.i ? 'on' : ''}" aria-pressed="${i == NC.i}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="cpv(this.value)" autocomplete=off></div>`;
-/* Symbolauswahl auf-/zuklappen (Tipp auf das Symbol oben links) */
-function ipt(open) {
-  const p = $('#cpp'),
-    o = open == null ? p.hidden : open;
-  p.hidden = !o;
-  $('#cpi').setAttribute('aria-expanded', o);
-  if (o) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+/* Kategorie anlegen / bearbeiten (1.29.0, Banking-Look): Vollbild-Maske mit Art, Bezeichnung und Symbol.
+   Das Symbol wird in einer eigenen Vollbild-Ansicht gewählt (Suche, Reiter „Symbole | Emoji“).
+   NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet), tab ('s' | 'e'), q, nodel, dh }
+   NC.i: Emoji oder 'bi:<name>' (Bootstrap-Icon, siehe js/icons.js). Datenformat bleibt unverändert (Feld i). */
+const hdc = (ti, js) =>
+  `<div class=sht><h2>${ti}</h2><button class=x onclick="${js || 'ncx()'}" aria-label="${t('x')}">${bi('x')}</button></div>`;
+/* Maske zeichnen (neu und bearbeiten); beim Rückweg aus der Symbol-Auswahl bleiben Name und Symbol erhalten */
+function ncm() {
+  const ed = !!NC.id,
+    lock = !!NC.from || ed,
+    save = ed ? 'ecv()' : 'ac()',
+    tb = (ty, lb) =>
+      `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')">${lb}</button>`,
+    /* Art: wählbar nur beim Anlegen aus den Einstellungen; aus der Buchung heraus und beim Bearbeiten nur Anzeige */
+    art = lock
+      ? `<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(NC.t)}</div><small class=hint>${t(NC.from ? 'cty_lock' : 'h_' + NC.t)}</small></div>`
+      : `<div class=fld><span class=fl>${t('cty')}</span><div class="tp typ ctp" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small></div>`,
+    nm = `<div class=fld><label class=fl for=nn>${t('cat_nm')}</label><input class="form-control" id=nn value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done oninput="NC.n=this.value;this.style.borderColor='';$('#en').hidden=true" onkeydown="if(event.key=='Enter')${save}"><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div></div>`,
+    sy = `<div class=fld><span class=fl>${t('sym')}</span><button type=button class=sel id=cpi aria-haspopup=dialog onclick="ipk()"><span class=ckv><span class=cvp id=cpg>${ci(NC)}</span>${t('sym_chg')}</span></button></div>`;
+  sheet(
+    `${hdc(t(ed ? 'ced' : 'cat_new'))}${art}${nm}${sy}${ed && !NC.nodel ? acts2(`dc('${NC.id}')`, NC.dh) : ''}<div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="${save}">${t('save')}</button></div>`,
+    'fs fsk',
+  );
+  const s = $('#o .sh');
+  s.dataset.t = NC.t;
+  s.scrollTop = 0;
 }
-function pi(i, b) {
-  NC.i = i;
-  $('#ni').value = '';
-  $('#cpg').textContent = i;
-  ipt(false);
-  document.querySelectorAll('.ip button').forEach((x) => {
-    x.classList.toggle('on', x == b);
-    x.setAttribute('aria-pressed', x == b);
+/* Symbol-Auswahl: eigene Vollbild-Ansicht über der Maske. Ein Tipp wählt und führt zurück (ipx = zurück ohne Änderung) */
+function ipk() {
+  const n = $('#nn');
+  if (n) NC.n = n.value;
+  NC.tab = cin(NC) ? 's' : 'e';
+  NC.q = '';
+  const tab = (k, lb) =>
+    `<button type=button data-k="${k}" class="${NC.tab == k ? 'on' : ''}" aria-pressed="${NC.tab == k}" onclick="ipt('${k}')">${lb}</button>`;
+  sheet(
+    `${hdc(t('ico'), 'ipx()')}<div class="tp typ ipt" role=group aria-label="${t('ico')}">${tab('s', t('sym_tab_i'))}${tab('e', t('sym_tab_e'))}</div><div id=ipb>${ipb()}</div>`,
+    'fs',
+  );
+  const s = $('#o .sh');
+  s.dataset.t = NC.t;
+  s.scrollTop = 0;
+}
+/* Inhalt unter den Reitern */
+const ipb = () =>
+  NC.tab == 's'
+    ? `<input class="form-control" id=isi type=search placeholder="${t('search')}" aria-label="${t('search')}" value="${esc(NC.q)}" oninput="NC.q=this.value;ipf()" autocomplete=off enterkeyhint=search><div class=ig id=ig>${igrid()}</div>`
+    : `<label class=fl for=ni style="margin-top:18px">${t('ico2')}</label><div class=ie><input class="form-control" id=ni autocomplete=off enterkeyhint=done onkeydown="if(event.key=='Enter')ipe()"><button type=button class=dqb onclick="ipe()">${t('sym_use')}</button></div><div class=ig>${ICONS.map((e) => `<button type=button class="ib${!cin(NC) && NC.i == e ? ' on' : ''}" aria-pressed="${!cin(NC) && NC.i == e}" onclick="ipc('${e}')">${e}</button>`).join('')}</div>`;
+/* Raster der Bootstrap-Icons, gefiltert nach Suchbegriff (Name, deutsche und englische Stichwörter) */
+function igrid() {
+  const q = (NC.q || '').trim().toLowerCase(),
+    cur = cin(NC),
+    ns = Object.keys(CATI).filter((n) => !q || n.includes(q) || CATL[n].join(' ').includes(q));
+  return ns.length
+    ? ns
+        .map(
+          (n) =>
+            `<button type=button class="ib${cur == n ? ' on' : ''}" aria-pressed="${cur == n}" aria-label="${esc(CATL[n][S.set.lang == 'en' ? 1 : 0].split(' ')[0])}" onclick="ipc('${n}')">${svgi(n)}</button>`,
+        )
+        .join('')
+    : `<div class=nr><small>${t('sym_none')}</small></div>`;
+}
+function ipf() {
+  const g = $('#ig');
+  if (g) g.innerHTML = igrid();
+}
+/* Reiter wechseln */
+function ipt(k) {
+  NC.tab = k;
+  document.querySelectorAll('.ipt button').forEach((b) => {
+    const on = b.dataset.k == k;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
   });
+  $('#ipb').innerHTML = ipb();
 }
-function cpv(v) {
-  const g = gr(v);
-  $('#cpg').textContent = g || NC.i;
-  document.querySelectorAll('.ip button').forEach((x) => {
-    const on = !g && x.textContent == NC.i;
-    x.classList.toggle('on', on);
-    x.setAttribute('aria-pressed', on);
-  });
+/* Bootstrap-Icon gewählt */
+function ipc(v) {
+  NC.i = CATI[v] ? 'bi:' + v : v;
+  ncm();
 }
+/* Eigenes Emoji übernehmen */
+function ipe() {
+  const g = gr($('#ni').value);
+  if (!g) return $('#ni').focus();
+  NC.i = g;
+  ncm();
+}
+/* Zurück zur Maske ohne Änderung des Symbols */
+const ipx = () => ncm();
 function cty(ty) {
   NC.t = ty;
   document.querySelectorAll('.ctp button').forEach((b) => {
@@ -641,22 +797,17 @@ function cty(ty) {
     b.classList.toggle('on', on);
     b.setAttribute('aria-pressed', on);
   });
-  $('#cth').textContent = t('h_' + ty);
+  const h = $('#cth');
+  if (h) h.textContent = t('h_' + ty);
   const s = $('#o .sh');
   if (s) s.dataset.t = ty;
 }
 function ncs(entry) {
-  NC = { t: entry && X.t == 'i' ? 'i' : 'e', n: entry ? (X.q || '').trim() : '', i: '🏷️', from: entry ? 1 : 0 };
-  const tb = (ty, sg, lb) =>
-    `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')"><i class=t${ty}>${sg}</i> ${lb}</button>`;
-  sheet(
-    `${hdc(t('newc'))}${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<div class=stkb><button class="btn btn-primary pr" onclick="ac()">${t('save')}</button></div>${acts('ncx()')}`,
-  );
-  $('#o .sh').dataset.t = NC.t;
-  $('#o .sh').scrollTop = 0;
+  NC = { t: entry && X.t == 'i' ? 'i' : 'e', n: entry ? (X.q || '').trim() : '', i: 'bi:tag', from: entry ? 1 : 0 };
+  ncm();
   $('#nn').focus({ preventScroll: true });
 }
-/* Abbrechen: zurück zur Buchung bzw. Dialog schließen */
+/* Zurück: zur Buchung bzw. Maske schließen */
 const ncx = () => (NC.from ? op() : cl());
 function ac() {
   const n = $('#nn').value.trim();
@@ -666,7 +817,7 @@ function ac() {
     $('#nn').focus();
     return;
   }
-  const c = { id: uid(), t: NC.t, n, i: gr($('#ni').value) || NC.i };
+  const c = { id: uid(), t: NC.t, n, i: NC.i };
   S.cats.push(c);
   P();
   if (NC.from) {
@@ -684,12 +835,18 @@ function ac() {
 function ecs(id) {
   const c = S.cats.find((x) => x.id == id);
   if (!c) return;
-  const n = S.tx.filter((x) => x.c == id).length;
-  NC = { id, t: c.t, n: t(c.n), i: c.i, from: 0 };
-  sheet(
-    `${hdc(t('ced'))}${cnm()}${cip()}<div class=stkb><button class="btn btn-primary pr" onclick="ecv()">${t('save')}</button></div>${acts('cl()', id.startsWith('sonst') ? '' : "dc('" + id + "')", '', id.startsWith('sonst') ? '' : t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n))}`,
-  );
-  $('#o .sh').dataset.t = c.t;
+  const n = S.tx.filter((x) => x.c == id).length,
+    nodel = id.startsWith('sonst');
+  NC = {
+    id,
+    t: c.t,
+    n: t(c.n),
+    i: c.i,
+    from: 0,
+    nodel,
+    dh: nodel ? '' : t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n),
+  };
+  ncm();
 }
 function ecv() {
   const c = S.cats.find((x) => x.id == NC.id),
@@ -701,7 +858,7 @@ function ecv() {
     return;
   }
   if (n != t(c.n)) c.n = n;
-  c.i = gr($('#ni').value) || NC.i;
+  c.i = NC.i;
   cl();
   P();
   toast(t('sav'));

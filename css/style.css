@@ -1041,3 +1041,89 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .em .bi,.em>div .bi{margin-right:.3em}
 .btn .bi{margin-right:.35em;vertical-align:-.15em}
 .btn.dlt .bi,.cdy .bi{vertical-align:-.15em}
+
+
+/* ===== 1.28.0: Banking-Buchungsmaske (Typ-Leiste, Betrag, Auswahlfelder, Datum, Weitere Angaben, Kategorie-Auswahl) =====
+   WEITER MACHEN: gleiche Klassen (.fld .fl .sel .dq .more .acts2) für „Neue Kategorie“ (ncs) verwenden, siehe TODO [A] in js/app.js */
+.sh .fld{margin:0 0 16px}
+.sh .fl{display:block;margin:0 2px 4px;font-size:var(--fs-s);font-weight:400;color:var(--m);line-height:1.3}
+.sh .fld>.bstrip,.sh .fld>.tp{margin-top:0}
+/* Typ-Leiste: dezenter Farbakzent (Unterstrich + Textfarbe) statt voll gefüllter Fläche */
+.sh .tp.typ button.on{background:var(--surface);color:var(--tc,var(--text));box-shadow:inset 0 -3px 0 var(--tc,var(--gold)),0 1px 2px #0002}
+/* Betrag: groß, zentriert, Währungssymbol fest rechts, Farbe nach Typ (.sh[data-t] .amt) */
+.sh .amw{position:relative}
+.sh .amw .amt{font-size:clamp(1.75rem,8vw,2.5rem);line-height:1.2;padding:10px 3.2rem;min-height:64px}
+.sh .amw .cur{position:absolute;right:18px;top:50%;transform:translateY(-50%);font:var(--fs-l) var(--fd);color:var(--tc,var(--m));pointer-events:none}
+/* Kategorie-Auswahlfeld */
+.sh .sel{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--b);border-radius:var(--r-s);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);text-align:left;cursor:pointer}
+.sh .sel::after{content:'›';flex:none;color:var(--m);font:var(--fs-l)/1 var(--fd)}
+.sh .sel .ckv{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh .sel .ckv b{font-weight:400}
+.sh .sel em{font-style:normal;color:var(--m)}
+.sh .sel.bad{border-color:var(--rust);animation:sk .3s}
+/* Buchungsdatum: Kurzwahl + Datumsfeld */
+.sh .dq{display:flex;gap:8px;align-items:stretch}
+.sh .dq .dqb{flex:none;min-height:44px;padding:8px 14px;border:1px solid var(--b);border-radius:var(--r-s);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);cursor:pointer}
+.sh .dq .dqb.on{border-color:var(--tc,var(--gold));background:color-mix(in srgb,var(--tc,var(--gold)) 12%,var(--surface));font-weight:600}
+.sh .dq .form-control{flex:1;min-width:0}
+/* Weitere Angaben (eingeklappt) */
+.sh details.more{margin:0 0 12px;border-top:1px solid var(--b);padding-top:4px}
+.sh details.more>summary{display:flex;justify-content:space-between;align-items:center;min-height:48px;cursor:pointer;color:var(--m);font-size:var(--fs-m);list-style:none}
+.sh details.more>summary::-webkit-details-marker{display:none}
+.sh details.more>summary::after{content:'›';transform:rotate(90deg);transition:transform .2s}
+.sh details.more[open]>summary::after{transform:rotate(-90deg)}
+/* Löschen: dezenter Textlink in Rost */
+.sh .acts2{display:flex;justify-content:center;margin:4px 0 8px}
+.sh .acts2 .lnk{min-height:44px;padding:8px 12px;border:0;background:transparent;color:var(--rust);font:inherit;font-size:var(--fs-m);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* Kategorie-Auswahl (Liste) */
+.sh .cpl{margin-top:12px}
+.sh .ph{margin:16px 2px 6px;font-size:var(--fs-s);font-weight:400;color:var(--m)}
+.sh .pl{border:1px solid var(--b);border-radius:var(--r-m);background:var(--surface);overflow:hidden}
+.sh .pk{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 14px;border:0;border-bottom:1px solid var(--b);background:transparent;color:var(--text);font:inherit;font-size:var(--fs-m);text-align:left;cursor:pointer}
+.sh .pl .pk:last-child{border-bottom:0}
+.sh .pk b{flex:none;width:1.6rem;text-align:center;font-weight:400;font-size:1.25rem}
+.sh .pk span{flex:1;min-width:0}
+.sh .pk .hn{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-s);font-weight:400;color:var(--m)}
+.sh .pk.on{background:color-mix(in srgb,var(--tc,var(--gold)) 12%,var(--surface));font-weight:600}
+.sh .pk.pn{margin-top:16px;border:1px dashed var(--b);border-radius:var(--r-m)}
+.sh .pk.pn .bi{flex:none;width:1.6rem;text-align:center}
+.sh .cpl .nr{padding:16px 4px;text-align:center}
+/* Handy: Vollbild mit Titel und ✕; Tablet/Desktop bleibt zentriertes Fenster (Regeln in @media ab 768px) */
+@media (max-width:767px){.ov .sh.fs{align-self:stretch;max-height:none;border-radius:0}}
+/* Konto-Beschriftung wie alle Feld-Beschriftungen (klein, grau); aktive Konto-Auswahl im gleichen dezenten Akzent wie die Typ-Leiste */
+.sh .fld>.form-label{display:block;margin:0 2px 4px;font-size:var(--fs-s);font-weight:400;color:var(--m);line-height:1.3}
+.sh .tp.acct button.on{background:var(--surface);color:var(--tc,var(--text));box-shadow:inset 0 -3px 0 var(--tc,var(--gold)),0 1px 2px #0002}
+.sh .tp.acct button.on .bl{color:inherit}
+/* Kategorie-Auswahl: Suchfeld mit Abstand unter dem festen Titel */
+.sh .sht+#csi{margin-top:18px}
+/* Vollbild-Masken: Titelleiste bleibt bündig oben, Inhalt scheint nicht über ihr durch */
+.sh.fs .sht{top:-16px}
+/* Umbuchung: Von/Auf-Beschriftungen wie alle Feld-Beschriftungen */
+.sh .dir .form-label{margin:0 2px 4px;font-size:var(--fs-s);font-weight:400;color:var(--m);line-height:1.3}
+
+/* ===== 1.29.0: Neue Kategorie / Kategorie bearbeiten / Symbol-Auswahl (gleiche Klassen wie die Buchungsmaske) ===== */
+.cic{width:1.15em;height:1.15em;vertical-align:-.2em}
+.sh .sht+.fld{margin-top:18px}
+/* Art nur als Anzeige (aus der Buchung heraus und beim Bearbeiten) */
+.sh .ro{display:flex;align-items:center;min-height:48px;padding:10px 12px;border:1px solid var(--b);border-radius:var(--r-s);background:color-mix(in srgb,var(--m) 8%,var(--surface));color:var(--tc,var(--text));font-size:var(--fs-m);font-weight:600}
+.sh .fld>.hint{display:block;margin:6px 2px 0}
+/* Symbol-Feld mit Live-Vorschau */
+.sh .cvp{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-right:12px;border-radius:var(--r-s);border:1px solid var(--tc,var(--gold));background:color-mix(in srgb,var(--tc,var(--gold)) 12%,var(--surface));color:var(--tc,var(--text));font-size:1.4rem;line-height:1;vertical-align:middle}
+.sh .cvp .cic{width:1em;height:1em;vertical-align:0}
+.sh .sel .ckv{display:flex;align-items:center}
+/* Symbol-Auswahl: Raster */
+.sh .ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin-top:12px}
+.sh .ig .nr{grid-column:1/-1;padding:16px 4px;text-align:center}
+.sh .ib{display:flex;align-items:center;justify-content:center;min-height:56px;padding:0;border:1px solid var(--b);border-radius:var(--r-s);background:var(--surface);color:var(--text);font-size:1.5rem;line-height:1;cursor:pointer}
+.sh .ib .cic{width:1em;height:1em;vertical-align:0}
+.sh .ib.on{border-color:var(--tc,var(--gold));background:color-mix(in srgb,var(--tc,var(--gold)) 12%,var(--surface));color:var(--tc,var(--text))}
+.sh .ipt+#ipb #isi{margin-top:18px}
+.sh .ie{display:flex;gap:8px;align-items:stretch}
+.sh .ie .form-control{flex:1;min-width:0}
+.sh .ie .dqb{flex:none;min-height:44px;padding:8px 14px;border:1px solid var(--b);border-radius:var(--r-s);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);cursor:pointer}
+/* Löschen mit Hinweis (Anzahl betroffener Buchungen) */
+.sh .acts2{flex-direction:column;align-items:center}
+.sh .dh2{margin-bottom:2px;color:var(--m);font-size:var(--fs-s);text-align:center}
+/* Kategorie-Masken (Klasse fsk): Speichern-Knopf sitzt auch bei kurzem Inhalt fest am unteren Rand (Handy-Vollbild).
+   Die Buchungsmaske bleibt unverändert. */
+@media (max-width:767px){.ov .sh.fsk{display:flex;flex-direction:column;padding-bottom:0}.ov .sh.fsk>*{flex:none}.ov .sh.fsk>.stkb{margin-top:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}}

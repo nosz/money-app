@@ -34,7 +34,7 @@ const trow = (x, q) => {
     ty = u ? 'u' : x.t,
     kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
     tm = hm(x);
-  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
+  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
 const sortL = (l, sc, dr) => {
   /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
@@ -342,7 +342,7 @@ const V = {
           const c = cn(x[0]),
             p = (x[1] / tot) * 100,
             col = bu && i >= a.length - sm3.length ? GR : PAL[i % PAL.length];
-          return `<div onclick="gl('${x[0]}')" style="cursor:pointer;padding:9px 0;border-top:1px solid rgba(128,128,128,.18)"><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${col};flex:none"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.i} ${esc(t(c.n))}</span><small style="opacity:.7">${p.toFixed(0)} %</small><b style="min-width:4.6em;text-align:right">${fmt(x[1])}</b></div><div style="height:4px;border-radius:2px;background:rgba(128,128,128,.18);margin:6px 0 0 18px"><div style="width:${p}%;height:100%;border-radius:2px;background:${col}"></div></div></div>`;
+          return `<div onclick="gl('${x[0]}')" style="cursor:pointer;padding:9px 0;border-top:1px solid rgba(128,128,128,.18)"><div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${col};flex:none"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ci(c)} ${esc(t(c.n))}</span><small style="opacity:.7">${p.toFixed(0)} %</small><b style="min-width:4.6em;text-align:right">${fmt(x[1])}</b></div><div style="height:4px;border-radius:2px;background:rgba(128,128,128,.18);margin:6px 0 0 18px"><div style="width:${p}%;height:100%;border-radius:2px;background:${col}"></div></div></div>`;
         })
         .join('')}</div>`;
     const dot = (c) => `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:5px"></span>`;
@@ -424,7 +424,7 @@ const V = {
                 l
                   .map(
                     (c) =>
-                      `<div class="li cr" role=button tabindex=0 onclick="ecs('${c.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ecs('${c.id}')}"><span class=ic>${c.i}</span><div class=g>${esc(t(c.n))}</div><small>${cnt(c.id)}</small><span class=chv aria-hidden=true>›</span></div>`,
+                      `<div class="li cr" role=button tabindex=0 onclick="ecs('${c.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ecs('${c.id}')}"><span class=ic>${ci(c)}</span><div class=g>${esc(t(c.n))}</div><small>${cnt(c.id)}</small><span class=chv aria-hidden=true>›</span></div>`,
                   )
                   .join('') +
                 '</details>'
