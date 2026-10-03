@@ -43,6 +43,15 @@ function hsort(c) {
   }
   rd();
 }
+/* Kategorien (Einstellungen): Sortierung über die Spaltenköpfe Name / Anzahl */
+function csort(c) {
+  if ((CT.sc || 'n') == c) CT.dir = -(CT.dir || (c == 'u' ? -1 : 1));
+  else {
+    CT.sc = c;
+    CT.dir = c == 'u' ? -1 : 1;
+  }
+  rd();
+}
 function fsort(c) {
   if ((F.sc || 'd') == c) F.dir = -(F.dir || -1);
   else {
@@ -89,7 +98,7 @@ const lst = (l, st, id) => {
         dr,
       );
       if (!g.length) return '';
-      return `<details ${st.cl[k] ? '' : 'open'} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${hrow(sc, dr, 'fsort')}${g.map(trow).join('')}</details>`;
+      return `<details ${st.cl[k] === false || (st.cl[k] == null && (st.q || st.c)) ? 'open' : ''} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${hrow(sc, dr, 'fsort')}${g.map(trow).join('')}</details>`;
     })
     .join('');
 };
@@ -209,18 +218,13 @@ const V = {
       rec = () => {
         if (!S.rec.length) return `<small>${t('norec')}</small>`;
         RT.cl = RT.cl || {};
+        /* feste Reihenfolge: nächste Fälligkeit zuerst */
         const nx = (r) => iso(dateK(r, r.k)),
-          nm = (r) => (r.n || t(cn(r.c).n)).toLowerCase(),
-          so = {
-            n: (a, b) => nm(a).localeCompare(nm(b)),
-            h: (a, b) => b.a - a.a,
-            l: (a, b) => a.a - b.a,
-            d: (a, b) => (nx(a) < nx(b) ? -1 : nx(a) > nx(b) ? 1 : 0),
-          }[RT.s || 'd'];
+          so = (a, b) => (nx(a) < nx(b) ? -1 : nx(a) > nx(b) ? 1 : 0);
         const grp = (ty, ti) => {
           const l = S.rec.filter((r) => r.t == ty).sort(so);
           return l.length
-            ? `<details class=gx ${RT.cl[ty] ? '' : 'open'} ontoggle="RT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
+            ? `<details class=gx ${RT.cl[ty] === false ? 'open' : ''} ontoggle="RT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
                 l
                   .map(
                     (r) =>
@@ -230,28 +234,25 @@ const V = {
                 '</details>'
             : '';
         };
-        return (
-          `<select class="form-select" aria-label="Sort" onchange="RT.s=this.value;rd()">${O(
-            ['d', 'n', 'h', 'l'].map((k) => [k, t('o_' + k)]),
-            RT.s || 'd',
-          )}</select>` +
-          grp('e', t('ex')) +
-          grp('i', t('inn'))
-        );
+        return grp('e', t('ex')) + grp('i', t('inn'));
       },
       cats = () => {
         CT.cl = CT.cl || {};
-        const cnt = (id) => S.tx.filter((x) => x.c == id).length,
+        const cm = {};
+        S.tx.forEach((x) => (cm[x.c] = (cm[x.c] || 0) + 1));
+        const cnt = (id) => cm[id] || 0,
           nm = (c) => t(c.n).toLowerCase(),
-          so = {
-            n: (a, b) => nm(a).localeCompare(nm(b)),
-            z: (a, b) => nm(b).localeCompare(nm(a)),
-            u: (a, b) => cnt(b.id) - cnt(a.id),
-          }[CT.s || 'n'];
+          sc = CT.sc || 'n',
+          dr = CT.dir || (sc == 'u' ? -1 : 1),
+          ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
+          head = `<div class="li d-flex align-items-center gap-3 hd ch"><span class=ic></span><span class=g onclick="csort('n')">${t('name')}${ar('n')}</span><span class=cc onclick="csort('u')">${t('cnt')}${ar('u')}</span><span class=sp></span></div>`,
+          so = (a, b) =>
+            (sc == 'u' ? cnt(a.id) - cnt(b.id) : nm(a).localeCompare(nm(b))) * dr || nm(a).localeCompare(nm(b));
         const grp = (ty, ti) => {
           const l = S.cats.filter((c) => c.t == ty).sort(so);
           return l.length
-            ? `<details class=gx ${CT.cl[ty] ? '' : 'open'} ontoggle="CT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
+            ? `<details class=gx ${CT.cl[ty] === false ? 'open' : ''} ontoggle="CT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
+                head +
                 l
                   .map(
                     (c) =>
@@ -263,10 +264,6 @@ const V = {
         };
         return (
           `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="ncs(0)">＋ ${t('newc')}</button>` +
-          `<select class="form-select" aria-label="Sort" onchange="CT.s=this.value;rd()">${O(
-            ['n', 'z', 'u'].map((k) => [k, t('o_' + k)]),
-            CT.s || 'n',
-          )}</select>` +
           grp('e', t('ex')) +
           grp('i', t('inn'))
         );
@@ -326,7 +323,7 @@ const V = {
           .join('') +
         `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
       dat = () =>
-        `<div class="seg d-flex gap-2" style="align-items:flex-start"><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('j')">${t('bk')}</button><small>${t('bkj')}</small></div><div class=g><button class="btn btn-secondary s" style="width:100%" onclick="bk('c')">${t('csv')}</button><small>${t('bkc')}</small></div></div><button class="btn btn-secondary s sm" style="margin-top:10px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">` +
+        `<div class=dgrid><button class="btn btn-secondary s" onclick="bk('j')">${t('bk')}</button><button class="btn btn-secondary s" onclick="bk('c')">${t('csv')}</button><small>${t('bkj')}</small><small>${t('bkc')}</small></div><button class="btn btn-secondary s sm" style="margin-top:12px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">` +
         bx(
           lb(
             'pin',

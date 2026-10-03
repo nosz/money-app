@@ -1,6 +1,7 @@
 /* MoneyApp – Texte (DE/EN) */
 const T = {
   typ: ['Typ', 'Type'],
+  cnt: ['Anzahl', 'Count'],
   rec_e: ['Wiederkehrende Buchung bearbeiten', 'Edit recurring entry'],
   recdt: ['Wiederkehrende Buchung löschen', 'Delete recurring entry'],
   recdq: [

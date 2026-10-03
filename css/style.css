@@ -809,3 +809,38 @@ nav .nb.on svg.ni{opacity:1}
 
 /* Sichtbarer Fokusrahmen */
 :is(button,[role=button],summary,select,input,a):focus-visible,.form-control:focus-visible,.form-select:focus-visible{outline:3px solid var(--gold);outline-offset:2px;box-shadow:none}
+
+
+/* ===== 1.18.1: einheitliche Buttons, Datei-Auswahl im Dark-Mode, Feinschliff fürs Handy ===== */
+:root{--h-ctl:48px}
+/* Alle Buttons gleich aufgebaut: gleiche Höhe, Rahmenbreite, Schrift, Textmitte */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--h-ctl);padding:8px 16px;border:1px solid transparent;border-radius:var(--r-s);font-size:var(--fs-m);font-weight:600;line-height:1.2;text-align:center}
+.btn.s,.btn.btn-secondary{border-color:var(--b)}
+.btn.dlt{border-width:1px}
+.btn.sm,.btn.btn-sm{min-height:44px;padding:8px 12px}
+.form-control,.form-select,select{min-height:var(--h-ctl)}
+.seg{align-items:stretch}
+.seg button{min-width:0}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dgrid small{display:block}
+
+/* Datei auswählen: Button in Farbschema statt weiß */
+.form-control[type=file]{padding:6px 8px;line-height:1.3;color:var(--text)}
+.form-control[type=file]::file-selector-button,
+.form-control[type=file]:hover:not(:disabled):not([readonly])::file-selector-button{margin:0 12px 0 0;padding:8px 14px;min-height:36px;border:1px solid var(--b);border-radius:var(--r-s);background:var(--s2);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+
+/* Kleine Handys: Zeilen etwas schmaler, damit die Meta-Zeile nicht umbricht */
+@media (max-width:400px){
+  .li.tr,.li.hd{gap:8px}
+  .li.tr .dc,.li.hd .dc{width:2.8rem}
+  .li.tr b,.li.hd span:last-child{min-width:4.2rem}
+  .btn{padding:8px 12px}
+}
+
+
+/* ===== 1.18.4: Kategorien mit Spaltenköpfen ===== */
+.cr small{min-width:2.5rem;text-align:right}
+.cr .chv{width:1rem;text-align:center}
+.hd.ch .ic{cursor:default}
+.hd.ch .cc{min-width:2.5rem;justify-content:flex-end;text-align:right}
+.li.hd.ch span.sp{width:1rem;min-width:0;flex:none;cursor:default}
