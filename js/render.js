@@ -27,9 +27,15 @@ const trow = (x, q) => {
 const sortL = (l, sc, dr) => {
   /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
   const dk = (x) => x.d + String(x.ts || 0).padStart(14, '0'),
-    key = { d: dk, c: (x) => nmx(x).toLowerCase(), a: (x) => x.a, t: (x) => ({ e: 0, i: 1, u: 2 })[x.t] }[sc],
+    /* 1.21.3: Betrag mit Vorzeichen (Ausgabe −, Einnahme +, Umbuchung 0) */
+    sv = (x) => (x.t == 'i' ? Number(x.a) : x.t == 'e' ? -Number(x.a) : 0),
+    key = { d: dk, c: (x) => nmx(x).toLowerCase(), a: sv, t: (x) => ({ e: 0, i: 1, u: 2 })[x.t] }[sc],
+    /* Umbuchungen (alle 0) untereinander nach Betrag */
+    sub = (x) => (sc == 'a' && x.t == 'u' ? Number(x.a) : 0),
     cmp = (p, q) => (p < q ? -1 : p > q ? 1 : 0);
-  return l.slice().sort((a, b) => cmp(key(a), key(b)) * dr || (sc != 'd' ? cmp(dk(b), dk(a)) : 0));
+  return l
+    .slice()
+    .sort((a, b) => cmp(key(a), key(b)) * dr || cmp(sub(a), sub(b)) * dr || (sc != 'd' ? cmp(dk(b), dk(a)) : 0));
 };
 const hrow = (sc, dr, fn, ty) => {
   const ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : '');
@@ -69,12 +75,20 @@ function fsort(c) {
   }
   rs();
 }
-/* 1.21.1: Anzahl Ausgaben / Einnahmen (und ggf. Umbuchungen) oben im aufgeklappten Monat */
+/* 1.21.1: Anzahl Ausgaben / Einnahmen / Umbuchungen oben im aufgeklappten Monat.
+   1.21.3: Kacheln sind Filter-Schalter (HS.ty, gilt für alle Monate); Zahlen zeigen immer die Monatsgesamtzahl */
 const mcn = (g) => {
-  const n = (ty) => g.filter((x) => x.t == ty).length,
-    c = (ty, lbl) => `<span class="mc ${ty}">${lbl}<b>${n(ty)}</b></span>`;
-  return `<div class=mcnt>${c('e', t('ex'))}${c('i', t('inn'))}${n('u') ? c('u', t('tr')) : ''}</div>`;
+  const ty = HS.ty || '',
+    n = (k) => g.filter((x) => x.t == k).length,
+    c = (k, lbl) =>
+      `<button type=button class="mc ${k}${ty == k ? ' on' : ''}${ty && ty != k ? ' off' : ''}${n(k) ? '' : ' zero'}" aria-pressed="${ty == k}" onclick="mty('${k}')"><b>${n(k)}</b><span>${lbl}</span></button>`;
+  return `<div class=mcnt role=group aria-label="${t('typ')}">${c('e', t('ex'))}${c('i', t('inn'))}${c('u', t('tr'))}</div>`;
 };
+/* Tipp auf aktive Kachel hebt den Filter auf, Tipp auf andere Kachel wechselt direkt */
+function mty(k) {
+  HS.ty = HS.ty == k ? '' : k;
+  rd();
+}
 const mlist = () => {
   const cur = iso(D).slice(0, 7),
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
@@ -86,14 +100,12 @@ const mlist = () => {
     dr = HS.dir || -1;
   return ms
     .map((m) => {
-      const g = sortL(
-          all.filter((x) => x.d.slice(0, 7) == m),
-          sc,
-          dr,
-        ),
+      const gm = all.filter((x) => x.d.slice(0, 7) == m),
+        ft = HS.ty || '',
+        g = sortL(gm, sc, dr).filter((x) => !ft || x.t == ft),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(g)}${hrow(sc, dr, 'hsort', true)}${g.map((x) => trow(x)).join('')}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort', true) + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
     })
     .join('');
 };
@@ -278,7 +290,13 @@ const V = {
           ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
           key = { f: nx, n: nm, a: (r) => r.a }[sc],
           so = (a, b) => cmp(key(a), key(b)) * dr || cmp(nx(a), nx(b)) || cmp(nm(a), nm(b)),
-          head = `<div class="li d-flex align-items-center gap-3 hd ch"><span class=ic></span><span class=g><i class=hs onclick="rsort('f')">${t('rdue')}${ar('f')}</i><i class=hs onclick="rsort('n')">${t('name')}${ar('n')}</i><i class=hs onclick="rsort('a')">${t('amt')}${ar('a')}</i></span><span class=sp></span></div>`;
+          head = `<div class=rsb role=group>${[
+            ['f', 'rdue'],
+            ['n', 'name'],
+            ['a', 'amt'],
+          ]
+            .map(([k, l]) => `<button type=button class="${sc == k ? 'on' : ''}" aria-pressed="${sc == k}" onclick="rsort('${k}')">${t(l)}${ar(k)}</button>`)
+            .join('')}</div>`;
         const grp = (ty, ti) => {
           const l = S.rec.filter((r) => r.t == ty).sort(so);
           return l.length

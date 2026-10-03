@@ -532,7 +532,7 @@ function ecs(id) {
     `${hdc(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${
       id.startsWith('sonst')
         ? `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`
-        : `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button><button class="btn dlt" style="width:100%;margin-top:18px" onclick="dc('${id}')">🗑 ${t('del')}</button><small class=hint style="margin-top:6px">${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small>`
+        : `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button><button class="btn dlt" style="width:100%;margin-top:18px" onclick="dc('${id}')">🗑 ${t('del')}<small class=dh>${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small></button>`
     }`,
   );
   $('#o .sh').dataset.t = c.t;

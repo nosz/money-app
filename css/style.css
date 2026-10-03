@@ -879,11 +879,25 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 .fsum:empty{display:none}
 .fclr{min-height:44px;padding:0 6px;border:0;background:none;color:var(--gold);font:inherit;font-size:var(--fs-s);font-weight:700;cursor:pointer}
 
-/* ===== 1.21.1: Anzahl Ausgaben/Einnahmen im aufgeklappten Monat ===== */
+/* ===== 1.21.3: Zähler-Kacheln (Zahl über Label) als Typ-Filter im aufgeklappten Monat ===== */
 .mcnt{display:flex;gap:8px;margin:6px 0 4px}
-.mc{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:var(--r-m);font-size:var(--fs-s);color:var(--text);background:color-mix(in srgb,var(--tc) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 35%,var(--surface))}
-.mc b{flex:none;min-width:1.7em;padding:1px .5em;border-radius:999px;text-align:center;font-size:var(--fs-s);background:color-mix(in srgb,var(--tc) 22%,var(--surface))}
+.mc{flex:1 1 0;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;border-radius:var(--r-m);font:inherit;font-size:var(--fs-s);line-height:1.15;color:var(--text);background:color-mix(in srgb,var(--tc) 12%,var(--surface));border:2px solid color-mix(in srgb,var(--tc) 35%,var(--surface));cursor:pointer;transition:opacity .15s}
+.mc b{font-size:var(--fs-m);font-weight:700;line-height:1}
+.mc span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mc.e{--tc:var(--rust)}.mc.i{--tc:var(--sage)}.mc.u{--tc:var(--m,#888)}
+.mc.off,.mc.zero{opacity:.55}
+.mc.on{opacity:1;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));font-weight:700}
+.mc:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* 1.21.4: Löschen-Hinweis steht im Button */
+.btn.dlt .dh{display:block;margin-top:3px;font-size:var(--fs-s);font-weight:400;line-height:1.25;white-space:normal;opacity:.9}
+.mno{padding:14px 4px;text-align:center;font-size:var(--fs-s);color:var(--m)}
+@media (max-width:400px){.mc span{font-size:calc(var(--fs-s) * .92)}}
+
+/* ===== 1.21.5: Sortierleiste der wiederkehrenden Buchungen (Fällig / Name / Betrag) ===== */
+.rsb{display:flex;gap:6px;margin:8px 0 10px}
+.rsb button{flex:1 1 0;min-width:0;min-height:40px;padding:0 6px;border-radius:999px;border:2px solid var(--b);background:var(--surface);color:var(--m);font:inherit;font-size:var(--fs-s);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.rsb button.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--text);font-weight:700}
+.rsb button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 /* ===== 1.21.2: Platzhalter in allen Themes gut lesbar ===== */
 .form-control::placeholder{color:color-mix(in srgb,var(--text) 62%,var(--surface));opacity:1}
