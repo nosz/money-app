@@ -251,6 +251,7 @@ function sv(force) {
       return;
     }
   }
+  let nid = null;
   if (X.t == 'u') {
     if (X.k == X.to) {
       op();
@@ -262,20 +263,47 @@ function sv(force) {
         S.tr.find((x) => x.id == X.id),
         o,
       );
-    else S.tr.push({ id: uid(), ts: Date.now(), ...o });
+    else {
+      nid = uid();
+      S.tr.push({ id: nid, ts: Date.now(), ...o });
+    }
   } else if (X.id)
     Object.assign(
       S.tx.find((x) => x.id == X.id),
       { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' },
     );
   else {
-    S.tx.push({ id: uid(), ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
+    nid = uid();
+    S.tx.push({ id: nid, ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
     S.set.lk = X.k || 'bank';
     if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 });
   }
+  /* 1.21.18: Nach einer NEUEN Buchung (auch Umbuchung) zur Startseite wechseln, den Monat der Buchung aufklappen, einen Kachel-Filter nur lösen, wenn er die Buchung verbergen würde, und zur Buchung scrollen. Liegt das Datum nicht in den angezeigten Monaten (aktueller + zwei vorherige), gibt es keinen Sprung. */
+  const bm = d.slice(0, 7),
+    jmp = nid && bm >= iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7) && bm <= iso(D).slice(0, 7);
   cl();
+  if (jmp) {
+    tab = 'home';
+    HS.o = HS.o || {};
+    HS.o[bm] = true;
+    if (HS.ty && HS.ty != X.t) HS.ty = '';
+  }
   P();
   toast(t('sav'));
+  if (jmp) shw(nid);
+}
+/* 1.21.18: Zur neuen Buchung scrollen und die Zeile kurz aufleuchten lassen. Kurze Verzögerung, weil cl() per history.back() eine Scroll-Wiederherstellung auslösen kann. */
+function shw(id) {
+  setTimeout(() => {
+    const e = document.querySelector(`.mh [data-id="${id}"]`);
+    if (!e) return;
+    e.scrollIntoView({
+      block: 'center',
+      behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+    });
+    e.classList.add('fl');
+    setTimeout(() => e.classList.remove('fl'), 2000);
+  }, 150);
 }
 function dl() {
   const L = X.t == 'u' ? S.tr : S.tx,

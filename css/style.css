@@ -940,3 +940,8 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 /* ===== 1.21.16: Auswertung – Umschalter Ausgaben/Einnahmen bleibt beim Scrollen oben ===== */
 .tps{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0 -14px 6px;padding:6px 14px 4px;background:var(--surface);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
 .tps .tp{margin:0}
+
+/* ===== 1.21.18: neue Buchung leuchtet nach dem Sprung zur Startseite kurz auf (Klasse wird per JS nach 2 s entfernt) ===== */
+@keyframes fl{0%,55%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
+.li.fl{animation:fl 2s ease-out}
+@media (prefers-reduced-motion:reduce){.li.fl{animation:none;background:color-mix(in srgb,var(--gold) 30%,transparent)}}
