@@ -864,12 +864,14 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 
 /* ===== 1.20.1: „Alle Monate“ direkt unter der Monatsauswahl ===== */
 .allm{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-weight:400;color:var(--text);font-size:var(--fs-s)}
-.allm input{margin:0;width:1.15rem;height:1.15rem;accent-color:var(--gold)}
+.allm input{-webkit-appearance:none;appearance:none;display:grid;place-content:center;width:1.3rem;height:1.3rem;margin:0;border:2px solid var(--b);border-radius:6px;background:var(--surface);cursor:pointer}
+.allm input::after{content:'';width:.75rem;height:.75rem;background:var(--on);transform:scale(0);clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0,43% 62%)}
+.allm input:checked{background:var(--gold);border-color:var(--gold)}
+.allm input:checked::after{transform:scale(1)}
 
 /* ===== 1.21.0: Kategorie-Chips und Zusammenfassung über der Liste ===== */
-.chips{display:flex;gap:8px;overflow-x:auto;margin:10px -2px 0;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:2px solid var(--b);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-s);white-space:nowrap;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chip{min-height:40px;padding:0 12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;border-radius:999px;border:2px solid var(--b);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-s);white-space:nowrap;cursor:pointer}
 .chip.ce{border-color:color-mix(in srgb,var(--rust) 40%,var(--b))}
 .chip.ci{border-color:color-mix(in srgb,var(--sage) 55%,var(--b))}
 .chip.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));font-weight:700}
@@ -882,3 +884,6 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 .mc{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:var(--r-m);font-size:var(--fs-s);color:var(--text);background:color-mix(in srgb,var(--tc) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 35%,var(--surface))}
 .mc b{flex:none;min-width:1.7em;padding:1px .5em;border-radius:999px;text-align:center;font-size:var(--fs-s);background:color-mix(in srgb,var(--tc) 22%,var(--surface))}
 .mc.e{--tc:var(--rust)}.mc.i{--tc:var(--sage)}.mc.u{--tc:var(--m,#888)}
+
+/* ===== 1.21.2: Platzhalter in allen Themes gut lesbar ===== */
+.form-control::placeholder{color:color-mix(in srgb,var(--text) 62%,var(--surface));opacity:1}
