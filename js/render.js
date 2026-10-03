@@ -111,30 +111,50 @@ const lst = (l, st, id) => {
     })
     .join('');
 };
+/* Gefilterte Liste (Monat / alle Monate, Kategorie, Suche) */
+const fl = () => {
+  const q = F.q.trim().toLowerCase();
+  return allT().filter(
+    (x) =>
+      (F.all || x.d.startsWith(ym)) &&
+      (!F.c || x.c == F.c) &&
+      (!q || ((x.n || '') + ' ' + nmx(x)).toLowerCase().includes(q)),
+  );
+};
 const rl = () => {
-  const q = F.q.trim().toLowerCase(),
-    l = allT().filter(
-      (x) =>
-        (F.all || x.d.startsWith(ym)) &&
-        (!F.c || x.c == F.c) &&
-        (!q || ((x.n || '') + ' ' + nmx(x)).toLowerCase().includes(q)),
-    );
-  if (!l.length) return `<small>${t('none')}</small>`;
+  const l = fl();
+  if (!l.length) return `<small>${t(F.q || F.c ? 'nohit' : 'none')}</small>`;
   return lst(l, F, 'F');
 };
-const rs = () => ($('#res').innerHTML = rl());
-/* 1.19.0: Filter-Markierung und „Zurücksetzen“ in Buchungen */
-const fr = () => {
-  $('#frs').hidden = !(F.q || F.c || F.all);
-  $('#fq').classList.toggle('fon', !!F.q);
-  $('#fc').classList.toggle('fon', !!F.c);
+/* 1.21.0: Zusammenfassung über der Liste: Anzahl, Summe (ohne Umbuchungen) und „Zurücksetzen“ */
+const fsm = () => {
+  const l = fl(),
+    act = !!(F.q || F.c || F.all),
+    net = l.reduce((s, x) => (x.t == 'i' ? s + x.a : x.t == 'e' ? s - x.a : s), 0),
+    has = l.some((x) => x.t != 'u');
+  return `<span>${l.length ? `<b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${has ? ` · <b class="${net < 0 ? 'neg' : 'pos'}">${sg(net)}</b>` : ''}` : ''}</span>${act ? `<button type=button class=fclr onclick="frs()">✕ ${t('frs')}</button>` : ''}`;
 };
+const rs = () => {
+  $('#res').innerHTML = rl();
+  $('#fsum').innerHTML = fsm();
+};
+const fr = () => $('#fq').classList.toggle('fon', !!F.q);
 const frs = () => {
   F.q = '';
   F.c = '';
   F.all = 0;
   rd();
 };
+/* Kategorie-Chips: Tipp setzt den Filter, erneuter Tipp hebt ihn auf */
+function fc(id) {
+  F.c = F.c == id ? '' : id;
+  document.querySelectorAll('.chips .chip').forEach((b) => {
+    const on = b.dataset.c == F.c;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  rs();
+}
 /* Ansichten */
 const V = {
   home() {
@@ -173,8 +193,11 @@ const V = {
     );
   },
   lb() {
-    const act = !!(F.q || F.c || F.all);
-    return `${F.all ? '' : mn()}<input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="F.q=this.value;rs();fr()"><label class="form-label sfl" for=fc>${t('fcat')}</label><select id=fc class="form-select${F.c ? ' fon' : ''}" onchange="F.c=this.value;rs();fr()"><option value="">${t('allc')}</option>${S.cats.map((c) => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><button id=frs type=button class="btn btn-secondary s sm" ${act ? '' : 'hidden'} onclick="frs()">✕ ${t('frs')}</button><div class="card card-body" id=res style=margin-top:10px>${rl()}</div>`;
+    const used = new Set(S.tx.map((x) => x.c)),
+      cs = S.cats.filter((c) => used.has(c.id) || c.id == F.c),
+      chip = (id, cls, lbl) =>
+        `<button type=button class="chip ${cls}${F.c == id ? ' on' : ''}" data-c="${id}" aria-pressed="${F.c == id}" onclick="fc('${id}')">${lbl}</button>`;
+    return `${F.all ? '' : mn()}<label class=allm><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="F.q=this.value;rs();fr()"><div class=chips role=group aria-label="${t('fcat')}">${chip('', '', t('allk'))}${cs.map((c) => chip(c.id, c.t == 'i' ? 'ci' : 'ce', `${c.i} ${esc(t(c.n))}`)).join('')}</div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,
