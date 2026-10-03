@@ -384,6 +384,61 @@ function rdl() {
   );
   $('.sh').dataset.t = r.t;
 }
+/* 1.21.14: Neue wiederkehrende Buchung (Einstellungen → Wiederkehrende Buchungen → „Neue wiederkehrende Buchung“) */
+function nrc() {
+  X = {};
+  RE = { nw: 1, t: 'e', a: '', c: '', n: '', f: 'm', d: iso(D) };
+  nrt('e');
+}
+function nrt(ty) {
+  RE.t = ty;
+  if (!S.cats.some((c) => c.id == RE.c && c.t == ty)) RE.c = (S.cats.find((c) => c.t == ty) || {}).id || '';
+  nrd();
+}
+function nrd() {
+  const r = RE,
+    on = (k) => `class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}"`;
+  sheet(
+    `${hd(t('rec_n'))}<div class=tp><button ${on('e')} onclick="nrt('e')">${t('ex')}</button><button ${on('i')} onclick="nrt('i')">${t('inn')}</button></div><input class="form-control amt" id=ra inputmode=decimal placeholder="${t('sbp0')}" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div><label class="form-label">${t('cat1')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec').hidden=true">${O(
+      S.cats.filter((c) => c.t == r.t).map((c) => [c.id, c.i + ' ' + esc(t(c.n))]),
+      r.c,
+    )}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
+      ['m', 'w', 'y'].map((k) => [k, t(k)]),
+      r.f,
+    )}</select><label class="form-label">${t('rec_f1')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn pr" style="width:100%;margin-top:16px" onclick="nrs()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button></div>`,
+  );
+  $('.sh').dataset.t = r.t;
+}
+function nrs() {
+  const v = num(RE.a);
+  if (!(v > 0)) {
+    const e = $('#rea');
+    e.hidden = false;
+    e.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    $('#ra').focus({ preventScroll: true });
+    return;
+  }
+  if (!RE.c) {
+    const e = $('#rec');
+    e.hidden = false;
+    e.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
+  /* k = 0: noch keine Buchung erzeugt, die erste entsteht zur ersten Fälligkeit */
+  S.rec.push({
+    id: uid(),
+    t: RE.t,
+    a: Math.round(v * 100) / 100,
+    c: RE.c,
+    n: (RE.n || '').trim(),
+    f: RE.f,
+    s: RE.d || iso(D),
+    k: 0,
+  });
+  cl();
+  P();
+  toast(t('sav'));
+}
 function rdo() {
   const id = RE.id;
   cl();
@@ -629,7 +684,7 @@ function im(el) {
     } catch (e) {
       X = {};
       sheet(
-        `${hd(t('imerr'))}<p style="margin:8px 0 14px">${t('imerrt')}</p><button class="btn btn-primary" style="width:100%" onclick="cl()">${t('x')}</button>`,
+        `${hd(t('imerr'))}<p style="margin:8px 0 14px">${t('imerrt')}</p><button class="btn btn-primary" style="width:100%" onclick="${S.ob ? 'cl()' : 'ob()'}">${t('x')}</button>`,
       );
     }
   });
@@ -657,6 +712,7 @@ function ip(r) {
   S.tr.forEach((x) => {
     if (!x.to) x.to = x.f == 'bank' ? 'bar' : 'bank';
   });
+  S.ob = 1; /* wer ein Backup einspielt, braucht den Willkommensdialog nicht */
   cl();
   P();
 }
@@ -696,7 +752,7 @@ function lk() {
   o.id = 'lk';
   o.className = 'ov';
   o.style.cssText = 'z-index:30;align-items:center;background:var(--ink)';
-  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>🔒 ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:var(--fs-l)"><small></small></div>`;
+  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>${AV('lock')} ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:var(--fs-l)"><small></small></div>`;
   document.body.append(o);
   const i = o.querySelector('input');
   i.focus();
@@ -768,17 +824,39 @@ function ktoSave() {
   P();
   toast(t('sav'));
 }
+/* Erster Start (nur solange S.ob == 0): Schritt 1 Willkommen, Schritt 2 Kontostände. Beide Schritte lassen sich nicht wegtippen. */
 function ob() {
   X = { nc: 1 };
   sheet(
-    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>➕</i><span>${t('w1')}</span></li><li><i>🏦</i><span>${t('w2')}</span></li><li><i>📊</i><span>${t('w3')}</span></li></ul><div class=pv><b>🔒 ${t('wpt')}</b><br><span>${t('wp')}</span></div><label class="form-label">${t('sb')}</label><input id=ob_sb class="form-control" inputmode=decimal placeholder="${t('sbp')}"><small>${t('sbl')}</small><br><small>${t('wset')}</small><div class=cta><button class="btn btn-primary w-100" onclick="od()">${t('go')}</button></div>`,
+    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>${AV('edit')}</i><span>${t('w1')}</span></li><li><i>${AV('bank')}</i><span>${t('w2')}</span></li><li><i>${AV('stats')}</i><span>${t('w3')}</span></li></ul><div class=pv><b>${AV('shield')} ${t('wpt')}</b><br><span>${t('wp')}</span></div><div class=cta style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ob2()">${t('onx')}</button><button type=button class="btn btn-link w-100" onclick="$('#obf').click()">${t('obbk')}</button><input id=obf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true></div>`,
   );
 }
-function od() {
-  const e = $('#ob_sb'),
-    v = e ? num(e.value) : null;
+function ob2() {
+  X = { nc: 1 };
+  sheet(
+    `<h2>${t('obk')}</h2><p style="margin:.2rem 0 6px;color:var(--m)">${t('obkh')}</p>${['bank', 'bar', 'spar']
+      .map(
+        (k) =>
+          `<label class="form-label">${AV(k)} ${t('a_' + k)}${k == 'spar' ? ` <small>(${t('oopt')})</small>` : ''}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=ob_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="this.style.borderColor=''" autocomplete=off>`,
+      )
+      .join('')}<small style="display:block;margin-top:12px">${t('wset')}</small><div class=stkb><button class="btn btn-primary w-100" onclick="od(1)">${t('go')}</button><button type=button class="btn btn-link w-100" onclick="od(0)">${t('olat')}</button></div>`,
+  );
+}
+/* sv = 1: eingegebene Stände übernehmen (leere Felder zählen dann als 0, sind alle leer, wird nichts gesetzt); sv = 0: später */
+function od(sv) {
+  const vs = sv
+    ? ['bank', 'bar', 'spar'].map((k) => {
+        const e = $('#ob_' + k),
+          s = e ? e.value.trim() : '';
+        if (!s) return [k, 0, 1];
+        const v = num(s);
+        if (v == null && e) e.style.borderColor = 'var(--rust)';
+        return [k, v, 0];
+      })
+    : [];
+  if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
   S.ob = 1;
-  if (v != null) setBank(v);
+  if (vs.some(([, , empty]) => !empty)) vs.forEach(([k, v]) => setAcc(k, v));
   X = {};
   cl();
   P();

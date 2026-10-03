@@ -195,6 +195,9 @@ const V = {
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
     let h = mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
+    /* solange es keine einzige Buchung gibt: große Karte, die direkt den Buchungsdialog öffnet */
+    if (!S.tx.length)
+      h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
     h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
     if (hasSt() || S.tr.length || S.tx.some((x) => x.k == 'bar'))
       h += `<div style="margin-top:8px"><small>${t('a_bank')}</small> <b>${fmt(bal('bank'))}</b> &nbsp; <small>${t('a_bar')}</small> <b>${fmt(bal('bar'))}</b><br><small>${t('a_spar')}</small> <b>${fmt(bal('spar'))}</b>${hasSt() ? `<br><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b>` : ''}</div>`;
@@ -241,9 +244,78 @@ const V = {
     const a = Object.entries(by).sort((p, q) => q[1] - p[1]),
       tot = a.reduce((s, x) => s + x[1], 0);
     let cum = 0;
-    let h = `<div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" aria-pressed="${ST.t == 'e'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" aria-pressed="${ST.t == 'i'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body">`;
+    /* 1.21.14: Kennzahlen, Bilanz und Hinweise. Vergleich mit dem Vorzeitraum (Vormonat bzw. Vorjahr);
+       ist der gewählte Zeitraum noch nicht vorbei, wird nur bis zum gleichen Tag verglichen. */
+    const yr = ST.p == 'y',
+      nowP = yr ? String(D.getFullYear()) : D.getFullYear() + '-' + pad(D.getMonth() + 1),
+      live = pre == nowP,
+      d0 = new Date(+pre.slice(0, 4), +pre.slice(5, 7) - 2, 1),
+      pp = yr ? String(+pre - 1) : d0.getFullYear() + '-' + pad(d0.getMonth() + 1),
+      dm = yr ? 0 : new Date(+pp.slice(0, 4), +pp.slice(5, 7), 0).getDate(),
+      inP = (x) =>
+        !live ||
+        (yr
+          ? x.d.slice(5) <= pad(D.getMonth() + 1) + '-' + pad(D.getDate())
+          : +x.d.slice(8) <= Math.min(D.getDate(), dm)),
+      pc = S.tx.filter((x) => x.d.startsWith(pre)),
+      pq = S.tx.filter((x) => x.d.startsWith(pp) && inP(x)),
+      sm = (l, k) => l.filter((x) => x.t == k).reduce((q, x) => q + x.a, 0),
+      nq = (l, k) => l.filter((x) => x.t == k).length,
+      inc = sm(pc, 'i'),
+      exp = sm(pc, 'e'),
+      sal = inc - exp,
+      L = pc.filter((x) => x.t == ST.t),
+      big = L.reduce((m, x) => (!m || x.a > m.a ? x : m), null),
+      pt = sm(pq, ST.t),
+      df = tot - pt,
+      pct = pt > 0 ? (df / pt) * 100 : null,
+      nb = (n) => `${n} ${t(n == 1 ? 'au_b1' : 'au_bn')}`,
+      vw = t(yr ? 'au_vj' : 'au_vp'),
+      fl = (q, o) => Object.keys(o).reduce((z, k) => z.replace('{' + k + '}', () => o[k]), q),
+      cls = (v) => (v == 0 ? '' : v > 0 == (ST.t == 'i') ? 'pos' : 'neg'),
+      cname = (id) => esc(t(cn(id).n)),
+      hs = [],
+      pb = {};
+    pq.forEach((x) => x.t == 'e' && (pb[x.c] = (pb[x.c] || 0) + x.a));
+    /* Reihenfolge: Saldo, größter Anstieg, Veränderung, dominante Kategorie (höchstens 3) */
+    if (sal < 0) hs.push(fl(t('au_h1'), { x: fmt(-sal) }));
+    if (ST.t == 'e' && pt > 0) {
+      let ri = null;
+      a.forEach(([c, v]) => {
+        const g = v - (pb[c] || 0);
+        if (g >= 20 && (!ri || g > ri[1])) ri = [c, g];
+      });
+      if (ri) hs.push(fl(t('au_h3'), { c: cname(ri[0]), x: '+' + fmt(ri[1]), v: vw }));
+    }
+    if (pct != null && Math.abs(pct) >= 10)
+      hs.push(
+        fl(t(ST.t == 'e' ? 'au_h2e' : 'au_h2i'), {
+          p: Math.abs(pct).toFixed(0),
+          d: t(pct > 0 ? 'au_ab' : 'au_bl'),
+          v: vw,
+        }),
+      );
+    if (a.length > 1 && a[0][1] / tot >= 0.4)
+      hs.push(
+        fl(t(ST.t == 'e' ? 'au_h4e' : 'au_h4i'), { c: cname(a[0][0]), p: ((a[0][1] / tot) * 100).toFixed(0) }),
+      );
+    const bl = pc.length
+        ? `<div class="card card-body"><b>${t('au_bil')}</b><div class=ar><span>${t('inn')}<small>${nb(nq(pc, 'i'))}</small></span><b class=pos>${fmt(inc)}</b></div><div class=ar><span>${t('ex')}<small>${nb(nq(pc, 'e'))}</small></span><b class=neg>${fmt(exp)}</b></div><div class=ar><span>${t('au_sal')}</span><b class="${sal < 0 ? 'neg' : 'pos'}">${sg(sal)}</b></div><div class=ar><span>${t('au_sq')}</span><b>${inc > 0 ? ((sal / inc) * 100).toFixed(0).replace('-', '−') + ' %' : '–'}</b></div></div>`
+        : '',
+      hn = hs.length
+        ? `<div class="card card-body"><b>${t('au_hin')}</b>${hs
+            .slice(0, 3)
+            .map((x) => `<div class=ah>${AV('info')}<span>${x}</span></div>`)
+            .join('')}</div>`
+        : '',
+      sn = df > 0 ? '+' : df < 0 ? '−' : '±',
+      kz = tot
+        ? `<div class=kz><div><small>${t('au_n')}</small><b>${L.length}</b></div><div><small>${t('au_avg')}</small><b>${fmt(tot / L.length)}</b></div><div><small>${t('au_max')}</small><b>${fmt(big.a)}</b><small>${cname(big.c)} · ${big.d.slice(8)}.${big.d.slice(5, 7)}.</small></div><div><small>${fl(t('au_vgl'), { v: vw })}</small>${pct == null ? '<b>–</b>' : `<b class="${cls(df)}">${sn}${fmt(Math.abs(df))}</b><small>${sn}${Math.abs(pct).toFixed(0)} %</small>`}</div></div>${live && pct != null ? `<small class=kn>${t('au_bis')}</small>` : ''}`
+        : '';
+    let h = `<div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" aria-pressed="${ST.t == 'e'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" aria-pressed="${ST.t == 'i'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}${bl}${hn}<div class="card card-body">`;
     if (!tot) h += `<small>${t('none')}</small>`;
     else {
+      h += kz;
       const gap = a.length > 1 ? 0.6 : 0,
         ft = fmt(tot);
       h += `<svg viewBox="0 0 42 42" style="width:230px;max-width:80%;display:block;margin:4px auto 14px"><circle r=15.9155 cx=21 cy=21 fill=none stroke="rgba(128,128,128,.15)" stroke-width=5.5 />${a
@@ -294,7 +366,9 @@ const V = {
         return `<div class="card card-body sec${o ? ' open' : ''}" id="s_${k}"><button aria-expanded="${o}" onclick="se('${k}')"><span class=ic>${ic}</span><span class=g>${ti}</span><span class=chev aria-hidden=true>›</span></button>${o ? `<div class=sb>${fn()}</div>` : ''}</div>`;
       },
       rec = () => {
-        if (!S.rec.length) return `<small>${t('norec')}</small>`;
+        /* 1.21.14: neue wiederkehrende Buchung direkt anlegen (wie „Neue Kategorie“), auch bei leerer Liste */
+        const nb = `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="nrc()">＋ ${t('rec_n')}</button>`;
+        if (!S.rec.length) return nb + `<small>${t('norec')}</small>`;
         RT.cl = RT.cl || {};
         /* Sortierung wählbar (Standard: nächste Fälligkeit zuerst) */
         const nx = (r) => iso(dateK(r, r.k)),
@@ -320,7 +394,7 @@ const V = {
                 '</details>'
             : '';
         };
-        return grp('e', t('ex')) + grp('i', t('inn'));
+        return nb + grp('e', t('ex')) + grp('i', t('inn'));
       },
       cats = () => {
         CT.cl = CT.cl || {};
@@ -420,8 +494,8 @@ const V = {
       `<h2>${t('set')}</h2>` +
       sec('list', SI.list, t('list'), () => V.lb()) +
       sec('stats', SI.stats, t('stats'), () => V.sb()) +
-      sec('rec', SI.rec, t('recs'), rec) +
       sec('kto', SI.kto, t('kto'), kto) +
+      sec('rec', SI.rec, t('recs'), rec) +
       sec('cats', SI.cats, t('cats'), cats) +
       sec('look', SI.look, t('look'), look) +
       sec('gen', SI.gen, t('gen'), gen) +

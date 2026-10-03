@@ -910,3 +910,25 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .li.tr.re,.li.tr.ri{padding-left:10px}
 .li.tr .chv{width:1rem;text-align:center}
 @media (max-width:400px){.hd span.am{min-width:4.2rem}}
+
+/* ===== 1.21.12: Onboarding ===== */
+.card.first{cursor:pointer;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface))}
+.card.first b{font-size:var(--fs-l)}
+.card.first small{display:block;margin-top:2px;color:var(--m)}
+.wl i svg.ai{margin:0}
+.cta .btn+.btn,.stkb .btn+.btn{margin-top:4px}
+
+/* ===== 1.21.13: Onboarding seriös – Bootstrap Icons statt Emojis (erben die Textfarbe jedes Themes), neutrale Texte ===== */
+.pv b svg.ai,.card.first b svg.ai{margin-right:.35em}
+
+/* ===== 1.21.14: Auswertung (Bilanz, Hinweise, Kennzahlen) – Farben nur über Theme-Variablen / .pos / .neg ===== */
+.ar{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-top:1px solid rgba(128,128,128,.18)}
+.card>b:first-child+.ar{margin-top:6px}
+.ar>span{flex:1;min-width:0}
+.ar small{margin-left:8px;opacity:.7}
+.ah{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+.ah svg.ai{margin:.2em 0 0;flex:none}
+.kz{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-bottom:16px}
+.kz small{display:block;opacity:.7}
+.kz b{display:block}
+.kn{display:block;margin:-6px 0 14px;opacity:.7}
