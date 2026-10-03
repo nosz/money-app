@@ -57,7 +57,7 @@ function ot(id) {
   const x = id && allT().find((y) => y.id == id);
   X = x
     ? { ...x, a: String(x.a).replace('.', ','), f: '', k: x.t == 'u' ? x.f : x.k || 'bank' }
-    : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: 'bar' };
+    : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: S.set.lk || 'bar' };
   op();
 }
 /* Betrag: nur Ziffern, ein Komma oder Punkt, max. 2 Nachkommastellen */
@@ -160,7 +160,7 @@ function op() {
           X.f,
         )}</select>`
   }</details>
-<div class="em warn alert alert-warning" id=ew hidden role=alert></div><button class="btn pr" style="width:100%;margin-top:16px" onclick="sv()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button>${X.id ? `<button class="btn dlt" onclick="dl()">🗑 ${t('del')}</button>` : ''}</div>`);
+<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class=stkb><button class="btn pr" style="width:100%" onclick="sv()">${t('save')}</button></div><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button>${X.id ? `<button class="btn dlt" onclick="dl()">🗑 ${t('del')}</button>` : ''}</div>`);
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
@@ -266,6 +266,7 @@ function sv(force) {
     );
   else {
     S.tx.push({ id: uid(), ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
+    S.set.lk = X.k || 'bank';
     if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 });
   }
   cl();
@@ -682,7 +683,7 @@ function lk() {
   o.id = 'lk';
   o.className = 'ov';
   o.style.cssText = 'z-index:30;align-items:center;background:var(--ink)';
-  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>🔒 ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:1.4rem"><small></small></div>`;
+  o.innerHTML = `<div class="card card-body" style="width:280px;text-align:center"><h2>🔒 ${t('pi')}</h2><input class="form-control" type=password inputmode=numeric maxlength=6 style="text-align:center;font-size:var(--fs-l)"><small></small></div>`;
   document.body.append(o);
   const i = o.querySelector('input');
   i.focus();
