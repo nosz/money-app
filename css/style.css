@@ -371,22 +371,6 @@
             background: color-mix(in srgb, var(--tc, var(--gold)) 14%, var(--surface))
         }
 
-        .dir {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            margin: 6px 0 10px
-        }
-
-        .dir>div {
-            flex: 1;
-            min-width: 0
-        }
-
-        .dir label {
-            margin-top: 0
-        }
-
         .swp {
             flex: none;
             width: 44px;
@@ -675,7 +659,6 @@
         }
     .em{color:var(--rust);font-size:var(--fs-s);font-weight:600;margin:4px 2px 0}.em[hidden]{display:none}.em.warn{background:color-mix(in srgb,var(--gold) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 45%,var(--surface));color:var(--text);border-radius:var(--r-s);padding:10px 12px;margin:12px 0 0}.em.warn button{margin-top:8px}
 .amt.bad{border-color:var(--rust)!important;animation:sk .3s}.grid.bad{outline:2px solid var(--rust);outline-offset:3px;border-radius:var(--r-m)}details.gx>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}details.gx>summary::-webkit-details-marker{display:none}details.gx>summary::after{content:'›';transform:rotate(90deg);transition:.2s}details.gx:not([open])>summary::after{transform:none}details.gx+details.gx{margin-top:12px}
-.ip{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.ip button{font-size:var(--fs-l);width:44px;height:44px;border-radius:var(--r-s);border:2px solid var(--b);background:var(--surface)}.ip button.on{border-color:var(--gold)}
 .ov .sh{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.kb #nav{display:none}.kb .sh .hint{display:none}
 @keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}.wl{list-style:none;padding:0;margin:10px 0}.wl li{display:flex;gap:12px;align-items:flex-start;padding:8px 0}.wl i{font-style:normal;font-size:var(--fs-l);width:2rem;text-align:center;flex:none}.pv{background:color-mix(in srgb,var(--sage) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--sage) 40%,var(--surface));border-radius:var(--r-m);padding:12px 14px;margin:10px 0}.pv span{font-size:var(--fs-s)}
 
@@ -736,14 +719,9 @@ nav .nb.on .nl { color: var(--gold) }
 .cr .g{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cr small{color:var(--m);white-space:nowrap}
 .cr .chv{color:var(--m);font:var(--fs-l)/1 var(--fd)}
-.cn{display:flex;align-items:center;gap:12px;margin:4px 0 8px}
-.cn .form-control{margin:0;font-size:var(--fs-m);font-weight:600}
-.cpi{flex:none;width:56px;height:56px;border-radius:var(--r-m);display:flex;align-items:center;justify-content:center;font-size:var(--fs-l);background:color-mix(in srgb,var(--tc,var(--gold)) 14%,var(--surface));border:2px solid var(--tc,var(--gold))}
 .nwc{width:100%;margin-top:8px;border-style:dashed}
-.sh[data-t] .ip button.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,var(--surface))}
 
 /* Dialoge zum Anlegen/Bearbeiten: Kopf scrollt mit, deckt das Eingabefeld nie ab */
-.sht.ns{position:static;margin:0 0 8px;padding:0}
 .sh input{scroll-margin-top:16px}
 /* Löschen: nie in der Typ-Farbe von Speichern, sondern neutral mit roter Kontur */
 .sc{margin-top:12px}
@@ -847,12 +825,6 @@ nav .nb.on svg.ni{opacity:1}
 /* ===== 1.19.0: Suche/Filter, Symbolauswahl, wiederkehrende Buchungen ===== */
 [hidden]{display:none!important}
 .fon{border-color:var(--gold)!important;background:color-mix(in srgb,var(--gold) 12%,var(--surface))}
-/* Symbol oben links: antippbar, wächst mit der Schriftgröße (rem statt px) */
-.cpi{position:relative;width:3.4rem;height:3.4rem;min-width:44px;min-height:44px;padding:0;line-height:1;cursor:pointer;color:inherit;overflow:visible}
-.cpi #cpg{display:block;font-size:var(--fs-l);line-height:1}
-.cpe{position:absolute;right:-.4rem;bottom:-.4rem;width:1.5rem;height:1.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.8rem;background:var(--surface);border:1px solid var(--b);color:var(--m)}
-.ip button{width:3rem;height:3rem;min-width:44px;min-height:44px;padding:0;line-height:1;display:flex;align-items:center;justify-content:center}
-.cpp{margin-top:4px}
 
 /* ===== 1.19.1: Import-Knopf statt Browser-Dateifeld ===== */
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
@@ -1036,7 +1008,6 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .x .bi{width:1.1em;height:1.1em;vertical-align:middle}
 .swp .bi{width:1.25em;height:1.25em;vertical-align:middle}
 .tp .tu .bi{vertical-align:-.15em}
-.cpe .bi{width:100%;height:100%;padding:.28rem}
 .sht h2 .bi{vertical-align:-.1em}
 .em .bi,.em>div .bi{margin-right:.3em}
 .btn .bi{margin-right:.35em;vertical-align:-.15em}
@@ -1098,8 +1069,6 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .sh .sht+#csi{margin-top:18px}
 /* Vollbild-Masken: Titelleiste bleibt bündig oben, Inhalt scheint nicht über ihr durch */
 .sh.fs .sht{top:-16px}
-/* Umbuchung: Von/Auf-Beschriftungen wie alle Feld-Beschriftungen */
-.sh .dir .form-label{margin:0 2px 4px;font-size:var(--fs-s);font-weight:400;color:var(--m);line-height:1.3}
 
 /* ===== 1.29.0: Neue Kategorie / Kategorie bearbeiten / Symbol-Auswahl (gleiche Klassen wie die Buchungsmaske) ===== */
 .cic{width:1.15em;height:1.15em;vertical-align:-.2em}

@@ -1,14 +1,23 @@
-# MoneyApp – Nächste Schritte (Stand 1.34.0)
+# MoneyApp – Nächste Schritte (Stand 1.35.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.34.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.35.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **CSS-Aufräumen (1.35.0):** Nur `css/style.css` (plus Versionen). Entfernt wurden ungenutzte Regeln: `.dir`, `.dir>div`, `.dir label`,
+  `.sh .dir .form-label` (alte Von/Auf-Felder), `.cn`, `.cn .form-control`, beide `.cpi`-Blöcke samt `.cpi #cpg` (es gibt nur noch
+  eine `id=cpi`, keine Klasse), `.cpe`, `.cpe .bi`, `.cpp`, `.ip`, `.ip button`, `.ip button.on`, `.sh[data-t] .ip button.on`, `.sht.ns`.
+  Vorher geprüft: kein Treffer als Klasse in `js/*.js`, `index.html`, `service-worker.js` (nur Funktionen `ip()`/`ns()`/`cn()`,
+  Daten-Eigenschaft `.dir` in `render.js`, Wort „dir“ in Texten). Geprüft in der Testumgebung: berechnete Stile von 2117 Elementen in
+  16 Ansichten (Startseite, Einstellungen, Buchung E/A/Umbuchung, Kategorie-Auswahl, Kategorie neu/aus Buchung/bearbeiten,
+  Symbol-Auswahl beide Reiter, wiederkehrende Buchung neu/bearbeiten, PIN, Löschen-Rückfrage) vor und nach dem Aufräumen
+  identisch (Negativkontrolle mit absichtlich gelöschter Regel zeigte Unterschiede). Funktionstests (Dublettenprüfung, Knopfzeile)
+  unverändert bestanden. Keine JS-, Text- oder Datenänderung.
 - **Knopfzeile „Abbrechen | Speichern“ (1.34.0):** Neue Hilfsfunktion `svb(sx, cx, lb)` in `js/app.js` (direkt vor `acts2`) baut
   die feste Knopfzeile unten in EINER Zeile: links „Abbrechen“ (`.cb`, Ghost, flex 1), rechts Hauptknopf (`.sb`, flex 2,
   mindestens 52 px hoch). „Abbrechen“ macht dasselbe wie das ✕ oben und verwirft die Eingaben. Eingesetzt in: `op()` (Buchung inkl.
@@ -102,10 +111,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 4. Offene Punkte und optionales Aufräumen
 
-- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.34.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
-- Optional (eigene Version, nur Aufräumen): nicht mehr benutzte CSS-Regeln entfernen: `.dir`, `.dir>div`, `.dir label`, `.sh .dir .form-label` (alte Von/Auf-Auswahlfelder) sowie die der alten Kategorie-Maske:
-  `.cn`, `.cpi`, `.cpe`, `.cpp`, `.ip` (in `css/style.css`) sowie die zugehörigen `.sht.ns`-Regeln. Vorher per Suche
-  prüfen, dass nichts anderes sie benutzt.
+- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.35.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
 - Bekannte Eigenheit: Wählt der Nutzer für eine Standardkategorie im Emoji-Reiter genau ihr Standard-Emoji,
   wird in der Anzeige weiterhin das Linien-Icon gezeigt. Falls das stört: `CATD`-Zuordnung zusätzlich an ein
   Merkmal knüpfen (z. B. nur anwenden, wenn die Kategorie nie bearbeitet wurde).
@@ -114,6 +120,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] Nach dem CSS-Aufräumen (1.35.0) am Handy kurz alle Masken ansehen: Buchung, Umbuchung, Kategorie neu/bearbeiten, Symbol-Auswahl (Symbole und Emoji), wiederkehrende Buchung, PIN, Löschen-Rückfrage – sieht alles aus wie in 1.34.0?
 - [ ] Knopfzeile am Handy (Buchung, Umbuchung, Kategorie neu/bearbeiten, wiederkehrende Buchung neu/bearbeiten, Betrag ändern, PIN setzen): „Abbrechen“ und „Speichern“ in einer Zeile, beide gut treffbar, Texte auf Deutsch und Englisch ohne Umbruch, Tastatur verdeckt die Zeile nicht, „Abbrechen“ schließt ohne Speichern (Kategorie aus der Buchung: zurück in die Buchung)?
 - [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit einzeiliger Meldung abgelehnt (bei geöffneter Tastatur voll sichtbar), in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
 - [ ] Alle Masken gleicher Aufbau (Titel + ✕, Beschriftungen oben, Knopfzeile „Abbrechen | Speichern“ in einer Zeile fest unten)?
