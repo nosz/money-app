@@ -953,3 +953,12 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .cdm{margin:4px 0 18px;font-size:var(--fs-m);line-height:1.45;color:var(--text)}
 .cdy{width:100%;min-height:48px;font-weight:700}
 .sh .cdy+.acts{margin-top:10px}
+
+/* 1.21.20: Mobile-Feinschliff */
+.sh .sht+.tp{margin-top:22px}
+.sh .sht+.hint{margin-top:18px}
+.tp button{min-width:0;padding-left:4px;padding-right:4px;font-size:min(var(--fs-m),3.8vw);overflow:hidden;text-overflow:ellipsis}
+.tp i{margin-right:3px}
+.grid button{min-width:0;padding-left:0;padding-right:0;font-size:min(var(--fs-s),3.2vw);overflow-wrap:normal}
+.btn.btn-link{--bs-btn-bg:transparent;--bs-btn-hover-bg:transparent;--bs-btn-active-bg:transparent;--bs-btn-color:var(--m);--bs-btn-hover-color:var(--text);--bs-btn-border-color:transparent;background:transparent;color:var(--m);font-weight:600;text-decoration:underline}
+.btn.btn-link:hover,.btn.btn-link:active{background:transparent;color:var(--text)}
