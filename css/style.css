@@ -932,3 +932,7 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .kz small{display:block;opacity:.7}
 .kz b{display:block}
 .kn{display:block;margin:-6px 0 14px;opacity:.7}
+
+/* ===== 1.21.15: Auswertung – Umschalter Ausgaben (rot) / Einnahmen (grün) wie im Rest der App; Textfarbe je Theme aus theme.js (--onr, --ong); Monat/Jahr bleibt golden ===== */
+.tp button.on[data-ty=e]{--tc:var(--rust);--tcx:var(--onr,#fff)}
+.tp button.on[data-ty=i]{--tc:color-mix(in srgb,var(--sage) 70%,var(--text));--tcx:var(--ong,#fff)}

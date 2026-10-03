@@ -28,6 +28,18 @@ function ap(u) {
         0.114 * parseInt(g.slice(5, 7), 16);
     s.setProperty('--on', l > 150 ? '#1d1a14' : '#fff');
   }
+  /* 1.21.15: lesbare Textfarbe auf Rot (Ausgaben) und Grün (Einnahmen) je Theme: weiß oder dunkel, was mehr Kontrast hat */
+  {
+    const hx = (k) => [1, 3, 5].map((i) => parseInt(k.slice(i, i + 2), 16)),
+      lm = (r) => {
+        const f = (v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * f(r[0]) + 0.7152 * f(r[1]) + 0.0722 * f(r[2]);
+      },
+      pk = (bg) => ((l) => (1.05 / (l + 0.05) >= (l + 0.05) / (lm([29, 26, 20]) + 0.05) ? '#fff' : '#1d1a14'))(lm(bg)),
+      tx = hx(c[5]);
+    s.setProperty('--onr', pk(hx(c[4])));
+    s.setProperty('--ong', pk(hx(c[3]).map((v, i) => Math.round(v * 0.7 + tx[i] * 0.3))));
+  }
   const m = document.querySelector('meta[name=theme-color]');
   m && m.setAttribute('content', c[0]);
 }
