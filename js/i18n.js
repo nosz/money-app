@@ -195,6 +195,8 @@ const T = {
   pinoff: ['PIN entfernen', 'Remove PIN'],
   bk: ['Backup erstellen (JSON)', 'Create backup (JSON)'],
   csv: ['CSV exportieren', 'Export CSV'],
+  bkok: ['Backup erstellt: {n}', 'Backup created: {n}'],
+  csvok: ['Export erstellt: {n}', 'Export created: {n}'],
   imp: ['Backup importieren', 'Import backup'],
   rpl: ['Ersetzen', 'Replace'],
   mrg: ['Zusammenführen', 'Merge'],

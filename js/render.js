@@ -200,7 +200,7 @@ const V = {
       h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
     h += `<div class="card card-body"><small>${t('bal')}</small><div class="big ${m.b < 0 ? 'neg' : 'pos'}">${sg(m.b)}</div><small>↑ ${fmt(m.i)} &nbsp; ↓ ${fmt(m.e)}</small>`;
     if (balOn())
-      h += `<div style="margin-top:10px">${bstrip()}${hasSt() ? `<div class=btot><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b></div>` : ''}</div>`;
+      h += `<div style="margin-top:10px">${bstrip(null, 1)}${hasSt() ? `<div class=btot><small>${t('tot')}</small> <b>${fmt(bal('bank') + bal('bar') + bal('spar'))}</b></div>` : ''}</div>`;
     h += '</div>';
     if (cur) {
       const u = up(),
@@ -525,6 +525,21 @@ const fx = (k) => {
       behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
     });
 };
+/* 1.21.24: Tipp auf Bank/Bar/Gespart (Startseite): Einstellungen → Konten aufklappen, zum Feld scrollen, kurz markieren, Cursor hineinsetzen. Auf manchen Handys öffnet sich die Tastatur dabei nicht von allein; dann genügt ein Tipp ins Feld. */
+function gk(k) {
+  tab = 'set';
+  SE.o = 'kto';
+  rd();
+  const e = $('#st_' + k);
+  if (!e) return;
+  e.scrollIntoView({
+    block: 'center',
+    behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+  });
+  e.classList.add('kfl');
+  setTimeout(() => e.classList.remove('kfl'), 2000);
+  e.focus({ preventScroll: true });
+}
 /* 1.21.16: Umschalten Ausgaben/Einnahmen in der Auswertung. Steht der Donut dabei nicht (ganz) im Bild, scrollt die Ansicht sanft zu ihm; sonst bleibt die Position. */
 function stt(k) {
   ST.t = k;

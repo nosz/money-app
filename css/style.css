@@ -941,9 +941,9 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .tps{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0 -14px 6px;padding:6px 14px 4px;background:var(--surface);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
 .tps .tp{margin:0}
 
-/* ===== 1.21.18: neue Buchung leuchtet nach dem Sprung zur Startseite kurz auf (Klasse wird per JS nach 2 s entfernt) ===== */
+/* ===== 1.21.18: neue Buchung leuchtet nach dem Sprung zur Startseite kurz auf (Klasse wird per JS nach 5 s entfernt; 1.21.24: vorher 2 s) ===== */
 @keyframes fl{0%,55%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
-.li.fl{animation:fl 2s ease-out}
+.li.fl{animation:fl 5s ease-out}
 @media (prefers-reduced-motion:reduce){.li.fl{animation:none;background:color-mix(in srgb,var(--gold) 30%,transparent)}}
 
 /* Einheitliche Dialog-Knöpfe: Hauptaktion breit, darunter Abbrechen (schlicht), rote Aktion zuletzt */
@@ -993,3 +993,10 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .stkb .btn.pr,.stkb .btn.btn-primary{width:100%}
 /* ===== 1.21.22: Sperrmeldung (Bar/Gespart nie unter 0) ===== */
 .em.blk{background:color-mix(in srgb,var(--rust) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--rust) 45%,var(--surface));color:var(--text);border-radius:var(--r-s);padding:10px 12px;margin:12px 0 0}
+
+/* ===== 1.21.24: Konto-Kacheln der Startseite sind tippbar; Konto-Feld leuchtet nach dem Sprung kurz auf ===== */
+button.bc{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.bc:active{border-color:var(--gold)}
+@keyframes kfl{0%,60%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 65%,transparent)}100%{box-shadow:0 0 0 3px transparent}}
+.form-control.kfl{animation:kfl 2s ease-out}
+@media (prefers-reduced-motion:reduce){.form-control.kfl{animation:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 65%,transparent)}}

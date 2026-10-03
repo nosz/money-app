@@ -142,13 +142,14 @@ const AV = (k) => `<svg class=ai viewBox="0 0 16 16" fill=currentColor aria-hidd
 /* Kontostände: nur zeigen, wenn sie aussagekräftig sind (Startwert eingetragen, Umbuchung oder Bar-Buchung vorhanden) */
 const balOn = () => hasSt() || S.tr.length > 0 || S.tx.some((x) => x.k == 'bar');
 /* Kontoleiste für Geld-Dialoge und Startseite; hi = hervorgehobene Konten */
-const bstrip = (hi) => {
+/* 1.21.24: nav = Kacheln sind Knöpfe und springen zum Konto-Feld in den Einstellungen (nur Startseite, nicht in den Dialogen) */
+const bstrip = (hi, nav) => {
   if (!balOn()) return '';
   const ks = ['bar', 'bank'].concat(S.set[SK.spar] != null || Math.abs(bal('spar')) > 0.004 ? ['spar'] : []);
   return `<div class=bstrip role=group aria-label="${t('kto')}">${ks
     .map(
       (k) =>
-        `<div class="bc${(hi || []).includes(k) ? ' on' : ''}"><span class=bcn>${AV(k)} ${t('a_' + k)}</span><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></div>`,
+        `<${nav ? 'button type=button' : 'div'} class="bc${(hi || []).includes(k) ? ' on' : ''}"${nav ? ` onclick="gk('${k}')"` : ''}><span class=bcn>${AV(k)} ${t('a_' + k)}</span><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></${nav ? 'button' : 'div'}>`,
     )
     .join('')}</div>`;
 };
@@ -209,4 +210,4 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.21.23'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.21.24'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

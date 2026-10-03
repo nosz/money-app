@@ -323,7 +323,7 @@ function sv(force) {
   toast(balOn() ? `${t('sav')} · ${(X.t == 'u' ? [X.k, X.to] : [X.k || 'bank']).map((k) => t('a_' + k) + ' ' + fmt(bal(k))).join(' · ')}` : t('sav'));
   if (jmp) shw(nid);
 }
-/* 1.21.18: Zur neuen Buchung scrollen und die Zeile kurz aufleuchten lassen. Kurze Verzögerung, weil cl() per history.back() eine Scroll-Wiederherstellung auslösen kann. */
+/* 1.21.18: Zur neuen Buchung scrollen und die Zeile aufleuchten lassen (1.21.24: 5 s statt 2 s). Kurze Verzögerung, weil cl() per history.back() eine Scroll-Wiederherstellung auslösen kann. */
 function shw(id) {
   setTimeout(() => {
     const e = document.querySelector(`.mh [data-id="${id}"]`);
@@ -333,7 +333,7 @@ function shw(id) {
       behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
     });
     e.classList.add('fl');
-    setTimeout(() => e.classList.remove('fl'), 2000);
+    setTimeout(() => e.classList.remove('fl'), 5000);
   }, 150);
 }
 function dl() {
@@ -730,6 +730,11 @@ function dlf(f) {
   a.download = f.name;
   a.click();
 }
+/* 1.21.24: Zeitstempel für Dateinamen (JJJJ-MM-TT_hh-mm, ohne Doppelpunkt) */
+const stamp = () => {
+  const n = new Date();
+  return iso(n) + '_' + pad(n.getHours()) + '-' + pad(n.getMinutes());
+};
 async function bk(k) {
   const j = k == 'j',
     txt = j
@@ -751,7 +756,7 @@ async function bk(k) {
               ),
           )
           .join('\n'),
-    f = new File([txt], 'moneyapp-' + iso(D) + (j ? '.json' : '.csv'), {
+    f = new File([txt], 'moneyapp-' + stamp() + (j ? '.json' : '.csv'), {
       type: j ? 'application/json' : 'text/csv',
     });
   try {
@@ -765,6 +770,7 @@ async function bk(k) {
     S.set.lb = Date.now();
     P();
   }
+  toast(t(j ? 'bkok' : 'csvok').replace('{n}', f.name));
 }
 function im(el) {
   const f = el.files[0];

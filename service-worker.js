@@ -2,7 +2,7 @@
 //
 // RELEASE: CACHE_VERSION bei JEDEM Release hochzählen (zusammen mit APP_VERSION in js/core.js).
 // Die geänderte Datei löst beim Browser das Update aus. Ohne neue Version kommt kein Update an.
-const CACHE_VERSION = '1.21.23';
+const CACHE_VERSION = '1.21.24';
 const CACHE_NAME = 'moneyapp-' + CACHE_VERSION;
 const ASSETS = [
   './', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
