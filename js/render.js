@@ -16,13 +16,13 @@ const NI = {
   set: `<svg class=ni viewBox="0 0 16 16" width=32 height=32 fill=currentColor aria-hidden=true><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/> <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg>`,
 };
 const nmx = (x) => (x.t == 'u' ? t('tr') : t(cn(x.c).n));
-const trow = (x) => {
+const trow = (x, q) => {
   const u = x.t == 'u',
     c = u ? { i: '⇄', n: 'tr' } : cn(x.c),
     ty = u ? 'u' : x.t,
     kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
     tm = hm(x);
-  return `<div class="li d-flex align-items-center gap-3 tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${esc(t(c.n))}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${esc(x.n)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
+  return `<div class="li d-flex align-items-center gap-3 tr" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${c.i} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
 const sortL = (l, sc, dr) => {
   /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
@@ -87,7 +87,7 @@ const mlist = () => {
         ),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${hrow(sc, dr, 'hsort', true)}${g.map(trow).join('')}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${hrow(sc, dr, 'hsort', true)}${g.map((x) => trow(x)).join('')}</details></div>`;
     })
     .join('');
 };
@@ -107,17 +107,17 @@ const lst = (l, st, id) => {
         dr,
       );
       if (!g.length) return '';
-      return `<details ${st.cl[k] === false || (st.cl[k] == null && (st.q || st.c)) ? 'open' : ''} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${hrow(sc, dr, 'fsort')}${g.map(trow).join('')}</details>`;
+      return `<details ${st.cl[k] === false || (st.cl[k] == null && (st.q || st.c)) ? 'open' : ''} ontoggle="${id}.cl.${k}=!this.open"><summary><b>${t(n)} (${g.length})${k == 'u' ? '' : ' · ' + fmt(g.reduce((s, x) => s + x.a, 0))}</b></summary>${hrow(sc, dr, 'fsort')}${g.map((x) => trow(x, st.q)).join('')}</details>`;
     })
     .join('');
 };
 const rl = () => {
-  const q = F.q.toLowerCase(),
+  const q = F.q.trim().toLowerCase(),
     l = allT().filter(
       (x) =>
         (F.all || x.d.startsWith(ym)) &&
         (!F.c || x.c == F.c) &&
-        (!q || (x.n + ' ' + t(cn(x.c).n)).toLowerCase().includes(q)),
+        (!q || ((x.n || '') + ' ' + nmx(x)).toLowerCase().includes(q)),
     );
   if (!l.length) return `<small>${t('none')}</small>`;
   return lst(l, F, 'F');
@@ -353,7 +353,7 @@ const V = {
           .join('') +
         `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
       dat = () =>
-        `<div class=dgrid><button class="btn btn-secondary s" onclick="bk('j')">${t('bk')}</button><button class="btn btn-secondary s" onclick="bk('c')">${t('csv')}</button><small>${t('bkj')}</small><small>${t('bkc')}</small></div><button class="btn btn-secondary s sm" style="margin-top:12px" onclick="bki()">ⓘ ${t('bki')}</button><label class="form-label">${t('imp')}</label><input class="form-control" type=file accept=".json,application/json" onchange="im(this)">` +
+        `<div class=dgrid><button class="btn btn-secondary s" onclick="bk('j')">${t('bk')}</button><button class="btn btn-secondary s" onclick="bk('c')">${t('csv')}</button><small>${t('bkj')}</small><small>${t('bkc')}</small></div><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
         bx(
           lb(
             'pin',

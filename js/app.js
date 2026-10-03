@@ -121,22 +121,24 @@ function ns(v) {
 /* Kategorie-Kacheln: alle anzeigen, bei Suche nach Name oder früheren Notizen filtern */
 function ghtml() {
   const cnt = (c) => S.tx.slice(-80).filter((x) => x.c == c.id).length,
-    q = (X.q || '').trim().toLowerCase();
+    q = (X.q || '').trim().toLowerCase(),
+    hn = {};
   let cs = S.cats.filter((c) => c.t == X.t);
   cs.sort((a, b) => cnt(b) - cnt(a));
   if (q) {
-    const nt = {};
-    S.tx.forEach((x) => {
-      if (x.n && x.t == X.t) nt[x.c] = (nt[x.c] || '') + '\n' + String(x.n).toLowerCase();
+    /* jüngste passende Notiz je Kategorie merken, um sie unter der Kachel zu zeigen */
+    [...S.tx].reverse().forEach((x) => {
+      if (x.n && x.t == X.t && !hn[x.c] && String(x.n).toLowerCase().includes(q)) hn[x.c] = String(x.n);
     });
-    cs = cs.filter((c) => t(c.n).toLowerCase().includes(q) || (nt[c.id] || '').includes(q));
+    cs = cs.filter((c) => t(c.n).toLowerCase().includes(q) || hn[c.id]);
   }
   return cs.length
     ? cs
-        .map(
-          (c) =>
-            `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${esc(t(c.n))}</span></button>`,
-        )
+        .map((c) => {
+          const nameHit = !q || t(c.n).toLowerCase().includes(q),
+            sub = !nameHit && hn[c.id] ? `<small class=hn>📝 ${hl(exc(hn[c.id], q), q)}</small>` : '';
+          return `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${hl(t(c.n), q)}</span>${sub}</button>`;
+        })
         .join('')
     : `<div class=nr><small>${t('nores')}</small></div>`;
 }
@@ -750,12 +752,6 @@ addEventListener('focusin', (e) => {
     } catch (x) {}
   }, 320);
 });
-function bki() {
-  X = {};
-  sheet(
-    `${hd(t('bki'))}<div class="card card-body"><b>📦 JSON</b><br><span>${t('bj')}</span></div><div class="card card-body"><b>📊 CSV</b><br><span>${t('bc')}</span></div><div class=pv><b>💡 ${t('bt')}</b><br><span>${t('btt')}</span></div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cl()">${t('x')}</button>`,
-  );
-}
 /* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert */
 function ktoSave() {
   const vs = ['bank', 'bar', 'spar'].map((k) => {

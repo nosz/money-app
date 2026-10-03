@@ -32,20 +32,6 @@ const T = {
   ico2: ['oder eigenes Emoji eingeben', 'or type your own emoji'],
   bkj: ['Komplett-Backup zum Wiederherstellen', 'Full backup to restore your data'],
   bkc: ['Tabelle für Excel & Co.', 'Spreadsheet for Excel & co.'],
-  bki: ['Unterschied JSON und CSV', 'JSON vs. CSV'],
-  bj: [
-    'Enthält alles: Buchungen, Umbuchungen, Kategorien, wiederkehrende Buchungen und Einstellungen. Nur mit dieser Datei kannst du deine Daten auf einem neuen Gerät oder nach dem Löschen der Browserdaten über „Backup importieren“ wiederherstellen. Zum Lesen in Excel ist sie nicht gedacht.',
-    'Contains everything: entries, transfers, categories, recurring entries and settings. Only this file lets you restore your data on a new device or after clearing browser data, via “Import backup”. It is not meant to be read in Excel.',
-  ],
-  bc: [
-    'Enthält nur deine Einnahmen und Ausgaben als Tabelle (Datum, Typ, Kategorie, Betrag, Notiz). Ideal, um die Zahlen in Excel, Numbers oder Google Tabellen auszuwerten. Kategorien, Umbuchungen und Einstellungen sind nicht enthalten, und die Datei lässt sich nicht in die App zurückladen.',
-    'Contains only your income and expenses as a table (date, type, category, amount, note). Ideal for analysing your numbers in Excel, Numbers or Google Sheets. Categories, transfers and settings are not included, and the file cannot be loaded back into the app.',
-  ],
-  bt: ['Empfehlung', 'Recommendation'],
-  btt: [
-    'Sichere regelmäßig die JSON-Datei und lege sie an einem sicheren Ort ab, zum Beispiel in deiner Cloud. CSV brauchst du nur, wenn du die Zahlen außerhalb der App auswerten willst.',
-    'Back up the JSON file regularly and keep it somewhere safe, for example in your cloud. You only need CSV if you want to analyse your numbers outside the app.',
-  ],
   wl: [
     'Dein einfaches Haushaltsbuch.',
     'Your simple household budget.',

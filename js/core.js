@@ -6,6 +6,26 @@ const $ = (s) => document.querySelector(s),
   uid = () => Math.random().toString(36).slice(2, 9);
 const esc = (s) =>
   String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+/* 1.20.0: Suchbegriff in Ergebnissen markieren (Text wird maskiert, Treffer in <mark>) */
+const hl = (s, q) => {
+  s = String(s);
+  q = String(q || '').trim();
+  if (!q) return esc(s);
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  let o = '',
+    i = 0,
+    m;
+  while ((m = re.exec(s))) {
+    o += esc(s.slice(i, m.index)) + '<mark class=hl>' + esc(m[0]) + '</mark>';
+    i = m.index + m[0].length;
+  }
+  return o + esc(s.slice(i));
+};
+/* Ausschnitt einer langen Notiz, der den Treffer sichtbar hält */
+const exc = (s, q) => {
+  const i = String(s).toLowerCase().indexOf(String(q).trim().toLowerCase());
+  return i > 10 ? '…' + String(s).slice(i - 8) : String(s);
+};
 const DC = [
   ['wohnen', 'e', '🏠'],
   ['lebensmittel', 'e', '🛒'],
@@ -93,4 +113,4 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.19.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.20.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
