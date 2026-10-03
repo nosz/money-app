@@ -1125,8 +1125,9 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .stkb .sbr .btn.cb{flex:1 1 0;min-width:0;background:transparent;border:1px solid var(--b);color:var(--text);padding-left:8px;padding-right:8px}
 .stkb .sbr .btn.sb{flex:2 1 0;min-width:0;font-weight:700}
 
-/* ===== 1.36.0: Speichern-Knopf (Haken) neben dem Kontofeld in den Einstellungen ===== */
+/* ===== 1.36.1: Speichern-Knopf neben dem Kontofeld in den Einstellungen – Haken plus Text „Speichern“ (nie nur ein Symbol) ===== */
 .kr{display:flex;gap:10px;align-items:stretch}
 .kr .form-control{flex:1 1 auto;min-width:0}
-.kr .ks{flex:0 0 52px;width:52px;min-width:52px;min-height:var(--h-ctl);margin:4px 0;padding:0;border-radius:var(--r-s)}
-.kr .ks .bi{margin:0;width:1.5em;height:1.5em;vertical-align:middle}
+.kr .ks{flex:0 0 auto;gap:8px;min-width:44px;min-height:var(--h-ctl);margin:4px 0;padding:0 14px;border-radius:var(--r-s);font-size:1rem;font-weight:700;white-space:nowrap}
+.kr .ks .bi{margin:0;width:1.2em;height:1.2em;vertical-align:middle}
+@media (max-width:359px){.kr .ks{padding:0 10px;gap:6px;font-size:.9rem}}

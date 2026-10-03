@@ -82,6 +82,7 @@ Symbole in Dialogen sind immer Bootstrap Icons, keine Emojis oder Sonderzeichen.
 - Handy: Vollbild mit Titel und „✕“ oben. Tablet/Desktop: zentriertes Fenster.
 - Knopfzeile fest unten, in EINER Zeile (Hilfsfunktion `svb()` in `js/app.js`): links „Abbrechen“ (schmal, schlicht, Ghost mit feinem Rahmen), rechts „Speichern“ (Hauptknopf, doppelt so breit, mindestens 52 px hoch). „Abbrechen“ schließt wie das ✕ oben und verwirft die Eingaben (in der Kategorie-Maske aus einer Buchung heraus: zurück zur Buchung, `ncx()`). Gilt für alle Eingabe-Masken (Buchung, Kategorie, wiederkehrende Buchung, Betrag ändern, PIN setzen). Löschen bleibt der Textlink über der Knopfzeile.
 - Rückfragen zum Löschen und Import-Dialoge behalten ihre gestapelten Knöpfe (Hauptaktion, darunter „Abbrechen“), damit die gefährliche Aktion nicht neben „Abbrechen“ liegt.
+- Speichern-Knöpfe sind immer beschriftet: Haken-Symbol plus Text „Speichern“ / „Save“ (Bootstrap Icon `check`, `.btn-primary`). Reine Symbol-Knöpfe ohne Text sind nicht erlaubt, weil man sonst nicht erkennt, dass sie speichern (Nutzer-Rückmeldung zu 1.36.0). Das gilt auch für kleine Knöpfe neben einem Eingabefeld (z. B. Konten in den Einstellungen, Klasse `.ks` in einer Zeile `.kr`: Feld links, Knopf rechts, mindestens 44 px hoch, ab 360 px Breite etwas kleinere Schrift, nie nur das Symbol).
 - Felder: kleine graue Beschriftung oben, feiner Rahmen, dezent runde Ecken.
 - Sachliche Wortwahl: „Betrag“, „Konto“, „Kategorie“, „Buchungsdatum“, „Notiz“. Hinweistexte sagen, was zu tun ist.
 - Gilt für alle Eingabe-Masken. Rückfragen, Backup und PIN bleiben kleine Dialoge, nur in angepasster Optik.
@@ -108,6 +109,12 @@ Symbole in Dialogen sind immer Bootstrap Icons, keine Emojis oder Sonderzeichen.
 - Speicherung: ein gewähltes Bootstrap Icon wird im bestehenden Feld `i` als Kürzel gespeichert, z. B. `bi:cart`. Es gibt kein neues Datenfeld.
 - Bestehende Emojis bleiben unverändert erhalten. Standardkategorien behalten ihr gespeichertes Emoji und bekommen in der Anzeige das passende Linien-Icon (Emoji → nächstpassendes Icon, nur Darstellung, gespeicherte Daten bleiben unverändert).
 
+# 7a. Konten in den Einstellungen
+
+- Jedes Konto (Bank, Bar, Gespart) hat einen eigenen Speichern-Knopf neben dem Feld (`kto()` in `js/render.js`, `ktoSave(k)` in `js/app.js`). Er speichert nur dieses Konto, der gemeinsame Knopf unten entfällt.
+- Der Knopf trägt Haken und Text „Speichern“ (siehe Abschnitt 5). Prüfungen unverändert (ungültige Zahl, Bar/Gespart nie unter 0, Altbestand im Minus zulässig). Nicht gespeicherte Eingaben in den anderen Feldern bleiben nach dem Speichern erhalten.
+- Der Willkommen-Dialog (`ob2()`) bleibt unverändert: dort speichert „Los“ alle Felder.
+
 # 8. Immer ohne Rückfrage einhalten
 
 - Gewählte Icons direkt in den Code einbetten (offline, inline) und im Service Worker cachen.
@@ -126,6 +133,7 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 
 # 10. Abschlussprüfung nach jeder Lieferung
 
+- Sind alle Speichern-Knöpfe beschriftet (Haken plus „Speichern“), nirgends nur ein Symbol?
 - Haben alle Masken denselben Aufbau (Titel + ✕, Beschriftungen oben, Knopfzeile „Abbrechen | Speichern“ in einer Zeile)?
 - Sind alle Texte in Deutsch und Englisch vorhanden?
 - Ist der Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?

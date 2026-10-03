@@ -492,7 +492,7 @@ const V = {
             const set = s[SK[k]] != null,
               b = bal(k);
             return bx(
-              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><div class=kr><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><button type=button class="btn btn-primary ks" onclick="ktoSave('${k}')" aria-label="${t('save')}" title="${t('save')}">${bi('check')}</button></div><div class="em" id=st_e_${k} hidden role=alert></div>`,
+              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><div class=kr><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><button type=button class="btn btn-primary ks" onclick="ktoSave('${k}')">${bi('check')}<span>${t('save')}</span></button></div><div class="em" id=st_e_${k} hidden role=alert></div>`,
             );
           })
           .join('') +

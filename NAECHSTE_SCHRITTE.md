@@ -1,14 +1,19 @@
-# MoneyApp – Nächste Schritte (Stand 1.36.0)
+# MoneyApp – Nächste Schritte (Stand 1.36.1)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.36.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.36.1** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **1.36.1: Speichern-Knopf beschriftet.** Rückmeldung des Nutzers: Nur ein Haken ist nicht als „Speichern“ erkennbar. Der Knopf `.ks` neben den
+  Kontofeldern zeigt jetzt Haken plus Text `t('save')` („Speichern“ / „Save“), Schrift 1rem, Polster 0 14px (unter 360 px Breite 0,9rem und 0 10px).
+  Geändert: `js/render.js` (`kto()`), `css/style.css` (Abschnitt „1.36.1“ ersetzt „1.36.0“), `js/core.js` und `service-worker.js` (nur Version).
+  `aria-label`/`title` entfallen (sichtbarer Text). Skill ergänzt: Speichern-Knöpfe sind nie nur ein Symbol (Abschnitt 5, 7a und 10). Getestet in Chromium
+  bei 390 und 320 px (Deutsch und Englisch), keine JS-Fehler; Logik von `ktoSave(k)` unverändert.
 - **1.36.0: Speichern-Knopf pro Konto (Einstellungen → Konten).** Geändert: `js/render.js` (`kto()`), `js/app.js` (`ktoSave(k)`),
   `js/core.js` (neues Icon `check` in `BIP`, `APP_VERSION`), `css/style.css` (Abschnitt „1.36.0“), `service-worker.js` (`CACHE_VERSION`).
   Jedes Feld (`#st_bank`, `#st_bar`, `#st_spar`) steht in einer Zeile `.kr` mit einem Symbol-Knopf (Haken, `.ks`, 52 × 52 px,
@@ -119,14 +124,13 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 - Fehlermeldungen bleiben unter dem Feld und werden nach dem Fehler automatisch über die feste Knopfzeile gescrollt (`evis()`, Entscheidung 1.35.1); eine Meldung über dem Feld wurde verworfen.
 - Fehlermeldungen in Masken sind einzeilig (Entscheidung 1.33.1), statt eine Scroll-Logik für die Tastatur einzubauen.
 
-- Konten-Einstellungen (1.36.0): Ein Speichern-Knopf pro Konto neben dem Feld (speichert nur dieses Konto), als Symbol-Knopf mit Haken
-  (mindestens 44 px, `aria-label` Deutsch/Englisch); der gemeinsame Knopf unten entfällt; der Willkommen-Dialog `ob2()` bleibt unverändert
+- Konten-Einstellungen (1.36.0): Ein Speichern-Knopf pro Konto neben dem Feld (speichert nur dieses Konto), mit beschriftetem Knopf (Haken plus Text „Speichern“, ab 1.36.1; ein reiner Haken war nicht erkennbar, mindestens 44 px); der gemeinsame Knopf unten entfällt; der Willkommen-Dialog `ob2()` bleibt unverändert
   (dort speichert „Los“ alle Felder).
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### Schritt 1 – Tastatur-Test auf echten Geräten [Punkt D]
-- iOS und Android: Der Speichern-Knopf (`.stkb`) darf in allen Masken nicht von der Tastatur verdeckt werden. Neu: Auch die Haken-Knöpfe neben den Kontofeldern (Einstellungen → Konten, `.ks`) müssen bei offener Tastatur erreichbar bleiben.
+- iOS und Android: Der Speichern-Knopf (`.stkb`) darf in allen Masken nicht von der Tastatur verdeckt werden. Neu: Auch die Speichern-Knöpfe neben den Kontofeldern (Einstellungen → Konten, `.ks`) müssen bei offener Tastatur erreichbar bleiben.
 - Besonders prüfen: Bezeichnung (Kategorie), Betrag und Notiz (Buchung), Suchfelder der Auswahl-Ansichten.
 - Ergebnis als Rückmeldung an den Nutzer. Nur bei Mängeln eine Korrekturversion bauen.
 
@@ -142,12 +146,13 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 5. Prüfliste nach jeder Lieferung
 
-- [ ] Einstellungen → Konten am Handy: Haken-Knopf neben jedem Feld sichtbar ohne Scrollen, gut treffbar, speichert nur das eigene Konto, Eingaben in anderen Feldern bleiben stehen, Meldung bei Bar/Gespart unter 0 und bei ungültiger Zahl, Texte Deutsch und Englisch?
+- [ ] Einstellungen → Konten am Handy: Knopf „Speichern“ (Haken plus Text) neben jedem Feld sichtbar ohne Scrollen, auch bei 320 px Breite noch genug Platz zum Tippen, gut treffbar, speichert nur das eigene Konto, Eingaben in anderen Feldern bleiben stehen, Meldung bei Bar/Gespart unter 0 und bei ungültiger Zahl, Texte Deutsch und Englisch?
 - [ ] Fehlermeldungen am Handy mit offener Tastatur: Kategorie (Name leer, Name doppelt), Betrag ändern (0), PIN (zu kurz) – Meldung ganz sichtbar über der Knopfzeile, ohne selbst zu scrollen? Auch auf kleinen Handys und im Querformat.
 - [ ] Nach dem CSS-Aufräumen (1.35.0) am Handy kurz alle Masken ansehen: Buchung, Umbuchung, Kategorie neu/bearbeiten, Symbol-Auswahl (Symbole und Emoji), wiederkehrende Buchung, PIN, Löschen-Rückfrage – sieht alles aus wie in 1.34.0?
 - [ ] Knopfzeile am Handy (Buchung, Umbuchung, Kategorie neu/bearbeiten, wiederkehrende Buchung neu/bearbeiten, Betrag ändern, PIN setzen): „Abbrechen“ und „Speichern“ in einer Zeile, beide gut treffbar, Texte auf Deutsch und Englisch ohne Umbruch, Tastatur verdeckt die Zeile nicht, „Abbrechen“ schließt ohne Speichern (Kategorie aus der Buchung: zurück in die Buchung)?
 - [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit einzeiliger Meldung abgelehnt (bei geöffneter Tastatur voll sichtbar), in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
 - [ ] Alle Masken gleicher Aufbau (Titel + ✕, Beschriftungen oben, Knopfzeile „Abbrechen | Speichern“ in einer Zeile fest unten)?
+- [ ] Alle Speichern-Knöpfe beschriftet (Haken plus Text), nirgends nur ein Symbol?
 - [ ] Texte in Deutsch und Englisch?
 - [ ] Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?
 - [ ] Alte Backups weiter importierbar (Datenformat unverändert)?
