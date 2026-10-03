@@ -905,3 +905,6 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 
 /* ===== 1.21.2: Platzhalter in allen Themes gut lesbar ===== */
 .form-control::placeholder{color:color-mix(in srgb,var(--text) 62%,var(--surface));opacity:1}
+
+/* Kontosymbole (Bootstrap Icons) */
+svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:none}
