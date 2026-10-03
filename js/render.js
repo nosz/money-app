@@ -69,6 +69,12 @@ function fsort(c) {
   }
   rs();
 }
+/* 1.21.1: Anzahl Ausgaben / Einnahmen (und ggf. Umbuchungen) oben im aufgeklappten Monat */
+const mcn = (g) => {
+  const n = (ty) => g.filter((x) => x.t == ty).length,
+    c = (ty, lbl) => `<span class="mc ${ty}">${lbl}<b>${n(ty)}</b></span>`;
+  return `<div class=mcnt>${c('e', t('ex'))}${c('i', t('inn'))}${n('u') ? c('u', t('tr')) : ''}</div>`;
+};
 const mlist = () => {
   const cur = iso(D).slice(0, 7),
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
@@ -87,7 +93,7 @@ const mlist = () => {
         ),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${hrow(sc, dr, 'hsort', true)}${g.map((x) => trow(x)).join('')}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(g)}${hrow(sc, dr, 'hsort', true)}${g.map((x) => trow(x)).join('')}</details></div>`;
     })
     .join('');
 };

@@ -876,3 +876,9 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 .fsum{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:2px 2px 4px;font-size:var(--fs-s);color:var(--m)}
 .fsum:empty{display:none}
 .fclr{min-height:44px;padding:0 6px;border:0;background:none;color:var(--gold);font:inherit;font-size:var(--fs-s);font-weight:700;cursor:pointer}
+
+/* ===== 1.21.1: Anzahl Ausgaben/Einnahmen im aufgeklappten Monat ===== */
+.mcnt{display:flex;gap:8px;margin:6px 0 4px}
+.mc{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:var(--r-m);font-size:var(--fs-s);color:var(--text);background:color-mix(in srgb,var(--tc) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 35%,var(--surface))}
+.mc b{flex:none;min-width:1.7em;padding:1px .5em;border-radius:999px;text-align:center;font-size:var(--fs-s);background:color-mix(in srgb,var(--tc) 22%,var(--surface))}
+.mc.e{--tc:var(--rust)}.mc.i{--tc:var(--sage)}.mc.u{--tc:var(--m,#888)}
