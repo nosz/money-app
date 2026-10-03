@@ -945,3 +945,11 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 @keyframes fl{0%,55%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
 .li.fl{animation:fl 2s ease-out}
 @media (prefers-reduced-motion:reduce){.li.fl{animation:none;background:color-mix(in srgb,var(--gold) 30%,transparent)}}
+
+/* Einheitliche Dialog-Knöpfe: Hauptaktion breit, darunter Abbrechen (schlicht), rote Aktion zuletzt */
+.acts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.acts .btn{width:100%;margin:0}
+.acts .btn.dlt{margin-top:10px}
+.cdm{margin:4px 0 18px;font-size:var(--fs-m);line-height:1.45;color:var(--text)}
+.cdy{width:100%;min-height:48px;font-weight:700}
+.sh .cdy+.acts{margin-top:10px}

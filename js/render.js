@@ -318,7 +318,7 @@ const V = {
       GR = 'rgba(128,128,128,.55)',
       ds = bu ? [...a.slice(0, a.length - sm3.length), [null, sm3.reduce((q, x) => q + x[1], 0)]] : a;
     let h = `<div class=tps id=tps><div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" data-ty=e aria-pressed="${ST.t == 'e'}" onclick="stt('e')">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" data-ty=i aria-pressed="${ST.t == 'i'}" onclick="stt('i')">${t('inn')}</button></div></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body" id=dn>`;
-    if (!tot) h += `<small>${t('none')}</small>`;
+    if (!tot) h += `<small>${t(pc.length ? 'no_' + ST.t + (yr ? 'y' : '') : 'none')}</small>`;
     else {
       const gap = ds.length > 1 ? 0.6 : 0,
         ft = fmt(tot);

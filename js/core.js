@@ -53,13 +53,17 @@ let S,
   U;
 const t = (k) => (T[k] || [k, k])[S.set.lang == 'en' ? 1 : 0],
   loc = () => (S.set.lang == 'en' ? 'en-GB' : 'de-DE');
-const fmt = (a) =>
-  new Intl.NumberFormat(loc(), {
+const fmt = (a) => {
+  /* Ganze Beträge ohne Cent (1.234 €), sonst immer mit zwei Nachkommastellen (12,50 €) */
+  const v = Math.round((Number(a) || 0) * 100) / 100,
+    c = Math.abs(v % 1) > 0;
+  return new Intl.NumberFormat(loc(), {
     style: 'currency',
     currency: S.set.cur,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.round(a) || 0);
+    minimumFractionDigits: c ? 2 : 0,
+    maximumFractionDigits: c ? 2 : 0,
+  }).format(v);
+};
 const sg = (a, ty) => (ty ? (ty == 'i' ? '+' : '−') : a < 0 ? '−' : '+') + fmt(Math.abs(a));
 const cn = (id) => S.cats.find((c) => c.id == id) || { id: 'x', n: 'c_sonst_e', i: '📦' };
 const allT = () => S.tx.concat(S.tr.map((x) => ({ ...x, t: 'u', c: 'u' })));
@@ -122,4 +126,4 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.21.18'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.21.19'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

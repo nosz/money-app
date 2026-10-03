@@ -43,6 +43,15 @@ addEventListener('keydown', (e) => {
 });
 const hd = (ti) =>
   `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">✕</button></div>`;
+/* Einheitliche Knopfzeile unter dem Hauptknopf: Abbrechen (schlicht), optional rote Aktion (Löschen/Ersetzen) */
+const acts = (cx, dx, dl, dh) =>
+  `<div class=acts><button class="btn btn-secondary s ghost" onclick="${cx}">${t('cancel')}</button>${dx ? `<button class="btn dlt" onclick="${dx}">${dl || '🗑 ' + t('del')}${dh ? `<small class=dh>${dh}</small>` : ''}</button>` : ''}</div>`;
+/* Einheitliche Lösch-Rückfrage für Buchung, Kategorie und wiederkehrende Buchung */
+function cdel(ti, msg, yes, back) {
+  sheet(
+    `${hd(ti)}<p class=cdm>${msg}</p><button class="btn btn-danger d cdy" onclick="${yes}">🗑 ${t('del')}</button><div class=acts><button class="btn btn-secondary s ghost" onclick="${back}">${t('cancel')}</button></div>`,
+  );
+}
 function toast(m, f, l, k) {
   /* l = Beschriftung des Knopfes (Standard: Rückgängig), k = Toast bleibt stehen */
   const e = $('#toast');
@@ -164,7 +173,7 @@ function op() {
           X.f,
         )}</select>`
   }</details>
-<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class=stkb><button class="btn pr" style="width:100%" onclick="sv()">${t('save')}</button></div><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button>${X.id ? `<button class="btn dlt" onclick="dl()">🗑 ${t('del')}</button>` : ''}</div>`);
+<div class="em warn alert alert-warning" id=ew hidden role=alert></div><div class=stkb><button class="btn btn-primary pr" style="width:100%" onclick="sv()">${t('save')}</button></div>${acts('cl()', X.id ? 'dl()' : '')}`);
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
   fm();
@@ -306,16 +315,15 @@ function shw(id) {
   }, 150);
 }
 function dl() {
+  cdel(t('delt'), t('delm'), 'dlo()', 'op()');
+}
+function dlo() {
   const L = X.t == 'u' ? S.tr : S.tx,
-    i = L.findIndex((x) => x.id == X.id),
-    o = L[i];
-  L.splice(i, 1);
+    i = L.findIndex((x) => x.id == X.id);
+  if (i >= 0) L.splice(i, 1);
   cl();
   P();
-  toast(t('gone'), () => {
-    L.push(o);
-    P();
-  });
+  toast(t('gone'));
 }
 /* Fällige Buchungen */
 function dsh() {
@@ -345,7 +353,7 @@ function cfa(id) {
   if (!r) return;
   X.nc = 0;
   sheet(
-    `${hd(t('chg'))}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${String(r.a).replace('.', ',')}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="cfs('${id}')">${t('ok')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="dsh()">${t('cancel')}</button></div>`,
+    `${hd(t('chg'))}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${String(r.a).replace('.', ',')}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="cfs('${id}')">${t('ok')}</button>${acts('dsh()')}`,
   );
   $('.sh').dataset.t = r.t;
   const e = $('#ca_a');
@@ -379,7 +387,7 @@ function erd() {
     )}</select><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
       ['m', 'w', 'y'].map((k) => [k, t(k)]),
       r.f,
-    )}</select><label class="form-label">${t('nextd')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn pr" style="width:100%;margin-top:16px" onclick="rsv()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button><button class="btn dlt" onclick="rdl()">🗑 ${t('del')}</button></div>`,
+    )}</select><label class="form-label">${t('nextd')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="rsv()">${t('save')}</button>${acts('cl()', 'rdl()')}`,
   );
   $('.sh').dataset.t = r.t;
 }
@@ -407,10 +415,7 @@ function rsv() {
 function rdl() {
   const r = S.rec.find((x) => x.id == RE.id);
   if (!r) return cl();
-  sheet(
-    `${hd(t('recdt'))}<p style="margin:8px 0 14px">${t('recdq').replace('{n}', esc(r.n || t(cn(r.c).n)))}</p><div class="seg d-flex gap-2"><button class="btn btn-secondary s" onclick="erd()">${t('cancel')}</button><button class="btn dlt" onclick="rdo()">🗑 ${t('del')}</button></div>`,
-  );
-  $('.sh').dataset.t = r.t;
+  cdel(t('recdt'), t('recdq').replace('{n}', esc(r.n || t(cn(r.c).n))), 'rdo()', 'erd()');
 }
 /* 1.21.14: Neue wiederkehrende Buchung (Einstellungen → Wiederkehrende Buchungen → „Neue wiederkehrende Buchung“) */
 function nrc() {
@@ -433,7 +438,7 @@ function nrd() {
     )}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div><label class="form-label">${t('note')}</label><input class="form-control" maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off><label class="form-label">${t('rep')}</label><select class="form-select" onchange="RE.f=this.value">${O(
       ['m', 'w', 'y'].map((k) => [k, t(k)]),
       r.f,
-    )}</select><label class="form-label">${t('rec_f1')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn pr" style="width:100%;margin-top:16px" onclick="nrs()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button></div>`,
+    )}</select><label class="form-label">${t('rec_f1')}</label><input class="form-control" type=date value="${r.d}" onchange="RE.d=this.value"><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="nrs()">${t('save')}</button>${acts('cl()')}`,
   );
   $('.sh').dataset.t = r.t;
 }
@@ -483,13 +488,9 @@ function ca() {
   P();
 }
 const rm = (id) => {
-  const o = S.rec.find((x) => x.id == id);
   S.rec = S.rec.filter((x) => x.id != id);
   P();
-  toast(t('gone'), () => {
-    S.rec.push(o);
-    P();
-  });
+  toast(t('gone'));
 };
 /* Kategorien */
 const ICONS = [
@@ -577,7 +578,7 @@ function ncs(entry) {
   const tb = (ty, sg, lb) =>
     `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')"><i class=t${ty}>${sg}</i> ${lb}</button>`;
   sheet(
-    `${hdc(t('newc'))}${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ac()">${t('save')}</button><button class="btn btn-secondary s ghost" onclick="ncx()">${t('cancel')}</button>`,
+    `${hdc(t('newc'))}${cnm()}<label class="form-label">${t('cty')}</label><div class="tp ctp" role=group>${tb('e', '−', t('e'))}${tb('i', '+', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small>${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ac()">${t('save')}</button>${acts('ncx()')}`,
   );
   $('#o .sh').dataset.t = NC.t;
   $('#o .sh').scrollTop = 0;
@@ -614,11 +615,7 @@ function ecs(id) {
   const n = S.tx.filter((x) => x.c == id).length;
   NC = { id, t: c.t, n: t(c.n), i: c.i, from: 0 };
   sheet(
-    `${hdc(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${
-      id.startsWith('sonst')
-        ? `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button>`
-        : `<button class="btn btn-secondary s ghost" onclick="cl()">${t('cancel')}</button><button class="btn dlt" style="width:100%;margin-top:18px" onclick="dc('${id}')">🗑 ${t('del')}<small class=dh>${t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n)}</small></button>`
-    }`,
+    `${hdc(t('ced'))}${cnm()}${cip()}<button class="btn btn-primary pr" style="width:100%;margin-top:14px" onclick="ecv()">${t('save')}</button>${acts('cl()', id.startsWith('sonst') ? '' : "dc('" + id + "')", '', id.startsWith('sonst') ? '' : t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n))}`,
   );
   $('#o .sh').dataset.t = c.t;
 }
@@ -638,22 +635,22 @@ function ecv() {
   toast(t('sav'));
 }
 function dc(id) {
-  const c = S.cats.find((x) => x.id == id),
-    to = 'sonst_' + c.t,
-    ix = S.cats.indexOf(c),
-    tx = S.tx.filter((x) => x.c == id),
-    rc = S.rec.filter((x) => x.c == id);
-  tx.forEach((x) => (x.c = to));
-  rc.forEach((x) => (x.c = to));
-  S.cats.splice(ix, 1);
+  const c = S.cats.find((x) => x.id == id);
+  if (!c) return cl();
+  const n = S.tx.filter((x) => x.c == id).length,
+    h = t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n);
+  cdel(t('delct'), t('delc').replace('{n}', esc(t(c.n))) + ' ' + h, `dco('${id}')`, `ecs('${id}')`);
+}
+function dco(id) {
+  const c = S.cats.find((x) => x.id == id);
+  if (!c) return cl();
+  const to = 'sonst_' + c.t;
+  S.tx.filter((x) => x.c == id).forEach((x) => (x.c = to));
+  S.rec.filter((x) => x.c == id).forEach((x) => (x.c = to));
+  S.cats.splice(S.cats.indexOf(c), 1);
   cl();
   P();
-  toast(t('gone'), () => {
-    S.cats.splice(Math.min(ix, S.cats.length), 0, c);
-    tx.forEach((x) => (x.c = id));
-    rc.forEach((x) => (x.c = id));
-    P();
-  });
+  toast(t('gone'));
 }
 /* Backup */
 function dlf(f) {
@@ -707,7 +704,7 @@ function im(el) {
       if (!Array.isArray(d.tx) || !d.cats) throw 0;
       X = { imp: d, nc: 0 };
       sheet(
-        `${hd(t('imd'))}<div class="seg d-flex gap-2"><button class="btn btn-danger d" onclick="ip(1)">${t('rpl')}</button><button class="btn btn-primary" onclick="ip(0)">${t('mrg')}</button></div>`,
+        `${hd(t('imd'))}<button class="btn btn-primary pr" style="width:100%" onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
       );
     } catch (e) {
       X = {};
@@ -754,7 +751,7 @@ function pn() {
   }
   X = {};
   sheet(
-    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><label class="form-label">${t('pin1')}</label><input id=pn1 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"><label class="form-label">${t('pin2')}</label><input id=pn2 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="pns()">${t('save')}</button><div class="seg d-flex gap-2 sc"><button class="btn btn-secondary s" onclick="cl()">${t('cancel')}</button></div>`,
+    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><label class="form-label">${t('pin1')}</label><input id=pn1 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"><label class="form-label">${t('pin2')}</label><input id=pn2 class="form-control" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div><button class="btn btn-primary pr" style="width:100%;margin-top:16px" onclick="pns()">${t('save')}</button>${acts('cl()')}`,
   );
   $('#pn1').focus({ preventScroll: true });
 }
