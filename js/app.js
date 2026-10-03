@@ -810,14 +810,23 @@ function ncs(entry) {
 }
 /* Zurück: zur Buchung bzw. Maske schließen */
 const ncx = () => (NC.from ? op() : cl());
+/* 1.33.0: Fehler direkt am Namensfeld zeigen (leer oder doppelt) */
+function cerr(k) {
+  $('#nn').style.borderColor = 'var(--rust)';
+  const e = $('#en');
+  e.textContent = t(k);
+  e.hidden = false;
+  $('#nn').focus();
+}
+/* 1.33.0: Name in derselben Art schon vergeben? Groß-/Kleinschreibung und Randleerzeichen egal; die Kategorie selbst (id) zählt nicht */
+const cdup = (n, ty, id) => {
+  const k = (v) => String(v).trim().toLowerCase();
+  return S.cats.some((c) => c.t == ty && c.id != id && k(t(c.n)) == k(n));
+};
 function ac() {
   const n = $('#nn').value.trim();
-  if (!n) {
-    $('#nn').style.borderColor = 'var(--rust)';
-    $('#en').hidden = false;
-    $('#nn').focus();
-    return;
-  }
+  if (!n) return cerr('e_name');
+  if (cdup(n, NC.t)) return cerr('e_catdup');
   const c = { id: uid(), t: NC.t, n, i: NC.i };
   S.cats.push(c);
   P();
@@ -852,12 +861,9 @@ function ecs(id) {
 function ecv() {
   const c = S.cats.find((x) => x.id == NC.id),
     n = $('#nn').value.trim();
-  if (!n) {
-    $('#nn').style.borderColor = 'var(--rust)';
-    $('#en').hidden = false;
-    $('#nn').focus();
-    return;
-  }
+  if (!n) return cerr('e_name');
+  /* 1.33.0: nur prüfen, wenn der Name geändert wurde (bestehende Dubletten bleiben bearbeitbar) */
+  if (n != t(c.n) && cdup(n, c.t, c.id)) return cerr('e_catdup');
   if (n != t(c.n)) c.n = n;
   c.i = NC.i;
   cl();

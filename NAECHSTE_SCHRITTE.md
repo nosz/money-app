@@ -1,14 +1,21 @@
-# MoneyApp – Nächste Schritte (Stand 1.32.0)
+# MoneyApp – Nächste Schritte (Stand 1.33.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.32.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.33.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **Doppelte Kategorienamen verhindert (1.33.0):** Geändert: `js/app.js`, `js/i18n.js`, `js/core.js` (nur `APP_VERSION`),
+  `service-worker.js` (nur `CACHE_VERSION`). Neue Hilfsfunktionen in `js/app.js`: `cdup(n, ty, id)` (Name in derselben Art
+  schon vergeben? Vergleich ohne Groß-/Kleinschreibung und ohne Randleerzeichen, mit dem angezeigten Namen `t(c.n)`, die
+  Kategorie mit der Id `id` zählt nicht) und `cerr(k)` (Fehlertext am Namensfeld, rostroter Rahmen, Fokus). `ac()` (neu)
+  prüft nach der Leer-Prüfung auf Dubletten; `ecv()` (bearbeiten) prüft nur, wenn der Name geändert wurde. Neuer Text
+  `e_catdup` (Deutsch und Englisch). Der Fehlertext in `#en` wird bei jedem Fehler neu gesetzt (`e_name` oder `e_catdup`).
+  Backup, Import und Datenformat unverändert, bestehende Dubletten bleiben unangetastet. Keine neuen CSS-Regeln, keine neuen Dateien.
 - **Kleine Dialoge (1.32.0):** nur Optik, Logik unverändert. Umfang: Rückfragen (`cdel()`, Sperrmeldungen in `dl()`,
   `ip()`, `im()`), PIN-Maske `pn()` und Sperrbild `lk()`, Backup-Karte `brCard()` in `js/core.js`. Willkommen (`ob()`, `ob2()`),
   Kontostände beim Start und Starthinweis `negHint()` bewusst unverändert. „Abbrechen“ bleibt (Entscheidung), Knöpfe,
@@ -65,6 +72,10 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 - Wiederkehrende Buchung: nur Optik, keine Konto-Leiste (Konto bleibt wie bisher, neu angelegte laufen über Bank), Kategorie als normales Auswahlfeld im neuen Stil, keine Vollbild-Kategorieliste.
 - Umbuchung: Von/Auf als zwei Konto-Leisten untereinander (nicht nebeneinander), Reihenfolge Bank, Bar, Gespart, Tauschen-Knopf dazwischen. Gleiches Konto bleibt wählbar, Meldung wie bisher.
 
+- Doppelte Kategorienamen: gelten nur innerhalb derselben Art (Ausgabe/Einnahme) als doppelt; Vergleich ohne Groß-/Kleinschreibung und
+  ohne Randleerzeichen; Meldung am Feld, Speichern bleibt gesperrt, kein Knopf „Vorhandene verwenden“; bestehende Dubletten bleiben
+  in den Daten und sind weiter bearbeitbar, solange der Name unverändert bleibt (Prüfung nur beim Speichern, nie gegen sich selbst).
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### Schritt 1 – Tastatur-Test auf echten Geräten [Punkt D]
@@ -74,7 +85,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 4. Offene Punkte und optionales Aufräumen
 
-- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.32.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
+- Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.33.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
 - Optional (eigene Version, nur Aufräumen): nicht mehr benutzte CSS-Regeln entfernen: `.dir`, `.dir>div`, `.dir label`, `.sh .dir .form-label` (alte Von/Auf-Auswahlfelder) sowie die der alten Kategorie-Maske:
   `.cn`, `.cpi`, `.cpe`, `.cpp`, `.ip` (in `css/style.css`) sowie die zugehörigen `.sht.ns`-Regeln. Vorher per Suche
   prüfen, dass nichts anderes sie benutzt.
@@ -86,6 +97,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] Kategorien am Handy: gleicher Name in derselben Art (auch „ESSEN “ statt „Essen“) wird mit Meldung abgelehnt, in der anderen Art erlaubt; Umbenennen auf vorhandenen Namen wird abgelehnt; Symbol ändern bei bestehender Dublette funktioniert?
 - [ ] Alle Masken gleicher Aufbau (Titel + ✕, Beschriftungen oben, Speichern fest unten, kein „Abbrechen“)?
 - [ ] Texte in Deutsch und Englisch?
 - [ ] Service Worker aktualisiert (neue Dateien, neue `CACHE_VERSION`)?
