@@ -49,9 +49,12 @@ const sortL = (l, sc, dr) => {
     .slice()
     .sort((a, b) => cmp(key(a), key(b)) * dr || cmp(sub(a), sub(b)) * dr || (sc != 'd' ? cmp(dk(b), dk(a)) : 0));
 };
-const hrow = (sc, dr, fn) => {
-  const ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : '');
-  return `<div class="li d-flex align-items-center gap-3 hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g><i class=hs onclick="${fn}('c')">${t('cat1')}${ar('c')}</i></span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>`;
+/* Einheitlicher Spaltenkopf für alle sortierbaren Listen: Datum/Fällig | Kategorie/Name | Betrag (aktive Spalte mit ▲/▼).
+   cols = [[Sortierschlüssel, Textschlüssel] × 3], cls = Zusatzklasse, tail = Platzhalter für die Pfeil-Spalte rechts */
+const hrow = (sc, dr, fn, cols = [['d', 'date'], ['c', 'cat1'], ['a', 'amt']], cls = '', tail = '') => {
+  const ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
+    [a, b, c] = cols;
+  return `<div class="li d-flex align-items-center gap-3 hd${cls}"><span class=dc onclick="${fn}('${a[0]}')">${t(a[1])}${ar(a[0])}</span><span class=g><i class=hs onclick="${fn}('${b[0]}')">${t(b[1])}${ar(b[0])}</i></span><span class=am onclick="${fn}('${c[0]}')">${t(c[1])}${ar(c[0])}</span>${tail}</div>`;
 };
 function hsort(c) {
   if ((HS.sc || 'd') == c) HS.dir = -(HS.dir || -1);
@@ -238,7 +241,7 @@ const V = {
     const a = Object.entries(by).sort((p, q) => q[1] - p[1]),
       tot = a.reduce((s, x) => s + x[1], 0);
     let cum = 0;
-    let h = `<div class="seg d-flex gap-2"><button class="btn ${ST.t == 'e' ? '' : 's'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="btn ${ST.t == 'i' ? '' : 's'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class="seg d-flex gap-2" style=margin:8px 0><button class="btn sm ${ST.p == 'm' ? '' : 's'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="btn sm ${ST.p == 'y' ? '' : 's'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body">`;
+    let h = `<div class=tp><button class="${ST.t == 'e' ? 'on' : ''}" aria-pressed="${ST.t == 'e'}" onclick="ST.t='e';rd()">${t('ex')}</button><button class="${ST.t == 'i' ? 'on' : ''}" aria-pressed="${ST.t == 'i'}" onclick="ST.t='i';rd()">${t('inn')}</button></div><div class=tp><button class="${ST.p == 'm' ? 'on' : ''}" aria-pressed="${ST.p == 'm'}" onclick="ST.p='m';rd()">${t('month')}</button><button class="${ST.p == 'y' ? 'on' : ''}" aria-pressed="${ST.p == 'y'}" onclick="ST.p='y';rd()">${t('year')}</button></div>${mn()}<div class="card card-body">`;
     if (!tot) h += `<small>${t('none')}</small>`;
     else {
       const gap = a.length > 1 ? 0.6 : 0,
@@ -302,13 +305,7 @@ const V = {
           ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
           key = { f: nx, n: nm, a: (r) => r.a }[sc],
           so = (a, b) => cmp(key(a), key(b)) * dr || cmp(nx(a), nx(b)) || cmp(nm(a), nm(b)),
-          head = `<div class=rsb role=group>${[
-            ['f', 'rdue'],
-            ['n', 'name'],
-            ['a', 'amt'],
-          ]
-            .map(([k, l]) => `<button type=button class="${sc == k ? 'on' : ''}" aria-pressed="${sc == k}" onclick="rsort('${k}')">${t(l)}${ar(k)}</button>`)
-            .join('')}</div>`;
+          head = hrow(sc, dr, 'rsort', [['f', 'rdue'], ['n', 'name'], ['a', 'amt']], ' rcd', '<span class=sp></span>');
         const grp = (ty, ti) => {
           const l = S.rec.filter((r) => r.t == ty).sort(so);
           return l.length
@@ -317,7 +314,7 @@ const V = {
                 l
                   .map(
                     (r) =>
-                      `<div class="li d-flex align-items-center gap-3 r${ty}" role=button tabindex=0 aria-label="${t('rec_e')}" onclick="er('${r.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();er('${r.id}')}"><span class=ic>${cn(r.c).i}</span><div class=g>${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)} · 📅 ${nx(r).split('-').reverse().join('.')} · <b class="${ty == 'i' ? 'pos' : 'neg'}">${sg(r.a, r.t)}</b></small></div><span class=chv aria-hidden=true>›</span></div>`,
+                      `<div class="li d-flex align-items-center gap-3 tr r${ty}" role=button tabindex=0 aria-label="${t('rec_e')}" onclick="er('${r.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();er('${r.id}')}"><span class=dc>${nx(r).slice(8)}.${nx(r).slice(5, 7)}.</span><span class=g>${cn(r.c).i} ${esc(r.n || t(cn(r.c).n))}<br><small>${t(r.f)}${nx(r).slice(0, 4) != iso(D).slice(0, 4) ? ' · ' + nx(r).slice(0, 4) : ''}</small></span><b class="${ty == 'i' ? 'pos' : 'neg'}">${sg(r.a, r.t)}</b><span class=chv aria-hidden=true>›</span></div>`,
                   )
                   .join('') +
                 '</details>'

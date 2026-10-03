@@ -893,12 +893,6 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 .mno{padding:14px 4px;text-align:center;font-size:var(--fs-s);color:var(--m)}
 @media (max-width:400px){.mc span{font-size:calc(var(--fs-s) * .92)}}
 
-/* ===== 1.21.5: Sortierleiste der wiederkehrenden Buchungen (Fällig / Name / Betrag) ===== */
-.rsb{display:flex;gap:6px;margin:8px 0 10px}
-.rsb button{flex:1 1 0;min-width:0;min-height:40px;padding:0 6px;border-radius:999px;border:2px solid var(--b);background:var(--surface);color:var(--m);font:inherit;font-size:var(--fs-s);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.rsb button.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--text);font-weight:700}
-.rsb button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
 /* ===== 1.21.6: Einstellungsmenü – schlichte einfarbige Symbole (Bootstrap Icons) ===== */
 .sec>button .ic{display:inline-flex;align-items:center;justify-content:center;color:var(--m)}
 .sec>button .ic svg{width:1.3rem;height:1.3rem;display:block}
@@ -908,3 +902,11 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 
 /* Kontosymbole (Bootstrap Icons) */
 svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:none}
+
+/* ===== 1.21.11: einheitlicher Spaltenkopf (Sortierung) auch bei wiederkehrenden Buchungen ===== */
+.hd span.am{min-width:5rem;justify-content:flex-end;text-align:right}
+.li.hd.rcd{padding-left:10px}
+.li.hd.rcd span.sp{width:1rem;min-width:0;flex:none;cursor:default}
+.li.tr.re,.li.tr.ri{padding-left:10px}
+.li.tr .chv{width:1rem;text-align:center}
+@media (max-width:400px){.hd span.am{min-width:4.2rem}}
