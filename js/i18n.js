@@ -190,6 +190,11 @@ const T = {
   lang: ['Sprache', 'Language'],
   theme: ['Farbschema', 'Color scheme'],
   font: ['Schriftgröße', 'Font size'],
+  dec: ['Nachkommastellen anzeigen', 'Show decimal places'],
+  dec_h: [
+    'Aus: {a} · An: {b}. Beträge werden gerundet angezeigt; gespeichert und exportiert wird immer centgenau. Summen werden aus den exakten Beträgen berechnet und können deshalb leicht von der Summe der angezeigten Zeilen abweichen.',
+    'Off: {a} · On: {b}. Amounts are shown rounded; stored and exported values always keep the cents. Totals are calculated from the exact amounts, so they can differ slightly from the sum of the displayed lines.',
+  ],
   pin: ['PIN-Sperre', 'PIN lock'],
   pinon: ['PIN festlegen (4–6 Ziffern)', 'Set PIN (4–6 digits)'],
   pinoff: ['PIN entfernen', 'Remove PIN'],

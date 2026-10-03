@@ -53,18 +53,24 @@ let S,
   U;
 const t = (k) => (T[k] || [k, k])[S.set.lang == 'en' ? 1 : 0],
   loc = () => (S.set.lang == 'en' ? 'en-GB' : 'de-DE');
+/* 1.23.0: Einstellung S.set.dec. An (Standard) = immer zwei Nachkommastellen; aus = ganze Beträge, kaufmännisch gerundet. Nur die Anzeige ändert sich, gespeicherte Werte und Exporte bleiben centgenau. Nur ein ausdrücklich ausgeschalteter Wert (false) schaltet ab; fehlt der Wert (alter Stand, altes Backup), gilt „an“. */
+const decOn = () => S.set.dec !== false;
+/* Wert so, wie er angezeigt wird (ohne -0) */
+const dsp = (a) => {
+  const v = Math.round((Number(a) || 0) * 100) / 100;
+  return (decOn() ? v : Math.sign(v) * Math.round(Math.abs(v))) || 0;
+};
 const fmt = (a) => {
-  /* Ganze Beträge ohne Cent (1.234 €), sonst immer mit zwei Nachkommastellen (12,50 €) */
-  const v = Math.round((Number(a) || 0) * 100) / 100,
-    c = Math.abs(v % 1) > 0;
+  const d = decOn() ? 2 : 0;
   return new Intl.NumberFormat(loc(), {
     style: 'currency',
     currency: S.set.cur,
-    minimumFractionDigits: c ? 2 : 0,
-    maximumFractionDigits: c ? 2 : 0,
-  }).format(v);
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  }).format(dsp(a));
 };
-const sg = (a, ty) => (ty ? (ty == 'i' ? '+' : '−') : a < 0 ? '−' : '+') + fmt(Math.abs(a));
+/* Vorzeichen nur, wenn der angezeigte Betrag nicht 0 ist (kein „−0 €“) */
+const sg = (a, ty) => (dsp(a) === 0 ? '' : ty ? (ty == 'i' ? '+' : '−') : a < 0 ? '−' : '+') + fmt(Math.abs(a));
 const cn = (id) => S.cats.find((c) => c.id == id) || { id: 'x', n: 'c_sonst_e', i: '📦' };
 const allT = () => S.tx.concat(S.tr.map((x) => ({ ...x, t: 'u', c: 'u' })));
 /* Startwerte je Konto in S.set: bank → sb, bar → sbr, spar → sbs (null = nicht eingetragen) */
@@ -241,4 +247,4 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.22.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.24.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

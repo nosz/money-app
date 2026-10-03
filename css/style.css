@@ -1004,3 +1004,21 @@ button.bc:active{border-color:var(--gold)}
 /* ===== 1.22.0: Backup-Erinnerung – Karte oben auf der Startseite ===== */
 .bkc{margin-bottom:12px;border-color:var(--gold)}
 .bkc small{display:block;margin:2px 0 10px}
+
+/* 1.23.0: Schalter „Nachkommastellen anzeigen“ (Touch-Fläche mind. 44 px, Farbe über --bs-primary = Gold) */
+.form-switch.dsw{display:flex;align-items:center;gap:12px;min-height:44px;margin:4px 0;padding-left:0}
+.form-switch.dsw .form-check-input{float:none;flex:none;margin:0;width:3em;height:1.6em;cursor:pointer}
+.form-switch.dsw .form-check-label{flex:1;cursor:pointer}
+
+/* ===== 1.24.0: Überschriften aufgeklappter Bereiche bleiben beim Scrollen sichtbar (zum Zuklappen) =====
+   --stk = Abstand nach oben, unter dem die jeweilige Kopfzeile klebt. Auf der Startseite nur der Rand oben;
+   in den Einstellungen zusätzlich die Höhe der Bereichs-Kopfzeile (--sech, wird in rd() gemessen).
+   Gestapelt: Bereichs-Kopfzeile (z 4) > Umschalter Ausgaben/Einnahmen (z 3) > Gruppen und Monate (z 2). */
+:root{--sech:0px;--stk:env(safe-area-inset-top,0px)}
+.sec{--stk:calc(env(safe-area-inset-top,0px) + var(--sech,62px))}
+.sec.open>button{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--surface);border-radius:var(--r-m) var(--r-m) 0 0}
+.sec .tps{top:var(--stk)}
+.mh details[open]>summary,
+details.gx[open]>summary,
+#res details[open]>summary{position:sticky;top:var(--stk);z-index:2;background:var(--surface)}
+details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(--b)}

@@ -436,6 +436,9 @@ const V = {
           grp('i', t('inn'))
         );
       },
+      /* Beispielbetrag 12,50 in beiden Darstellungen, in der gewählten Währung */
+      dx = (d) =>
+        new Intl.NumberFormat(loc(), { style: 'currency', currency: s.cur, minimumFractionDigits: d, maximumFractionDigits: d }).format(12.5),
       look = () =>
         lb(
           'font',
@@ -458,6 +461,10 @@ const V = {
               )
               .join('') +
             '</div>',
+        ) +
+        /* 1.23.0: Nachkommastellen anzeigen (Standard: aus) */
+        bx(
+          `<div class="form-check form-switch dsw"><input class="form-check-input" type="checkbox" role="switch" id="dec_sw" ${decOn() ? 'checked' : ''} onchange="S.set.dec=this.checked;P()"><label class="form-check-label" for="dec_sw">${t('dec')}</label></div><small style="display:block;margin-top:8px">${t('dec_h').replace('{a}', dx(0)).replace('{b}', dx(2))}</small>`,
         ),
       gen = () =>
         lb(
@@ -521,10 +528,17 @@ const V = {
   },
 };
 /* 1.21.17: Das ＋ (neue Buchung) in der unteren Leiste bleibt auch in den Einstellungen sichtbar (vorher dort ausgeblendet, mit leerer Lücke) */
+/* 1.24.0: Höhe der Kopfzeile des geöffneten Einstellungsbereichs als --sech; darunter bleiben Umschalter, Gruppen und Kategorielisten (CSS: --stk) mitlaufend sichtbar */
+const stk = () => {
+  const b = $('.sec.open>button');
+  document.documentElement.style.setProperty('--sech', (b ? b.offsetHeight : 0) + 'px');
+};
+addEventListener('resize', stk);
 function rd() {
   $('#v').innerHTML = V[tab]();
   $('#nav').innerHTML =
     `<button class="nb${tab == 'home' ? ' on' : ''}" ${tab == 'home' ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}<span class=nl>${t('home')}</span></button><button id=fab onclick="ot()" aria-label="${t('new')}"><svg viewBox="0 0 24 24" width=36 height=36 aria-hidden=true><path d="M12 4.5v15M4.5 12h15" stroke="currentColor" stroke-width=3 stroke-linecap=round fill=none /></svg></button><button class="nb${tab == 'set' ? ' on' : ''}" ${tab == 'set' ? 'aria-current=page ' : ''}onclick="go('set')" aria-label="${t('set')}">${NI.set}<span class=nl>${t('set')}</span></button>`;
+  stk();
 }
 const fx = (k) => {
   const e = $('#s_' + k);
@@ -568,6 +582,11 @@ function se(k) {
   SE.o = SE.o == k ? null : k;
   rd();
   if (SE.o) fx(k);
+  else {
+    /* 1.24.0: Beim Zuklappen aus der Tiefe des Bereichs springt die Ansicht zurück zu dessen Kopfzeile, statt irgendwo weiter unten zu landen */
+    const e = $('#s_' + k);
+    if (e && e.getBoundingClientRect().top < 0) fx(k);
+  }
 }
 function go(x) {
   tab = x;
