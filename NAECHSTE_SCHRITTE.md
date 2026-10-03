@@ -1,14 +1,28 @@
-# MoneyApp – Nächste Schritte (Stand 1.36.1)
+# MoneyApp – Nächste Schritte (Stand 1.37.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.36.1** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.37.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
+- **1.37.0: Validierung aller Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage** (Skill 5a und 5b, Spezifikation siehe Abschnitt 3, Schritt 1).
+  Geändert: `js/app.js` (neuer Block nach `rej()`: `amn()`, `amc(el, neg)`, `dgc()`, `txc()`, `dvl()`, `typed()`, `SN`, `CUR`, `NW`, `BADF`, `sbs()`, `svr()`, `dcl()`, `dscAsk()`/`dscN()`/`dscY()`;
+  `kLive()` mit Filter, neu `kSt()`, `kDone()`; `sheet(h, cls, mk)`, `cl()`, `hd(ti, cx)`, `svb(sx, cx, lb, mk)`; Maskenfunktionen `ot()`, `op()`, `dpk()`, `sv()`, `cfa()`, `caLive()`, `er()`, `nrc()`, `rfm()`, `rdc()`, `rdBad()`, `rsv()`, `nrs()`, `ncm()`, `ncs()`, `ecs()`, `ipk()`, `pn()`, `lk()`),
+  `js/core.js` (`num()` streng, `APP_VERSION`), `js/render.js` (`kto()`: Knopf-Zustände, Hinweiszeile, Enter-Verhalten, Suchfeld `fq`), `js/i18n.js` (neue Texte `unsv`, `dsc_t`, `dsc_m`, `dsc_y`, `dsc_n`, `e_date`),
+  `css/style.css` (Abschnitt „1.37.0“), `service-worker.js` (nur `CACHE_VERSION`). Datenformat, Backup und Import unverändert.
+  Ergebnis: Buchstaben lassen sich in keinem Zahlenfeld mehr tippen oder einfügen (Kontostände, Buchung, wiederkehrend, Betrag ändern, Willkommen); Einfügen von „1.234,56 €“ ergibt 1234,56; PIN nur Ziffern (auch Sperrbild);
+  alle Textfelder mit `maxlength`; Datum geprüft (2000 bis 2100); Live-Meldungen (Betrag 0, gleiches Konto, Konto-Minus, Kategorie-Dublette, Datum, PIN abweichend); Speichern-Knopf `idle`/`dirty`/`bad`/`done`;
+  Zeile „Nicht gespeicherte Änderung“; Verwerfen-Rückfrage bei ✕, Abbrechen, Escape, Zurück-Geste und Tipp neben das Fenster.
+  Konten: nach dem Speichern 2 Sekunden grün „✓ Gespeichert“ (kein Toast mehr), Enter speichert nur bei aktivem Knopf. Masken, die sich beim Speichern schließen, behalten den Toast.
+  Getestet in Chromium (390 und 320 px, Deutsch und Englisch): 71 automatische Prüfungen bestanden, keine JS-Fehler (Filter, Einfügen, Zustandswechsel, Zurückändern, Rückfrage, Zurück-Geste, Datum, Dublette, PIN, Umbuchung, Konto-Minus, Bearbeiten und Speichern).
+- **1.36.2: nur Dokumentation (Skill).** Kein Code geändert (nur `APP_VERSION`/`CACHE_VERSION`). Neue Nutzer-Vorgaben stehen im Skill (Abschnitt 5a, 7a, 10):
+  Eingabe-Filter (keine Buchstaben in Zahlenfeldern, auch nicht per Einfügen), Live-Prüfung in allen Dialogen, Speichern-Knopf mit Zuständen
+  (unverändert deaktiviert/„Gespeichert“, geändert und gültig aktiv, ungültig deaktiviert). Umsetzung folgt in 1.37.0 (Schritt 1 unten).
+  Fund im Code: Die Konto-Felder (`#st_<k>`, `#ob_<k>`) hatten keinen Filter, und `num()` las „12abc“ als 12.
 - **1.36.1: Speichern-Knopf beschriftet.** Rückmeldung des Nutzers: Nur ein Haken ist nicht als „Speichern“ erkennbar. Der Knopf `.ks` neben den
   Kontofeldern zeigt jetzt Haken plus Text `t('save')` („Speichern“ / „Save“), Schrift 1rem, Polster 0 14px (unter 360 px Breite 0,9rem und 0 10px).
   Geändert: `js/render.js` (`kto()`), `css/style.css` (Abschnitt „1.36.1“ ersetzt „1.36.0“), `js/core.js` und `service-worker.js` (nur Version).
@@ -129,12 +143,37 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
-### Schritt 1 – Tastatur-Test auf echten Geräten [Punkt D]
+### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
+Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>`/`#ob_<k>` ohne Filter, `num()` las „12abc“ als 12). Jetzt gilt überall:
+
+**A. Validierung (Skill 5a), jedes Feld nach Feldart:**
+- `amc(el, neg)` (`js/app.js`): nur Ziffern, ein Trenner, 2 Nachkommastellen, höchstens 9 Stellen vor dem Trenner, optional führendes Minus (`neg`, nur Konten); schlaues Einfügen („1.234,56 €“ → 1234,56) über `amn()` und `event.inputType`; rotes Blinken `.rej`, wenn etwas entfernt wurde. Einsatz in: `ia` (Buchung), `ra` (wiederkehrend), `ca_a` (Betrag ändern), `st_<k>`, `ob_<k>` (über `kLive()`).
+- `num()` (`js/core.js`) streng: nur reine Zahlen, sonst `null`.
+- `dgc(el)`: PIN nur Ziffern in `pn1`, `pn2` und im Sperrbild `lk()`.
+- `txc(el)` + `maxlength`: Notiz `ino` (100), Bezeichnung `nn` (30, Live-Prüfung leer/Dublette), `rn` (80), Suchfelder `csi`, `isi`, `fq` (60), Emoji `ni` (12).
+- `dvl(v)`: Datum gültig und 2000-01-01 bis 2100-12-31 (`idd`, `rd`; `min`/`max` am Feld, Meldung neuer Text `e_date`, Speichern gesperrt).
+- Alle Prüfungen laufen zusätzlich beim Speichern (`sv()`, `rsv()`, `nrs()`, `cfs()`, `ac()`, `ecv()`, `pns()`, `ktoSave()`, `od()`).
+
+**B. Speichern-Knopf (Skill 5b), Entscheidungen des Nutzers:**
+- Zustände `idle` / `dirty` / `bad` / `done` (`data-s` am Knopf), sofort beim Tippen; nach dem Speichern 2 Sekunden grün „✓ Gespeichert“ (Konten, ohne Toast), Masken, die sich schließen, behalten den Toast.
+- Zeile „Nicht gespeicherte Änderung“ über dem Knopf (Masken: `.dhint` in `.stkb`; Konten: `#st_h_<k>`).
+- Verwerfen-Rückfrage „Änderungen verwerfen?“ (Verwerfen / Weiter bearbeiten, gestapelt) beim Schließen mit ungespeicherten Änderungen (✕, Abbrechen, Escape, Zurück-Geste, Tipp daneben). Ohne Änderung schließt die Maske direkt.
+- Bearbeiten-Masken und Einzelfeld-Dialoge starten `idle`; neue Masken lassen „Speichern“ aktiv.
+- Umsetzung: `svb(sx, cx, lb, mk)`, `svr()`, `kSt(k)`, `kDone(k)`, `SN`/`CUR`, `dirtyNow()`, `dcl(fn)`, `dscAsk(fn)`; `sheet(h, cls, mk)` merkt das Masken-Kürzel (`x` Buchung, `n` Kategorie, `r` wiederkehrend, `c` Betrag ändern, `p` PIN).
+
+### Schritt 1 – Tastatur- und Eingabe-Test auf echten Geräten [Punkt D, erweitert in 1.37.0]
 - iOS und Android: Der Speichern-Knopf (`.stkb`) darf in allen Masken nicht von der Tastatur verdeckt werden. Neu: Auch die Speichern-Knöpfe neben den Kontofeldern (Einstellungen → Konten, `.ks`) müssen bei offener Tastatur erreichbar bleiben.
 - Besonders prüfen: Bezeichnung (Kategorie), Betrag und Notiz (Buchung), Suchfelder der Auswahl-Ansichten.
+- Neu in 1.37.0 mitprüfen: Die Hinweiszeile „Nicht gespeicherte Änderung“ (`.dhint`) macht die feste Knopfzeile (`.stkb`) höher; die Meldungen am Feld (`evis()`) müssen bei offener Tastatur weiter ganz sichtbar bleiben.
+- iOS: Die Dezimaltastatur (`inputmode=decimal`) hat kein Minus. Für Bank im Minus prüfen, ob ein Minus eingegeben werden kann; falls nicht, für die Kontofelder auf `inputmode=text` mit Filter (`amc(el, true)`) umstellen (Entscheidung beim Nutzer).
+- Einfügen aus der Zwischenablage auf dem Gerät testen (Beträge mit Währungszeichen, Tausenderpunkt, Buchstaben). `amc()` erkennt das Einfügen über `event.inputType`; Tastaturen ohne `inputType` verhalten sich wie Tippen.
 - Ergebnis als Rückmeldung an den Nutzer. Nur bei Mängeln eine Korrekturversion bauen.
 
 ## 4. Offene Punkte und optionales Aufräumen
+
+- Nach Rückmeldung des Nutzers zu 1.37.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
+- Entscheidung 1.37.0: Der grüne Zustand „✓ Gespeichert“ gilt nur für Knöpfe, die nach dem Speichern sichtbar bleiben (Konten). Masken, die sich beim Speichern schließen, bestätigen mit dem Toast. Falls der Nutzer auch dort den grünen Knopf sehen will: Schließen um etwa 600 ms verzögern (`sv()`, `ecv()`, `ac()`, `rsv()`, `nrs()`, `pns()`, `cfs()`), nur auf Wunsch.
+- Notizlänge `ino` ist jetzt auf 100 Zeichen begrenzt (vorhandene längere Notizen bleiben erhalten und bearbeitbar).
 
 - Nach Rückmeldung des Nutzers zu 1.29.0 bis 1.36.0 (Test am Handy) zuerst eventuelle Korrekturen einbauen.
 - Bekannte Eigenheit: Wählt der Nutzer für eine Standardkategorie im Emoji-Reiter genau ihr Standard-Emoji,
@@ -145,6 +184,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
   (`service-worker.js`) eintragen, ZIP nach der Version benennen (`money_app_<x_y_z>.zip`).
 
 ## 5. Prüfliste nach jeder Lieferung
+
+- [ ] 1.37.0 am Handy: In Konten, Buchung, wiederkehrender Buchung, „Betrag ändern“ und PIN Buchstaben tippen und einfügen (nichts kommt an), „1.234,56 €“ einfügen (ergibt 1234,56), Wert ändern und zurückändern (Knopf und Zeile „Nicht gespeicherte Änderung“ wechseln mit), Konto speichern (2 Sekunden grün, dann grau „Gespeichert“), Maske mit Änderung schließen (Rückfrage „Änderungen verwerfen?“, beide Knöpfe), Zurück-Geste mit Änderung, ohne Änderung schließt direkt, Deutsch und Englisch?
 
 - [ ] Einstellungen → Konten am Handy: Knopf „Speichern“ (Haken plus Text) neben jedem Feld sichtbar ohne Scrollen, auch bei 320 px Breite noch genug Platz zum Tippen, gut treffbar, speichert nur das eigene Konto, Eingaben in anderen Feldern bleiben stehen, Meldung bei Bar/Gespart unter 0 und bei ungültiger Zahl, Texte Deutsch und Englisch?
 - [ ] Fehlermeldungen am Handy mit offener Tastatur: Kategorie (Name leer, Name doppelt), Betrag ändern (0), PIN (zu kurz) – Meldung ganz sichtbar über der Knopfzeile, ohne selbst zu scrollen? Auch auf kleinen Handys und im Querformat.

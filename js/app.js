@@ -1,14 +1,16 @@
 /* MoneyApp – Eingabe-Sheets, Kategorien, Backup, PIN, Start */
 /* Sheets & Toast */
-let HP = 0;
-function sheet(h, cls) {
+let HP = 0,
+  MK = null; /* 1.37.0: Kürzel der geöffneten Eingabe-Maske (x Buchung, n Kategorie, r wiederkehrend, c Betrag ändern, p PIN), null = keine */
+function sheet(h, cls, mk) {
+  MK = mk || null;
   let o = $('#o');
   if (!o) {
     o = document.createElement('div');
     o.id = 'o';
     o.className = 'ov';
     o.onclick = (e) => {
-      if (e.target == o && !X.nc) cl();
+      if (e.target == o && !X.nc) dcl(() => cl());
     };
     document.body.append(o);
     if (!X.nc) {
@@ -20,9 +22,11 @@ function sheet(h, cls) {
   }
   o.innerHTML = `<div class="sh${cls ? ' ' + cls : ''}" role=dialog aria-modal=true>${h}</div>`;
   vvf();
+  svr(1);
 }
 const cl = () => {
   const o = $('#o');
+  MK = null;
   if (o) {
     o.remove();
     if (HP) {
@@ -34,20 +38,31 @@ const cl = () => {
 addEventListener('popstate', () => {
   const o = $('#o');
   if (o && HP) {
+    /* 1.37.0: Zurück-Geste mit ungespeicherten Änderungen: Eintrag wieder anlegen und nachfragen */
+    if ($('#dsc') || dirtyNow()) {
+      try {
+        history.pushState({ sh: 1 }, '');
+      } catch (e) {}
+      if (!$('#dsc')) dscAsk(() => cl());
+      return;
+    }
     HP = 0;
     o.remove();
   }
 });
 addEventListener('keydown', (e) => {
-  if (e.key == 'Escape' && $('#o') && !X.nc) cl();
+  if (e.key != 'Escape') return;
+  if ($('#dsc')) return dscN();
+  if ($('#o') && !X.nc) dcl(() => cl());
 });
 /* Betrag fürs Eingabefeld: ganz = 12, sonst immer zwei Stellen = 12,50 */
 const af = (a) => {
   const v = Math.round(Number(a) * 100) / 100;
   return (Number.isInteger(v) ? String(v) : v.toFixed(2)).replace('.', ',');
 };
-const hd = (ti) =>
-  `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">${bi('x')}</button></div>`;
+/* cx = Schließen-Aktion einer Eingabe-Maske (mit Verwerfen-Rückfrage, Skill 5b); ohne cx schließt das ✕ sofort */
+const hd = (ti, cx) =>
+  `<div class=sht><h2>${ti}</h2><button class=x onclick="${cx ? `dcl(()=>${cx})` : 'cl()'}" aria-label="${t('x')}">${bi('x')}</button></div>`;
 /* Einheitliche Knopfzeile unter dem Hauptknopf: Abbrechen (schlicht), optional rote Aktion (Löschen/Ersetzen) */
 const acts = (cx, dx, dl, dh) =>
   `<div class=acts><button class="btn btn-secondary s ghost" onclick="${cx}">${t('cancel')}</button>${dx ? `<button class="btn dlt" onclick="${dx}">${dl || bi('trash') + ' ' + t('del')}${dh ? `<small class=dh>${dh}</small>` : ''}</button>` : ''}</div>`;
@@ -72,20 +87,64 @@ function ot(id) {
   X = x
     ? { ...x, a: af(x.a), f: '', k: x.t == 'u' ? x.f : x.k || 'bank' }
     : { t: 'e', c: null, a: '', d: '', n: '', f: '', k: S.set.lk || 'bar' };
+  SN.x = CUR.x();
   op();
 }
-/* Betrag: nur Ziffern, ein Komma oder Punkt, max. 2 Nachkommastellen */
-function amc(el) {
-  const o = el.value;
-  let v = o.replace(/[^\d.,]/g, '');
-  const m = v.search(/[.,]/);
-  if (m >= 0)
-    v =
-      v.slice(0, m + 1) +
-      v
-        .slice(m + 1)
-        .replace(/[.,]/g, '')
-        .slice(0, 2);
+/* ===== 1.37.0: Eingabe-Filter und Prüfung für ALLE Feldarten (Skill 5a) ===== */
+/* Feld blinkt kurz rostrot, wenn Zeichen nicht angenommen wurden */
+function rej(el) {
+  el.classList.remove('rej');
+  void el.offsetWidth;
+  el.classList.add('rej');
+  setTimeout(() => el.classList.remove('rej'), 700);
+}
+/* Betrag normalisieren: nur Ziffern, ein Trenner, 2 Nachkommastellen, höchstens 9 Stellen davor, optional führendes Minus (neg).
+   paste = Einfügen/Ziehen: Tausendertrenner erkennen („1.234,56“, „1,234.56“, „1.234.567“ → Zahl ohne Tausenderpunkte). */
+function amn(o, neg, paste) {
+  let v = String(o).replace(/[^\d.,-]/g, '');
+  const ng = neg && v.charAt(0) == '-' ? '-' : '';
+  v = v.replace(/-/g, '');
+  if (paste) {
+    const c = (v.match(/,/g) || []).length,
+      d = (v.match(/\./g) || []).length;
+    if (c && d) v = v.lastIndexOf(',') > v.lastIndexOf('.') ? v.replace(/\./g, '') : v.replace(/,/g, '');
+    const m = v.match(/[.,]/g) || [];
+    if (m.length > 1) v = v.replace(/[.,]/g, '');
+    else if (m.length == 1 && /^\d{1,3}\.\d{3}$/.test(v)) v = v.replace('.', '');
+  }
+  const i = v.search(/[.,]/);
+  if (i < 0) return ng + v.slice(0, 9);
+  return ng + v.slice(0, i).slice(0, 9) + v.charAt(i) + v.slice(i + 1).replace(/[.,]/g, '').slice(0, 2);
+}
+/* Betragsfeld filtern (oninput). neg = führendes Minus erlaubt (Kontostände). Gibt den bereinigten Wert zurück. */
+function amc(el, neg) {
+  const o = el.value,
+    ev = window.event,
+    it = (ev && ev.inputType) || '',
+    v = amn(o, neg, /^insertFrom(Paste|Drop|Yank)|^insertReplacementText/.test(it));
+  if (v != o) {
+    const p = Math.max(0, (el.selectionStart ?? o.length) - (o.length - v.length));
+    el.value = v;
+    try {
+      el.setSelectionRange(p, p);
+    } catch (e) {}
+    if (/[^\d.,\s\u00a0€$£-]/.test(o) || (v.length < o.length && !/^insertFrom/.test(it))) rej(el);
+  }
+  return v;
+}
+/* PIN-Feld: nur Ziffern */
+function dgc(el) {
+  const v = el.value.replace(/\D/g, '');
+  if (v != el.value) {
+    el.value = v;
+    rej(el);
+  }
+  return v;
+}
+/* Textfeld: keine Steuerzeichen, kein führendes Leerzeichen (maxlength steht am Feld) */
+function txc(el) {
+  const o = el.value,
+    v = o.replace(/[\u0000-\u001f\u007f]/g, '').replace(/^\s+/, '');
   if (v != o) {
     const p = Math.max(0, (el.selectionStart ?? o.length) - (o.length - v.length));
     el.value = v;
@@ -94,6 +153,155 @@ function amc(el) {
     } catch (e) {}
   }
   return v;
+}
+/* Datum gültig (JJJJ-MM-TT, real existierend, 2000 bis 2100) */
+const dvl = (v) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+  if (!m) return false;
+  const y = +m[1],
+    mo = +m[2],
+    d = +m[3],
+    dt = new Date(y, mo - 1, d);
+  return y >= 2000 && y <= 2100 && dt.getMonth() == mo - 1 && dt.getDate() == d;
+};
+/* Wert wirklich eingegeben (nicht leer, nicht nur „-“, „,“ oder „.“) */
+const typed = (s) => {
+  s = String(s || '').trim();
+  return !!s && !/^-?[.,]?$/.test(s);
+};
+/* ===== 1.37.0: Speichern-Knopf – Zustände, Änderungs-Erkennung, Verwerfen-Rückfrage (Skill 5b) =====
+   Zustände (data-s am Knopf): idle (unverändert, deaktiviert), dirty (geändert und gültig, aktiv), bad (ungültig, deaktiviert), done (gerade gespeichert, 2 s grün).
+   SN[mk] = Schnappschuss beim Öffnen, CUR[mk]() = aktuelle Werte, dirtyNow() vergleicht. */
+let SN = {};
+const na = (s) => {
+    const v = num(s);
+    return v == null ? 's:' + String(s || '').trim() : String(Math.round(v * 100) / 100);
+  },
+  CUR = {
+    x: () => JSON.stringify([X.t, na(X.a), X.k || '', X.t == 'u' ? X.to : X.c || '', X.d || iso(D), (X.n || '').trim(), X.f || '']),
+    n: () => JSON.stringify([NC.t, (NC.n || '').trim(), NC.i || '']),
+    r: () => JSON.stringify([RE.t, na(RE.a), RE.c || '', (RE.n || '').trim(), RE.f || '', RE.d || '']),
+    c: () => ($('#ca_a') ? na($('#ca_a').value) : ''),
+    p: () => JSON.stringify([($('#pn1') || {}).value || '', ($('#pn2') || {}).value || '']),
+  },
+  NW = { x: () => !X.id, n: () => !NC.id, r: () => !RE.id, c: () => false, p: () => true },
+  dirtyNow = () => !!MK && SN[MK] != null && CUR[MK]() !== SN[MK],
+  say = (q, m) => {
+    const e = $(q);
+    if (!e) return;
+    e.hidden = !m;
+    if (m) wm(e, m);
+  },
+  /* Ungültig-Prüfungen je Maske; live = true: Meldungen am Feld nachziehen (nur bei Eingabe, nie bei einem Tipp auf Speichern) */
+  BADF = {
+    x: (live) => {
+      const a = num(X.a),
+        ba = typed(X.a) && !(a > 0),
+        su = X.t == 'u' && X.k == X.to;
+      if (live) {
+        const m = msgs();
+        say('#ea', ba ? t('e_amt0') : X.tried ? m.a : '');
+        say('#eu', su ? t('e_acc') : X.tried ? m.u : '');
+      }
+      return !!(ba || su || X.dbad || blq() || (X.id && Object.keys(msgs()).length));
+    },
+    n: (live) => {
+      const n = (NC.n || '').trim(),
+        c = NC.id && S.cats.find((x) => x.id == NC.id),
+        dup = !!n && (NC.id ? n != t(c.n) && cdup(n, NC.t, NC.id) : cdup(n, NC.t)),
+        em = !!NC.id && !n && dirtyNow();
+      if (live) {
+        say('#en', dup ? t('e_catdup') : em ? t('e_name') : '');
+        const i = $('#nn');
+        if (i) i.style.borderColor = dup || em ? 'var(--rust)' : '';
+      }
+      return dup || em;
+    },
+    r: (live) => {
+      const s = String(RE.a || '').trim(),
+        inc = /^-?[.,]?$/.test(s),
+        ba = RE.id ? !(num(s) > 0) : !inc && !(num(s) > 0);
+      if (live) say('#rea', ba && !(inc && s) ? t('e_amt0') : '');
+      return !!(ba || RE.dbad);
+    },
+    c: (live) => {
+      const e = $('#ca_a'),
+        s = e ? e.value.trim() : '',
+        v = s ? num(s) : null,
+        r = S.rec.find((x) => x.id == (e && e.dataset.id)),
+        bl = v > 0 && r ? recBlk(r, Math.round(v * 100) / 100) : '',
+        bad = !(v > 0) || !!bl;
+      if (live) {
+        const m = $('#ca_e');
+        if (m) {
+          m.classList.toggle('blk', !!bl);
+          m.hidden = !(bl || (!(v > 0) && !/^-?[.,]?$/.test(s)) || (!s && dirtyNow()));
+          if (bl) wm(m, bl);
+          else m.textContent = t('e_amt0');
+        }
+      }
+      return bad;
+    },
+    p: (live) => {
+      const a = ($('#pn1') || {}).value || '',
+        b = ($('#pn2') || {}).value || '',
+        mm = a.length >= 4 && b.length > 0 && b.length >= a.length && a != b;
+      if (live) say('#pne', mm ? t('e_pin2') : '');
+      return mm;
+    },
+  };
+/* Knopf in einen Zustand setzen (Haken plus Text, nie nur ein Symbol) */
+function sbs(b, s, lb) {
+  const k = s + '|' + lb;
+  if (b.dataset.k == k) return;
+  b.dataset.k = k;
+  b.dataset.s = s;
+  b.disabled = s == 'idle' || s == 'bad';
+  b.innerHTML = `${bi('check')}<span>${lb}</span>`;
+}
+/* Zustand des Speichern-Knopfs der geöffneten Maske neu berechnen (live = true: auch Meldungen am Feld) */
+function svr(live) {
+  const b = $('#o .stkb .sb[data-mk]');
+  if (!b || !MK || b.dataset.mk != MK) return;
+  const d = dirtyNow(),
+    bad = BADF[MK](live),
+    nw = NW[MK](),
+    lb = b.dataset.lb || '',
+    st = nw ? (bad ? 'bad' : 'dirty') : !d ? 'idle' : bad ? 'bad' : 'dirty',
+    txt = st == 'idle' ? lb || t('sav') : lb || t('save');
+  sbs(b, st, txt);
+  const h = $('#dh');
+  if (h) h.hidden = !(d && st == 'dirty');
+}
+['input', 'change'].forEach((ev) => addEventListener(ev, () => setTimeout(() => svr(1), 0), true));
+addEventListener('click', () => setTimeout(() => svr(0), 0), true);
+/* Maske schließen: mit ungespeicherten Änderungen erst nachfragen, sonst sofort */
+function dcl(fn) {
+  if (dirtyNow()) dscAsk(fn);
+  else fn();
+}
+let DSF = null;
+function dscAsk(fn) {
+  if ($('#dsc')) return;
+  DSF = fn;
+  const sh = $('#o .sh'),
+    o = document.createElement('div');
+  o.id = 'dsc';
+  o.className = 'ov';
+  o.innerHTML = `<div class="sh" role=alertdialog aria-modal=true aria-labelledby=dsct data-t="${sh ? sh.dataset.t || '' : ''}"><div class=sht><h2 id=dsct>${t('dsc_t')}</h2></div><p class=cdm>${t('dsc_m')}</p><button type=button class="btn btn-danger d cdy" onclick="dscY()">${bi('x')} ${t('dsc_y')}</button><div class=acts><button type=button class="btn btn-secondary s ghost" onclick="dscN()">${t('dsc_n')}</button></div></div>`;
+  document.body.append(o);
+  const k = o.querySelector('.acts .btn');
+  if (k) k.focus();
+}
+function dscN() {
+  const o = $('#dsc');
+  if (o) o.remove();
+  DSF = null;
+}
+function dscY() {
+  const f = DSF;
+  dscN();
+  if (f) f();
 }
 function am(el) {
   X.a = amc(el);
@@ -165,8 +373,9 @@ const ckf = () => {
 function cpk() {
   X.q = '';
   sheet(
-    `<div class=sht><h2>${t('bk_cat')}</h2><button class=x onclick="op()" aria-label="${t('x')}">${bi('x')}</button></div><input class="form-control" id=csi type=search placeholder="${t('search')}" aria-label="${t('search')}" oninput="X.q=this.value;cfil()" autocomplete=off enterkeyhint=search><div class=cpl id=cpl>${clist()}</div>`,
+    `<div class=sht><h2>${t('bk_cat')}</h2><button class=x onclick="op()" aria-label="${t('x')}">${bi('x')}</button></div><input class="form-control" id=csi type=search placeholder="${t('search')}" aria-label="${t('search')}" oninput="txc(this);X.q=this.value;cfil()" maxlength=60 autocomplete=off enterkeyhint=search><div class=cpl id=cpl>${clist()}</div>`,
     'fs',
+    'x',
   );
   const sh = $('.sh');
   if (sh) {
@@ -228,7 +437,14 @@ function clist() {
 }
 
 /* Buchungsdatum: Kurzwahl Heute/Gestern und Datumsfeld bleiben synchron, ohne die Maske neu zu zeichnen */
-function dpk(v) {
+function dpk(v, el) {
+  /* 1.37.0: ungültiges oder unvollständiges Datum wird gemeldet, das letzte gültige bleibt gespeichert */
+  const bad = !dvl(v) || !!(el && el.validity && el.validity.badInput);
+  X.dbad = bad ? 1 : 0;
+  say('#ed', bad ? t('e_date') : '');
+  const di = $('#idd');
+  if (di) di.classList.toggle('bad', bad);
+  if (bad) return;
   X.d = v || '';
   const cd = X.d || iso(D);
   document.querySelectorAll('.dq .dqb').forEach((b) => {
@@ -242,8 +458,9 @@ function dpk(v) {
 
 /* 1.34.0: Einheitliche Knopfzeile unten in einer Zeile: Abbrechen (schmal, schlicht) links, Speichern (groß) rechts.
    sx = Speichern-Aktion, cx = Abbrechen-Aktion (wie das ✕ oben), lb = Beschriftung des Hauptknopfs (Standard: Speichern) */
-const svb = (sx, cx, lb) =>
-  `<div class=stkb><div class=sbr><button type=button class=\"btn ghost cb\" onclick=\"${cx}\">${t('cancel')}</button><button type=button class=\"btn btn-primary pr sb\" onclick=\"${sx}\">${lb || t('save')}</button></div></div>`;
+/* 1.37.0: mk = Masken-Kürzel (Skill 5b). Mit mk: Abbrechen fragt bei ungespeicherten Änderungen nach, der Knopf bekommt Haken, Zustände (data-s) und die Zeile „Nicht gespeicherte Änderung“. */
+const svb = (sx, cx, lb, mk) =>
+  `<div class=stkb>${mk ? `<div class=dhint id=dh hidden><i></i>${t('unsv')}</div>` : ''}<div class=sbr><button type=button class="btn ghost cb" onclick="${mk ? `dcl(()=>${cx})` : cx}">${t('cancel')}</button><button type=button class="btn btn-primary pr sb"${mk ? ` data-mk="${mk}" data-lb="${lb || ''}" data-s=dirty` : ''} onclick="${sx}">${mk ? bi('check') + '<span>' + (lb || t('save')) + '</span>' : lb || t('save')}</button></div></div>`;
 /* Löschen als dezenter Textlink in Rost am Ende der Maske (nur beim Bearbeiten) */
 const acts2 = (dx, h) =>
   `<div class=acts2>${h ? `<small class=dh2>${h}</small>` : ''}<button type=button class=lnk onclick="${dx}">${bi('trash')} ${t('del')}</button></div>`;
@@ -267,7 +484,7 @@ function op() {
       ? ''
       : `<div class=fld><label class=fl for=ck>${t('bk_cat')}</label><button type=button class=sel id=ck aria-haspopup=dialog onclick="cpk()">${ckin()}</button><div class="em invalid-feedback" id=ec hidden role=alert></div></div>`,
     /* Datum und Notiz sind immer sichtbar (nicht mehr eingeklappt) */
-    dat = `<div class=fld><label class=fl for=idd>${t('bk_date')}</label><div class=dq><button type=button class="dqb${cd == td ? ' on' : ''}" data-d="${td}" aria-pressed="${cd == td}" onclick="dpk('${td}')">${t('today')}</button><button type=button class="dqb${cd == yd ? ' on' : ''}" data-d="${yd}" aria-pressed="${cd == yd}" onclick="dpk('${yd}')">${t('yest')}</button><input class="form-control" id=idd type=date value="${cd}" onchange="dpk(this.value)"></div></div><div class=fld><label class=fl for=ino>${t('note')}</label><input class="form-control" id=ino value="${esc(X.n)}" oninput="ns(this.value)" autocomplete=off></div>`,
+    dat = `<div class=fld><label class=fl for=idd>${t('bk_date')}</label><div class=dq><button type=button class="dqb${cd == td ? ' on' : ''}" data-d="${td}" aria-pressed="${cd == td}" onclick="dpk('${td}')">${t('today')}</button><button type=button class="dqb${cd == yd ? ' on' : ''}" data-d="${yd}" aria-pressed="${cd == yd}" onclick="dpk('${yd}')">${t('yest')}</button><input class="form-control" id=idd type=date min="2000-01-01" max="2100-12-31" value="${cd}" oninput="dpk(this.value,this)" onchange="dpk(this.value,this)"></div><div class="em invalid-feedback" id=ed hidden role=alert></div></div><div class=fld><label class=fl for=ino>${t('note')}</label><input class="form-control" id=ino maxlength=100 value="${esc(X.n)}" oninput="txc(this);ns(this.value)" autocomplete=off></div>`,
     /* Weitere Angaben: eingeklappt, enthält die Wiederholung (nur bei neuer Buchung, nicht bei Umbuchung) */
     mehr =
       X.id || isU
@@ -282,8 +499,9 @@ function op() {
             X.f,
           )}</select></div></details>`;
   sheet(
-    `${hd(t(X.id ? 'et_' + X.t : 'bk_nt'))}${typ}<small class=hint>${t('bk_h_' + X.t)}</small>${betrag}${konto}${kat}${dat}${mehr}<div class="em warn alert alert-warning" id=ew hidden role=alert></div>${X.id ? acts2('dl()') : ''}${svb('sv()', 'cl()')}`,
+    `${hd(t(X.id ? 'et_' + X.t : 'bk_nt'), 'cl()')}${typ}<small class=hint>${t('bk_h_' + X.t)}</small>${betrag}${konto}${kat}${dat}${mehr}<div class="em warn alert alert-warning" id=ew hidden role=alert></div>${X.id ? acts2('dl()') : ''}${svb('sv()', 'cl()', '', 'x')}`,
     'fs',
+    'x',
   );
   const shh = $('.sh');
   if (shh) shh.dataset.t = X.t;
@@ -379,6 +597,15 @@ function mut(a, d) {
 function sv(force) {
   const a = parseFloat(String(X.a).replace(',', '.')),
     m = msgs();
+  /* 1.37.0: ungültiges Datum sperrt das Speichern (zusätzlich zur Live-Prüfung) */
+  if (X.dbad) {
+    const e = $('#ed');
+    if (e) {
+      say('#ed', t('e_date'));
+      e.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+    return;
+  }
   if (Object.keys(m).length) {
     X.tried = 1;
     fm();
@@ -504,8 +731,12 @@ function cfa(id) {
   if (!r) return;
   X.nc = 0;
   sheet(
-    `${hd(t('chg'))}${bstrip([r.ka || 'bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="caLive('${id}',this)" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div>${svb(`cfs('${id}')`, 'dsh()', t('ok'))}`,
+    `${hd(t('chg'), 'dsh()')}${bstrip([r.ka || 'bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a data-id="${id}" inputmode=decimal maxlength=13 placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="caLive('${id}',this)" onkeydown="if(event.key=='Enter'&&!$('#o .sb').disabled)cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div>${svb(`cfs('${id}')`, 'dsh()', t('ok'), 'c')}`,
+    '',
+    'c',
   );
+  SN.c = CUR.c();
+  svr(1);
   $('.sh').dataset.t = r.t;
   const e = $('#ca_a');
   e.focus({ preventScroll: true });
@@ -513,14 +744,7 @@ function cfa(id) {
 }
 /* Live-Prüfung des geänderten Betrags einer fälligen Buchung */
 function caLive(id, el) {
-  const v = num(amc(el)),
-    r = S.rec.find((x) => x.id == id),
-    m = r && v > 0 ? recBlk(r, Math.round(v * 100) / 100) : '',
-    e = $('#ca_e');
-  if (m) wm(e, m);
-  else e.textContent = t('e_amt0');
-  e.classList.toggle('blk', !!m);
-  e.hidden = !m;
+  amc(el); /* Filter; Meldung und Knopfzustand setzt svr() (BADF.c) */
 }
 function cfs(id) {
   const v = num($('#ca_a').value);
@@ -549,6 +773,7 @@ function er(id) {
   const d = iso(dateK(r, r.k));
   X = {};
   RE = { id, t: r.t, a: af(r.a), c: r.c, n: r.n || '', f: r.f, d, d0: d, f0: r.f };
+  SN.r = CUR.r();
   erd();
 }
 /* 1.31.0: Wiederkehrende Buchung im Banking-Look (gleiche Klassen wie die Buchungsmaske: .fld .fl .amw .sel-Optik .acts2); Logik unverändert */
@@ -557,18 +782,32 @@ function rfm(r, nw) {
     S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
     r.c,
   );
-  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this);$('#rea').hidden=true" autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><label class=fl for=rc>${t('bk_cat')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec')&&($('#rec').hidden=true)">${cats}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="RE.n=this.value" autocomplete=off></div><div class=fld><label class=fl for=rr>${t('rep')}</label><select class="form-select" id=rr onchange="RE.f=this.value">${O(
+  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><label class=fl for=rc>${t('bk_cat')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec')&&($('#rec').hidden=true)">${cats}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div><div class=fld><label class=fl for=rr>${t('rep')}</label><select class="form-select" id=rr onchange="RE.f=this.value">${O(
     ['m', 'w', 'y'].map((k) => [k, t(k)]),
     r.f,
-  )}</select></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date value="${r.d}" onchange="RE.d=this.value"></div>`;
+  )}</select></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div></div>`;
 }
 function erd() {
   const r = RE;
   sheet(
-    `${hd(t('rec_e'))}<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(r.t)}</div></div>${rfm(r, 0)}${acts2('rdl()')}${svb('rsv()', 'cl()')}`,
+    `${hd(t('rec_e'), 'cl()')}<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(r.t)}</div></div>${rfm(r, 0)}${acts2('rdl()')}${svb('rsv()', 'cl()', '', 'r')}`,
     'fs',
+    'r',
   );
   $('.sh').dataset.t = r.t;
+}
+/* 1.37.0: Datum der wiederkehrenden Buchung prüfen (Live und beim Speichern) */
+function rdc(el) {
+  const bad = !dvl(el.value) || el.validity.badInput;
+  RE.dbad = bad ? 1 : 0;
+  say('#red', bad ? t('e_date') : '');
+  el.classList.toggle('bad', bad);
+  if (!bad) RE.d = el.value;
+}
+function rdBad() {
+  const e = $('#red');
+  say('#red', t('e_date'));
+  if (e) e.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 function rsv() {
   const r = S.rec.find((x) => x.id == RE.id),
@@ -581,6 +820,7 @@ function rsv() {
     $('#ra').focus({ preventScroll: true });
     return;
   }
+  if (RE.dbad) return rdBad();
   Object.assign(r, { a: Math.round(a * 100) / 100, c: RE.c, n: RE.n.trim(), f: RE.f });
   /* Intervall oder Fälligkeit geändert: ab dem gewählten Datum neu zählen */
   if (RE.d && (RE.d != RE.d0 || RE.f != RE.f0)) {
@@ -601,6 +841,8 @@ function nrc() {
   X = {};
   RE = { nw: 1, t: 'e', a: '', c: '', n: '', f: 'm', d: iso(D) };
   nrt('e');
+  SN.r = CUR.r(); /* Schnappschuss nach dem Vorbelegen der Kategorie */
+  svr(1);
 }
 function nrt(ty) {
   RE.t = ty;
@@ -611,8 +853,9 @@ function nrd() {
   const r = RE,
     tb = (k, lb) => `<button type=button class="${r.t == k ? 'on' : ''}" aria-pressed="${r.t == k}" onclick="nrt('${k}')">${lb}</button>`;
   sheet(
-    `${hd(t('rec_n'))}<div class=fld><div class="tp typ" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div></div>${rfm(r, 1)}${svb('nrs()', 'cl()')}`,
+    `${hd(t('rec_n'), 'cl()')}<div class=fld><div class="tp typ" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div></div>${rfm(r, 1)}${svb('nrs()', 'cl()', '', 'r')}`,
     'fs',
+    'r',
   );
   $('.sh').dataset.t = r.t;
 }
@@ -631,6 +874,7 @@ function nrs() {
     e.scrollIntoView({ block: 'center', behavior: 'smooth' });
     return;
   }
+  if (RE.dbad) return rdBad();
   /* k = 0: noch keine Buchung erzeugt, die erste entsteht zur ersten Fälligkeit */
   S.rec.push({
     id: uid(),
@@ -712,7 +956,7 @@ const gr = (v) => {
    NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet), tab ('s' | 'e'), q, nodel, dh }
    NC.i: Emoji oder 'bi:<name>' (Bootstrap-Icon, siehe js/icons.js). Datenformat bleibt unverändert (Feld i). */
 const hdc = (ti, js) =>
-  `<div class=sht><h2>${ti}</h2><button class=x onclick="${js || 'ncx()'}" aria-label="${t('x')}">${bi('x')}</button></div>`;
+  `<div class=sht><h2>${ti}</h2><button class=x onclick="${js || 'dcl(()=>ncx())'}" aria-label="${t('x')}">${bi('x')}</button></div>`;
 /* Maske zeichnen (neu und bearbeiten); beim Rückweg aus der Symbol-Auswahl bleiben Name und Symbol erhalten */
 function ncm() {
   const ed = !!NC.id,
@@ -724,11 +968,12 @@ function ncm() {
     art = lock
       ? `<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(NC.t)}</div><small class=hint>${t(NC.from ? 'cty_lock' : 'h_' + NC.t)}</small></div>`
       : `<div class=fld><span class=fl>${t('cty')}</span><div class="tp typ ctp" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small></div>`,
-    nm = `<div class=fld><label class=fl for=nn>${t('cat_nm')}</label><input class="form-control" id=nn value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done oninput="NC.n=this.value;this.style.borderColor='';$('#en').hidden=true" onkeydown="if(event.key=='Enter')${save}"><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div></div>`,
+    nm = `<div class=fld><label class=fl for=nn>${t('cat_nm')}</label><input class="form-control" id=nn value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done oninput="txc(this);NC.n=this.value;this.style.borderColor='';$('#en').hidden=true" onkeydown="if(event.key=='Enter'&&!$('#o .sb').disabled)${save}"><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div></div>`,
     sy = `<div class=fld><span class=fl>${t('sym')}</span><button type=button class=sel id=cpi aria-haspopup=dialog onclick="ipk()"><span class=ckv><span class=cvp id=cpg>${ci(NC)}</span>${t('sym_chg')}</span></button></div>`;
   sheet(
-    `${hdc(t(ed ? 'ced' : 'cat_new'))}${art}${nm}${sy}${ed && !NC.nodel ? acts2(`dc('${NC.id}')`, NC.dh) : ''}${svb(save, 'ncx()')}`,
+    `${hdc(t(ed ? 'ced' : 'cat_new'))}${art}${nm}${sy}${ed && !NC.nodel ? acts2(`dc('${NC.id}')`, NC.dh) : ''}${svb(save, 'ncx()', '', 'n')}`,
     'fs fsk',
+    'n',
   );
   const s = $('#o .sh');
   s.dataset.t = NC.t;
@@ -745,6 +990,7 @@ function ipk() {
   sheet(
     `${hdc(t('ico'), 'ipx()')}<div class="tp typ ipt" role=group aria-label="${t('ico')}">${tab('s', t('sym_tab_i'))}${tab('e', t('sym_tab_e'))}</div><div id=ipb>${ipb()}</div>`,
     'fs',
+    'n',
   );
   const s = $('#o .sh');
   s.dataset.t = NC.t;
@@ -753,8 +999,8 @@ function ipk() {
 /* Inhalt unter den Reitern */
 const ipb = () =>
   NC.tab == 's'
-    ? `<input class="form-control" id=isi type=search placeholder="${t('search')}" aria-label="${t('search')}" value="${esc(NC.q)}" oninput="NC.q=this.value;ipf()" autocomplete=off enterkeyhint=search><div class=ig id=ig>${igrid()}</div>`
-    : `<label class=fl for=ni style="margin-top:18px">${t('ico2')}</label><div class=ie><input class="form-control" id=ni autocomplete=off enterkeyhint=done onkeydown="if(event.key=='Enter')ipe()"><button type=button class=dqb onclick="ipe()">${t('sym_use')}</button></div><div class=ig>${ICONS.map((e) => `<button type=button class="ib${!cin(NC) && NC.i == e ? ' on' : ''}" aria-pressed="${!cin(NC) && NC.i == e}" onclick="ipc('${e}')">${e}</button>`).join('')}</div>`;
+    ? `<input class="form-control" id=isi type=search placeholder="${t('search')}" aria-label="${t('search')}" value="${esc(NC.q)}" oninput="txc(this);NC.q=this.value;ipf()" maxlength=60 autocomplete=off enterkeyhint=search><div class=ig id=ig>${igrid()}</div>`
+    : `<label class=fl for=ni style="margin-top:18px">${t('ico2')}</label><div class=ie><input class="form-control" id=ni maxlength=12 oninput="txc(this)" autocomplete=off enterkeyhint=done onkeydown="if(event.key=='Enter')ipe()"><button type=button class=dqb onclick="ipe()">${t('sym_use')}</button></div><div class=ig>${ICONS.map((e) => `<button type=button class="ib${!cin(NC) && NC.i == e ? ' on' : ''}" aria-pressed="${!cin(NC) && NC.i == e}" onclick="ipc('${e}')">${e}</button>`).join('')}</div>`;
 /* Raster der Bootstrap-Icons, gefiltert nach Suchbegriff (Name, deutsche und englische Stichwörter) */
 function igrid() {
   const q = (NC.q || '').trim().toLowerCase(),
@@ -811,6 +1057,7 @@ function cty(ty) {
 }
 function ncs(entry) {
   NC = { t: entry && X.t == 'i' ? 'i' : 'e', n: entry ? (X.q || '').trim() : '', i: 'bi:tag', from: entry ? 1 : 0 };
+  SN.n = CUR.n();
   ncm();
   $('#nn').focus({ preventScroll: true });
 }
@@ -876,6 +1123,7 @@ function ecs(id) {
     nodel,
     dh: nodel ? '' : t(n == 0 ? 'cdh0' : n == 1 ? 'cdh1' : 'cdh').replace('{n}', n),
   };
+  SN.n = CUR.n();
   ncm();
 }
 function ecv() {
@@ -1053,8 +1301,11 @@ function pn() {
   }
   X = {};
   sheet(
-    `${hd(t('pinset'))}<small class=hint>${t('pinrule')}</small><div class=fld><label class=fl for=pn1>${t('pin1')}</label><input id=pn1 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="$('#pne').hidden=true"></div><div class=fld><label class=fl for=pn2>${t('pin2')}</label><input id=pn2 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter')pns()" oninput="$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div></div>${svb('pns()', 'cl()')}`,
+    `${hd(t('pinset'), 'cl()')}<small class=hint>${t('pinrule')}</small><div class=fld><label class=fl for=pn1>${t('pin1')}</label><input id=pn1 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off oninput="dgc(this);$('#pne').hidden=true"></div><div class=fld><label class=fl for=pn2>${t('pin2')}</label><input id=pn2 class="form-control pin" type=password inputmode=numeric maxlength=6 autocomplete=off onkeydown="if(event.key=='Enter'&&!$('#o .sb').disabled)pns()" oninput="dgc(this);$('#pne').hidden=true"><div class="em invalid-feedback" id=pne hidden role=alert></div></div>${svb('pns()', 'cl()', '', 'p')}`,
+    '',
+    'p',
   );
+  SN.p = CUR.p();
   $('#pn1').focus({ preventScroll: true });
 }
 function pns() {
@@ -1085,6 +1336,7 @@ function lk() {
   const i = o.querySelector('input');
   i.focus();
   i.oninput = () => {
+    dgc(i);
     if (hs(i.value) == S.set.pin) o.remove();
     else if (i.value.length >= (S.set.pin ? atob(S.set.pin).length - 2 : 4)) {
       n++;
@@ -1147,12 +1399,43 @@ function kLive(p, k) {
   const i = $('#' + p + '_' + k),
     m = $('#' + p + '_e_' + k);
   if (!i || !m) return;
+  amc(i, true); /* 1.37.0: Filter auch hier (Konten: Minus erlaubt) */
   const s = i.value.trim(),
     v = s ? num(s) : 0,
     bad = v != null && HK.includes(k) && blk(v, bal(k));
   i.style.borderColor = bad ? 'var(--rust)' : '';
   m.hidden = !bad;
   wm(m, bad ? t('e_neg0').replace('{k}', t('a_' + k)) : '');
+  if (p == 'st') kSt(k);
+}
+/* 1.37.0: Zustand des Speichern-Knopfs je Konto (Skill 5b): idle, dirty, bad, done */
+const KD = {};
+function kSt(k) {
+  const i = $('#st_' + k),
+    b = $('#st_b_' + k),
+    h = $('#st_h_' + k);
+  if (!i || !b) return;
+  clearTimeout(KD[k]);
+  const s = i.value.trim(),
+    inc = s != '' && !typed(s),
+    v = s ? num(s) : 0,
+    o = Number(i.dataset.o || 0),
+    sv = b.dataset.sv == '1',
+    bad = inc || (s != '' && v == null) || (v != null && HK.includes(k) && blk(v, bal(k))),
+    dirty = v != null && (Math.round(v * 100) != Math.round(o * 100) || (!sv && s != '')),
+    st = bad ? 'bad' : dirty ? 'dirty' : 'idle';
+  sbs(b, st, st == 'idle' && sv ? t('sav') : t('save'));
+  if (h) h.hidden = st != 'dirty';
+}
+/* Nach dem Speichern: etwa 2 Sekunden grün „✓ Gespeichert“, dann zurück zu idle */
+function kDone(k) {
+  const b = $('#st_b_' + k),
+    h = $('#st_h_' + k);
+  if (!b) return;
+  clearTimeout(KD[k]);
+  sbs(b, 'done', t('sav'));
+  if (h) h.hidden = true;
+  KD[k] = setTimeout(() => kSt(k), 2000);
 }
 /* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert.
    1.36.0: Jedes Konto hat seinen eigenen Speichern-Knopf neben dem Feld und speichert nur dieses Konto (k = 'bank' | 'bar' | 'spar').
@@ -1190,7 +1473,7 @@ function ktoSave(k) {
       kLive('st', x);
     }
   });
-  toast(t('sav'));
+  kDone(k);
 }
 /* Erster Start (nur solange S.ob == 0): Schritt 1 Willkommen, Schritt 2 Kontostände. Beide Schritte lassen sich nicht wegtippen. */
 function ob() {

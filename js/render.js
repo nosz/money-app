@@ -233,7 +233,7 @@ const V = {
       cs = S.cats.filter((c) => used.has(c.id) || c.id == F.c),
       chip = (id, cls, lbl) =>
         `<button type=button class="chip ${cls}${F.c == id ? ' on' : ''}" data-c="${id}" aria-pressed="${F.c == id}" onclick="fc('${id}')">${lbl}</button>`;
-    return `${F.all ? '' : mn()}<label class=allm><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="F.q=this.value;rs();fr()"><div class=chips role=group aria-label="${t('fcat')}">${chip('', '', t('allk'))}${cs.map((c) => chip(c.id, c.t == 'i' ? 'ci' : 'ce', `${c.i} ${esc(t(c.n))}`)).join('')}</div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
+    return `${F.all ? '' : mn()}<label class=allm><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="txc(this);F.q=this.value;rs();fr()" maxlength=60><div class=chips role=group aria-label="${t('fcat')}">${chip('', '', t('allk'))}${cs.map((c) => chip(c.id, c.t == 'i' ? 'ci' : 'ce', `${c.i} ${esc(t(c.n))}`)).join('')}</div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,
@@ -492,7 +492,7 @@ const V = {
             const set = s[SK[k]] != null,
               b = bal(k);
             return bx(
-              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><div class=kr><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><button type=button class="btn btn-primary ks" onclick="ktoSave('${k}')">${bi('check')}<span>${t('save')}</span></button></div><div class="em" id=st_e_${k} hidden role=alert></div>`,
+              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><div class=kr><input id=st_${k} class="form-control" inputmode=decimal maxlength=13 placeholder="${t('sbp0')}" data-o="${Math.round(b * 100) / 100}" oninput="kLive('st','${k}')" onkeydown="if(event.key=='Enter'){event.preventDefault();if(!$('#st_b_${k}').disabled)ktoSave('${k}')}" autocomplete=off enterkeyhint=done value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><button type=button id=st_b_${k} class="btn btn-primary ks" data-s=idle data-sv="${set ? 1 : 0}" disabled onclick="ktoSave('${k}')">${bi('check')}<span>${set ? t('sav') : t('save')}</span></button></div><div class=dhint id=st_h_${k} hidden><i></i>${t('unsv')}</div><div class="em" id=st_e_${k} hidden role=alert></div>`,
             );
           })
           .join('') +

@@ -1131,3 +1131,20 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .kr .ks{flex:0 0 auto;gap:8px;min-width:44px;min-height:var(--h-ctl);margin:4px 0;padding:0 14px;border-radius:var(--r-s);font-size:1rem;font-weight:700;white-space:nowrap}
 .kr .ks .bi{margin:0;width:1.2em;height:1.2em;vertical-align:middle}
 @media (max-width:359px){.kr .ks{padding:0 10px;gap:6px;font-size:.9rem}}
+
+/* ===== 1.37.0: Speichern-Knopf mit Zuständen, Änderungs-Hinweis, Eingabe-Blinken, Verwerfen-Rückfrage (Skill 5a, 5b) ===== */
+.btn[data-s=idle],.btn[data-s=bad]{background:transparent!important;border:1px solid var(--b)!important;color:var(--m)!important;opacity:1;box-shadow:none;cursor:default}
+.btn[data-s=done]{background:color-mix(in srgb,var(--sage) 68%,#000)!important;border-color:transparent!important;color:#fff!important;opacity:1}
+.btn[data-s]{transition:background-color .2s,color .2s,border-color .2s}
+.btn[data-s] .bi{width:1.15em;height:1.15em;margin-right:6px;vertical-align:-.2em;flex:none}
+.kr .ks[data-s] .bi{margin:0}
+.stkb .sbr .btn.sb{display:flex;align-items:center;justify-content:center}
+.dhint{display:flex;align-items:center;gap:8px;margin:0 2px 8px;font-size:var(--fs-s);font-weight:600;color:var(--text)}
+.dhint[hidden]{display:none}
+.dhint i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.kr+.dhint{margin-top:2px}
+.form-control.rej,.form-select.rej{border-color:var(--rust)!important;animation:rejf .6s ease}
+@keyframes rejf{0%,100%{box-shadow:0 0 0 0 transparent}30%{box-shadow:0 0 0 3px color-mix(in srgb,var(--rust) 40%,transparent)}}
+@media (prefers-reduced-motion:reduce){.form-control.rej{animation:none}.btn[data-s]{transition:none}}
+#dsc{z-index:25}
+#dsc .sh{min-height:0}

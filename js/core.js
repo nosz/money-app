@@ -139,11 +139,13 @@ const blkMsg = (r, a, h) =>
   ' ' +
   t(h || 'e_blkh').replace('{k}', t('a_' + r[0].k));
 /* Zahl aus Eingabe lesen (1.250,50 / 1250,5 / 1,250.50) – null bei ungültig */
+/* 1.37.0: streng – nur reine Zahlen; „12abc“, „1,2,3“, „-“ oder „,“ ergeben null (ungültig), nie eine halbe Zahl */
 const num = (s) => {
-  s = String(s).trim().replace(/\s/g, '');
+  s = String(s).trim().replace(/[\s\u00a0]/g, '');
   const c = s.lastIndexOf(','),
     p = s.lastIndexOf('.');
   s = c > p ? s.replace(/\./g, '').replace(',', '.') : c < 0 && /^-?\d{1,3}(\.\d{3})+$/.test(s) ? s.replace(/\./g, '') : s.replace(/,/g, '');
+  if (!/^-?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
   const v = parseFloat(s);
   return isNaN(v) ? null : v;
 };
@@ -270,4 +272,4 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.36.1'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.37.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
