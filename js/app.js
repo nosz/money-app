@@ -1154,36 +1154,42 @@ function kLive(p, k) {
   m.hidden = !bad;
   wm(m, bad ? t('e_neg0').replace('{k}', t('a_' + k)) : '');
 }
-/* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert */
-function ktoSave() {
-  const vs = ['bank', 'bar', 'spar'].map((k) => {
-    const e = $('#st_' + k),
-      s = e ? e.value.trim() : '',
-      v = s ? num(s) : 0;
-    if (v == null && e) e.style.borderColor = 'var(--rust)';
-    return [k, v];
-  });
-  if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
+/* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert.
+   1.36.0: Jedes Konto hat seinen eigenen Speichern-Knopf neben dem Feld und speichert nur dieses Konto (k = 'bank' | 'bar' | 'spar').
+   Noch nicht gespeicherte Eingaben in den anderen Feldern bleiben nach dem Neuzeichnen erhalten. Prüfungen unverändert. */
+function ktoSave(k) {
+  const e = $('#st_' + k),
+    m = $('#st_e_' + k),
+    s = e ? e.value.trim() : '',
+    v = s ? num(s) : 0;
+  if (v == null) {
+    if (e) e.style.borderColor = 'var(--rust)';
+    return toast(t('e_num'));
+  }
   /* 1.21.22: Bar/Gespart nicht negativ (ein unverändert gelassener Altbestand im Minus bleibt zulässig) */
-  const bad = vs.filter(([k, v]) => HK.includes(k) && blk(v, bal(k)));
-  HK.forEach((k) => {
-    const m = $('#st_e_' + k);
-    if (m) m.hidden = true;
-  });
-  if (bad.length) {
-    bad.forEach(([k]) => {
-      const e = $('#st_' + k),
-        m = $('#st_e_' + k);
-      if (e) e.style.borderColor = 'var(--rust)';
-      if (m) {
-        wm(m, t('e_neg0').replace('{k}', t('a_' + k)));
-        m.hidden = false;
-      }
-    });
+  if (HK.includes(k) && blk(v, bal(k))) {
+    if (e) e.style.borderColor = 'var(--rust)';
+    if (m) {
+      wm(m, t('e_neg0').replace('{k}', t('a_' + k)));
+      m.hidden = false;
+    }
     return;
   }
-  vs.forEach(([k, v]) => setAcc(k, v));
+  const others = ['bank', 'bar', 'spar'].filter((x) => x != k),
+    draft = {};
+  others.forEach((x) => {
+    const o = $('#st_' + x);
+    draft[x] = o ? o.value : null;
+  });
+  setAcc(k, v);
   P();
+  others.forEach((x) => {
+    const o = $('#st_' + x);
+    if (o && draft[x] != null && o.value != draft[x]) {
+      o.value = draft[x];
+      kLive('st', x);
+    }
+  });
   toast(t('sav'));
 }
 /* Erster Start (nur solange S.ob == 0): Schritt 1 Willkommen, Schritt 2 Kontostände. Beide Schritte lassen sich nicht wegtippen. */

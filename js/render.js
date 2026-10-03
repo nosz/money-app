@@ -492,11 +492,11 @@ const V = {
             const set = s[SK[k]] != null,
               b = bal(k);
             return bx(
-              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><div class="em" id=st_e_${k} hidden role=alert></div>`,
+              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><div class=kr><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><button type=button class="btn btn-primary ks" onclick="ktoSave('${k}')" aria-label="${t('save')}" title="${t('save')}">${bi('check')}</button></div><div class="em" id=st_e_${k} hidden role=alert></div>`,
             );
           })
           .join('') +
-        `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
+        '',
       /* 1.25.0: Backup steht allein im Vordergrund; der CSV-Export (kein Backup) ist ausgeblendet, bis der Schalter eingeschaltet wird */
       dat = () =>
         `<button type=button class="btn btn-secondary s w-100" onclick="bk('j')">${t('bk')}</button><small style="display:block;margin-top:8px">${t('bkj')}</small><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
