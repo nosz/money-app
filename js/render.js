@@ -41,7 +41,7 @@ const sortL = (l, sc, dr) => {
   const dk = (x) => x.d + String(x.ts || 0).padStart(14, '0'),
     /* 1.21.3: Betrag mit Vorzeichen (Ausgabe −, Einnahme +, Umbuchung 0) */
     sv = (x) => (x.t == 'i' ? Number(x.a) : x.t == 'e' ? -Number(x.a) : 0),
-    key = { d: dk, c: (x) => nmx(x).toLowerCase(), a: sv, t: (x) => ({ e: 0, i: 1, u: 2 })[x.t] }[sc],
+    key = { d: dk, c: (x) => nmx(x).toLowerCase(), a: sv }[sc],
     /* Umbuchungen (alle 0) untereinander nach Betrag */
     sub = (x) => (sc == 'a' && x.t == 'u' ? Number(x.a) : 0),
     cmp = (p, q) => (p < q ? -1 : p > q ? 1 : 0);
@@ -49,15 +49,15 @@ const sortL = (l, sc, dr) => {
     .slice()
     .sort((a, b) => cmp(key(a), key(b)) * dr || cmp(sub(a), sub(b)) * dr || (sc != 'd' ? cmp(dk(b), dk(a)) : 0));
 };
-const hrow = (sc, dr, fn, ty) => {
+const hrow = (sc, dr, fn) => {
   const ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : '');
-  return `<div class="li d-flex align-items-center gap-3 hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g><i class=hs onclick="${fn}('c')">${t('cat1')}${ar('c')}</i>${ty ? `<i class=hs onclick="${fn}('t')">${t('typ')}${ar('t')}</i>` : ''}</span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>`;
+  return `<div class="li d-flex align-items-center gap-3 hd"><span class=dc onclick="${fn}('d')">${t('date')}${ar('d')}</span><span class=g><i class=hs onclick="${fn}('c')">${t('cat1')}${ar('c')}</i></span><span onclick="${fn}('a')">${t('amt')}${ar('a')}</span></div>`;
 };
 function hsort(c) {
   if ((HS.sc || 'd') == c) HS.dir = -(HS.dir || -1);
   else {
     HS.sc = c;
-    HS.dir = c == 'c' || c == 't' ? 1 : -1;
+    HS.dir = c == 'c' ? 1 : -1;
   }
   rd();
 }
@@ -83,7 +83,7 @@ function fsort(c) {
   if ((F.sc || 'd') == c) F.dir = -(F.dir || -1);
   else {
     F.sc = c;
-    F.dir = c == 'c' || c == 't' ? 1 : -1;
+    F.dir = c == 'c' ? 1 : -1;
   }
   rs();
 }
@@ -117,7 +117,7 @@ const mlist = () => {
         g = sortL(gm, sc, dr).filter((x) => !ft || x.t == ft),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort', true) + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort') + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
     })
     .join('');
 };
