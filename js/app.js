@@ -444,13 +444,22 @@ const gr = (v) => {
 const hdc = (ti) =>
   `<div class="sht ns"><h2>${ti}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">✕</button></div>`;
 const cnm = () =>
-  `<div class=cn><span class=cpi id=cpi>${NC.i}</span><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
+  `<div class=cn><button type=button class=cpi id=cpi aria-expanded=false aria-controls=cpp aria-label="${t('ico')}" onclick="ipt()"><span id=cpg>${NC.i}</span><i class=cpe aria-hidden=true>✎</i></button><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
 const cip = () =>
-  `<label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NC.i ? 'on' : ''}" aria-pressed="${i == NC.i}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="cpv(this.value)" autocomplete=off>`;
+  `<div id=cpp class=cpp hidden><label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NC.i ? 'on' : ''}" aria-pressed="${i == NC.i}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="cpv(this.value)" autocomplete=off></div>`;
+/* Symbolauswahl auf-/zuklappen (Tipp auf das Symbol oben links) */
+function ipt(open) {
+  const p = $('#cpp'),
+    o = open == null ? p.hidden : open;
+  p.hidden = !o;
+  $('#cpi').setAttribute('aria-expanded', o);
+  if (o) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
 function pi(i, b) {
   NC.i = i;
   $('#ni').value = '';
-  $('#cpi').textContent = i;
+  $('#cpg').textContent = i;
+  ipt(false);
   document.querySelectorAll('.ip button').forEach((x) => {
     x.classList.toggle('on', x == b);
     x.setAttribute('aria-pressed', x == b);
@@ -458,7 +467,7 @@ function pi(i, b) {
 }
 function cpv(v) {
   const g = gr(v);
-  $('#cpi').textContent = g || NC.i;
+  $('#cpg').textContent = g || NC.i;
   document.querySelectorAll('.ip button').forEach((x) => {
     const on = !g && x.textContent == NC.i;
     x.classList.toggle('on', on);

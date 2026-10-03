@@ -52,6 +52,15 @@ function csort(c) {
   }
   rd();
 }
+/* Wiederkehrende Buchungen: Sortierung über Fällig / Name / Betrag */
+function rsort(c) {
+  if ((RT.sc || 'f') == c) RT.dir = -(RT.dir || (c == 'a' ? -1 : 1));
+  else {
+    RT.sc = c;
+    RT.dir = c == 'a' ? -1 : 1;
+  }
+  rd();
+}
 function fsort(c) {
   if ((F.sc || 'd') == c) F.dir = -(F.dir || -1);
   else {
@@ -77,7 +86,7 @@ const mlist = () => {
           dr,
         ),
         b = mt(m).b,
-        op = HS.o[m] != null ? HS.o[m] : m == cur;
+        op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
       return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${hrow(sc, dr, 'hsort', true)}${g.map(trow).join('')}</details></div>`;
     })
     .join('');
@@ -114,6 +123,18 @@ const rl = () => {
   return lst(l, F, 'F');
 };
 const rs = () => ($('#res').innerHTML = rl());
+/* 1.19.0: Filter-Markierung und „Zurücksetzen“ in Buchungen */
+const fr = () => {
+  $('#frs').hidden = !(F.q || F.c || F.all);
+  $('#fq').classList.toggle('fon', !!F.q);
+  $('#fc').classList.toggle('fon', !!F.c);
+};
+const frs = () => {
+  F.q = '';
+  F.c = '';
+  F.all = 0;
+  rd();
+};
 /* Ansichten */
 const V = {
   home() {
@@ -152,7 +173,8 @@ const V = {
     );
   },
   lb() {
-    return `${F.all ? '' : mn()}<input class="form-control" placeholder="${t('search')}" value="${esc(F.q)}" oninput="F.q=this.value;rs()"><select class="form-select" onchange="F.c=this.value;rs()"><option value="">${t('allc')}</option>${S.cats.map((c) => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><div class="card card-body" id=res style=margin-top:10px>${rl()}</div>`;
+    const act = !!(F.q || F.c || F.all);
+    return `${F.all ? '' : mn()}<input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="F.q=this.value;rs();fr()"><label class="form-label sfl" for=fc>${t('fcat')}</label><select id=fc class="form-select${F.c ? ' fon' : ''}" onchange="F.c=this.value;rs();fr()"><option value="">${t('allc')}</option>${S.cats.map((c) => `<option value="${c.id}" ${F.c == c.id ? 'selected' : ''}>${c.i} ${esc(t(c.n))}</option>`).join('')}</select><label style="display:flex;align-items:center;font-weight:400;color:var(--text)"><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><button id=frs type=button class="btn btn-secondary s sm" ${act ? '' : 'hidden'} onclick="frs()">✕ ${t('frs')}</button><div class="card card-body" id=res style=margin-top:10px>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,
@@ -218,13 +240,21 @@ const V = {
       rec = () => {
         if (!S.rec.length) return `<small>${t('norec')}</small>`;
         RT.cl = RT.cl || {};
-        /* feste Reihenfolge: nächste Fälligkeit zuerst */
+        /* Sortierung wählbar (Standard: nächste Fälligkeit zuerst) */
         const nx = (r) => iso(dateK(r, r.k)),
-          so = (a, b) => (nx(a) < nx(b) ? -1 : nx(a) > nx(b) ? 1 : 0);
+          nm = (r) => (r.n || t(cn(r.c).n)).toLowerCase(),
+          cmp = (p, q) => (p < q ? -1 : p > q ? 1 : 0),
+          sc = RT.sc || 'f',
+          dr = RT.dir || (sc == 'a' ? -1 : 1),
+          ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
+          key = { f: nx, n: nm, a: (r) => r.a }[sc],
+          so = (a, b) => cmp(key(a), key(b)) * dr || cmp(nx(a), nx(b)) || cmp(nm(a), nm(b)),
+          head = `<div class="li d-flex align-items-center gap-3 hd ch"><span class=ic></span><span class=g><i class=hs onclick="rsort('f')">${t('rdue')}${ar('f')}</i><i class=hs onclick="rsort('n')">${t('name')}${ar('n')}</i><i class=hs onclick="rsort('a')">${t('amt')}${ar('a')}</i></span><span class=sp></span></div>`;
         const grp = (ty, ti) => {
           const l = S.rec.filter((r) => r.t == ty).sort(so);
           return l.length
             ? `<details class=gx ${RT.cl[ty] === false ? 'open' : ''} ontoggle="RT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
+                head +
                 l
                   .map(
                     (r) =>
