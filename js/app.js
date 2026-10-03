@@ -241,6 +241,36 @@ function warns(a, d) {
   }
   return w;
 }
+/* 1.21.22: Eingabe auf S anwenden (neue Buchung, Bearbeiten, Umbuchung); liefert die ID einer neuen Buchung. Einträge werden ersetzt statt verändert, damit chk() auf einer Kopie prüfen kann. */
+/* Sperrprüfung für die aktuelle Eingabe im Erfassungsfenster; '' = alles in Ordnung */
+function blq() {
+  const a = num(X.a);
+  if (!(a > 0) || (X.t == 'u' && X.k == X.to)) return '';
+  const q = chk(() => mut(a, X.d || iso(D)));
+  return q.length ? blkMsg(q, a) : '';
+}
+function mut(a, d) {
+  let nid = null;
+  const rep = (L, o) => {
+    const i = L.findIndex((x) => x.id == X.id);
+    if (i >= 0) L[i] = { ...L[i], ...o };
+  };
+  if (X.t == 'u') {
+    const o = { d, a, f: X.k, to: X.to, n: X.n || '' };
+    if (X.id) rep(S.tr, o);
+    else {
+      nid = uid();
+      S.tr.push({ id: nid, ts: Date.now(), ...o });
+    }
+  } else if (X.id) rep(S.tx, { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' });
+  else {
+    nid = uid();
+    S.tx.push({ id: nid, ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
+    S.set.lk = X.k || 'bank';
+    if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1, ka: X.k || 'bank' });
+  }
+  return nid;
+}
 function sv(force) {
   const a = parseFloat(String(X.a).replace(',', '.')),
     m = msgs();
@@ -255,6 +285,13 @@ function sv(force) {
     return;
   }
   const d = X.d || iso(D);
+  /* 1.21.22: Bar und Gespart nie unter 0 – harte Sperre vor allen Warnungen, gilt auch beim Bearbeiten. Die Meldung steht schon beim Tippen unter der Kontoauswahl (bnu), hier springt die Ansicht dorthin. */
+  if (blq()) {
+    bnu();
+    const eb = $('#eb');
+    if (eb) eb.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
   if (!force && !X.id) {
     const w = warns(a, d);
     if (w.length) {
@@ -267,33 +304,11 @@ function sv(force) {
       return;
     }
   }
-  let nid = null;
-  if (X.t == 'u') {
-    if (X.k == X.to) {
-      op();
-      return;
-    }
-    const o = { d, a, f: X.k, to: X.to, n: X.n || '' };
-    if (X.id)
-      Object.assign(
-        S.tr.find((x) => x.id == X.id),
-        o,
-      );
-    else {
-      nid = uid();
-      S.tr.push({ id: nid, ts: Date.now(), ...o });
-    }
-  } else if (X.id)
-    Object.assign(
-      S.tx.find((x) => x.id == X.id),
-      { t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank' },
-    );
-  else {
-    nid = uid();
-    S.tx.push({ id: nid, ts: Date.now(), t: X.t, a, c: X.c, d, n: X.n || '', k: X.k || 'bank', r: X.f ? 1 : 0 });
-    S.set.lk = X.k || 'bank';
-    if (X.f) S.rec.push({ id: uid(), t: X.t, a, c: X.c, n: X.n || '', f: X.f, s: d, k: 1 });
+  if (X.t == 'u' && X.k == X.to) {
+    op();
+    return;
   }
+  const nid = mut(a, d);
   /* 1.21.18: Nach einer NEUEN Buchung (auch Umbuchung) zur Startseite wechseln, den Monat der Buchung aufklappen, einen Kachel-Filter nur lösen, wenn er die Buchung verbergen würde, und zur Buchung scrollen. Liegt das Datum nicht in den angezeigten Monaten (aktueller + zwei vorherige), gibt es keinen Sprung. */
   const bm = d.slice(0, 7),
     jmp = nid && bm >= iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7) && bm <= iso(D).slice(0, 7);
@@ -322,6 +337,16 @@ function shw(id) {
   }, 150);
 }
 function dl() {
+  /* 1.21.22: Löschen sperren, wenn Bar/Gespart dadurch unter 0 fiele */
+  const dq = chk(() => {
+    const L = X.t == 'u' ? S.tr : S.tx,
+      i = L.findIndex((x) => x.id == X.id);
+    if (i >= 0) L.splice(i, 1);
+  });
+  if (dq.length)
+    return sheet(
+      `${hd(t('e_delt'))}<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(t('e_delb').replace(/\{k\}/g, t('a_' + dq[0].k)).replace('{n}', fmt(dq[0].n)))}</div><div class=acts><button class="btn btn-secondary s ghost" onclick="op()">${t('e_back')}</button></div>`,
+    );
   const nm = X.t == 'u' ? t('tr') : X.n || t(cn(X.c).n);
   cdel(t('delt'), `<b>${esc(nm)} · ${fmt(num(X.a))}</b><br>${t('delm')}`, 'dlo()', 'op()');
 }
@@ -343,14 +368,27 @@ function dsh() {
   }
   X.nc = 0;
   sheet(
-    `${hd('🔔 ' + t('due'))}${bstrip(['bank'])}${l.map((o) => `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div><div class="seg d-flex gap-2"><button class="btn sm" onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
+    `${hd('🔔 ' + t('due'))}${bstrip([...new Set(l.map((o) => o.r.ka || 'bank'))])}${l.map((o) => {
+      const bm = recBlk(o.r);
+      return `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div>${bm ? `<div class="em blk" role=alert>⚠ ${esc(bm)}</div>` : ''}<div class="seg d-flex gap-2"><button class="btn sm" ${bm ? 'disabled' : ''} onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`;
+    }).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
+/* 1.21.22: Buchung aus einer wiederkehrenden Buchung (Konto der Vorlage, Standard Bank) und Sperrprüfung dafür */
+const recTx = (r, a) => ({ id: uid(), ts: Date.now(), t: r.t, a: a || r.a, c: r.c, d: iso(dateK(r, r.k)), n: r.n, r: 1, k: r.ka || 'bank' });
+const recBlk = (r, a) => {
+  const x = recTx(r, a),
+    q = chk(() => S.tx.push(x));
+  return q.length ? blkMsg(q, x.a, 'e_blkd') : '';
+};
 function cf(id, a, skip) {
   /* a = geänderter Betrag (optional), skip = überspringen statt buchen */
   const r = S.rec.find((x) => x.id == id);
   if (!r) return;
-  if (!skip) S.tx.push({ id: uid(), ts: Date.now(), t: r.t, a: a || r.a, c: r.c, d: iso(dateK(r, r.k)), n: r.n, r: 1 });
+  if (!skip) {
+    if (recBlk(r, a)) return dsh();
+    S.tx.push(recTx(r, a));
+  }
   r.k++;
   P();
   dsh();
@@ -361,17 +399,36 @@ function cfa(id) {
   if (!r) return;
   X.nc = 0;
   sheet(
-    `${hd(t('chg'))}${bstrip(['bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="amc(this);$('#ca_e').hidden=true" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><div class=stkb><button class="btn btn-primary pr" onclick="cfs('${id}')">${t('ok')}</button></div>${acts('dsh()')}`,
+    `${hd(t('chg'))}${bstrip([r.ka || 'bank'])}<small class=hint>${esc(r.n || t(cn(r.c).n))}</small><input class="form-control amt" id=ca_a inputmode=decimal placeholder="${t('sbp0')}" value="${af(r.a)}" oninput="caLive('${id}',this)" onkeydown="if(event.key=='Enter')cfs('${id}')" autocomplete=off><div class="em invalid-feedback" id=ca_e hidden role=alert>${t('e_amt0')}</div><div class=stkb><button class="btn btn-primary pr" onclick="cfs('${id}')">${t('ok')}</button></div>${acts('dsh()')}`,
   );
   $('.sh').dataset.t = r.t;
   const e = $('#ca_a');
   e.focus({ preventScroll: true });
   e.select();
 }
+/* Live-Prüfung des geänderten Betrags einer fälligen Buchung */
+function caLive(id, el) {
+  const v = num(amc(el)),
+    r = S.rec.find((x) => x.id == id),
+    m = r && v > 0 ? recBlk(r, Math.round(v * 100) / 100) : '',
+    e = $('#ca_e');
+  e.textContent = m ? '⚠ ' + m : t('e_amt0');
+  e.classList.toggle('blk', !!m);
+  e.hidden = !m;
+}
 function cfs(id) {
   const v = num($('#ca_a').value);
+  const e = $('#ca_e');
   if (!(v > 0)) {
-    $('#ca_e').hidden = false;
+    e.textContent = t('e_amt0');
+    e.hidden = false;
+    return;
+  }
+  const r = S.rec.find((x) => x.id == id),
+    m = r && recBlk(r, Math.round(v * 100) / 100);
+  if (m) {
+    e.textContent = '⚠ ' + m;
+    e.hidden = false;
     return;
   }
   cf(id, Math.round(v * 100) / 100);
@@ -485,15 +542,21 @@ function rdo() {
   cl();
   rm(id);
 }
+/* 1.21.22: Alle fälligen Buchungen chronologisch buchen; was Bar/Gespart unter 0 brächte, bleibt fällig (mit Meldung im Dialog) */
 function ca() {
-  dues().forEach((o) => {
-    for (let g = 0; g < 500 && iso(dateK(o.r, o.r.k)) <= iso(D); g++) {
-      S.tx.push({ id: uid(), ts: Date.now(), t: o.r.t, a: o.r.a, c: o.r.c, d: iso(dateK(o.r, o.r.k)), n: o.r.n, r: 1 });
-      o.r.k++;
+  const stuck = new Set(),
+    nx = (r) => iso(dateK(r, r.k));
+  for (let g = 0; g < 2000; g++) {
+    const c = S.rec.filter((r) => !stuck.has(r.id) && nx(r) <= iso(D)).sort((a, b) => (nx(a) < nx(b) ? -1 : 1))[0];
+    if (!c) break;
+    if (recBlk(c)) stuck.add(c.id);
+    else {
+      S.tx.push(recTx(c));
+      c.k++;
     }
-  });
-  cl();
+  }
   P();
+  stuck.size ? dsh() : cl();
 }
 const rm = (id) => {
   S.rec = S.rec.filter((x) => x.id != id);
@@ -711,8 +774,10 @@ function im(el) {
       const d = JSON.parse(s);
       if (!Array.isArray(d.tx) || !d.cats) throw 0;
       X = { imp: d, nc: 0 };
+      const q = chk(() => mergeIn(d)),
+        bm = q.length ? t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)) : '';
       sheet(
-        `${hd(t('imd'))}<button class="btn btn-primary pr" style="width:100%" onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
+        `${hd(t('imd'))}${bm ? `<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(bm)}</div>` : ''}<button class="btn btn-primary pr" style="width:100%" ${bm ? 'disabled' : ''} onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
       );
     } catch (e) {
       X = {};
@@ -723,31 +788,60 @@ function im(el) {
   });
   el.value = '';
 }
+const trTo = () =>
+  S.tr.forEach((x) => {
+    if (!x.to) x.to = x.f == 'bank' ? 'bar' : 'bank';
+  });
+const mergeIn = (d) => {
+  const ids = new Set(S.tx.map((x) => x.id));
+  d.tx.forEach((x) => {
+    if (!ids.has(x.id)) S.tx.push(x);
+  });
+  d.cats.forEach((c) => {
+    if (!S.cats.some((x) => x.id == c.id)) S.cats.push(c);
+  });
+  (d.rec || []).forEach((x) => {
+    if (!S.rec.some((y) => y.id == x.id)) S.rec.push(x);
+  });
+  (d.tr || []).forEach((x) => {
+    if (!S.tr.some((y) => y.id == x.id)) S.tr.push(x);
+  });
+  trTo();
+};
 function ip(r) {
   const d = X.imp;
   if (r) {
     S = { ...blank(), ...d, set: { ...blank().set, ...d.set } };
   } else {
-    const ids = new Set(S.tx.map((x) => x.id));
-    d.tx.forEach((x) => {
-      if (!ids.has(x.id)) S.tx.push(x);
-    });
-    d.cats.forEach((c) => {
-      if (!S.cats.some((x) => x.id == c.id)) S.cats.push(c);
-    });
-    (d.rec || []).forEach((x) => {
-      if (!S.rec.some((y) => y.id == x.id)) S.rec.push(x);
-    });
-    (d.tr || []).forEach((x) => {
-      if (!S.tr.some((y) => y.id == x.id)) S.tr.push(x);
-    });
+    /* 1.21.22: Zusammenführen darf Bar/Gespart nicht unter 0 bringen (Ersetzen übernimmt den Stand des Backups, Hinweis siehe negHint) */
+    const q = chk(() => mergeIn(d));
+    if (q.length)
+      return sheet(
+        `${hd(t('e_impt'))}<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)))}</div><button class="btn btn-primary" style="width:100%" onclick="${S.ob ? 'cl()' : 'ob()'}">${t('e_ver')}</button>`,
+      );
+    mergeIn(d);
   }
-  S.tr.forEach((x) => {
-    if (!x.to) x.to = x.f == 'bank' ? 'bar' : 'bank';
-  });
+  trTo();
   S.ob = 1; /* wer ein Backup einspielt, braucht den Willkommensdialog nicht */
   cl();
   P();
+  if (r) setTimeout(negHint, 400);
+}
+/* 1.21.22: Starthinweis, wenn Bar/Gespart (Altbestand) im Minus liegt: pro Konto einmal; wird ein Konto wieder positiv, kann der Hinweis später erneut erscheinen */
+function negHint() {
+  if ($('#o') || !S.ob) return;
+  S.set.nw = S.set.nw || {};
+  const l = HK.filter((k) => bal(k) < -0.004),
+    ok = HK.filter((k) => bal(k) >= -0.004 && S.set.nw[k]),
+    sh = l.filter((k) => !S.set.nw[k]);
+  ok.forEach((k) => delete S.set.nw[k]);
+  sh.forEach((k) => (S.set.nw[k] = 1));
+  if (ok.length || sh.length) dbPut();
+  if (!sh.length) return;
+  X = {};
+  sheet(
+    `${hd(t('e_negt'))}${sh.map((k) => `<p class=cdm>${esc(t('e_negm').replace('{k}', t('a_' + k)).replace('{v}', fmt(bal(k))))}</p>`).join('')}<p class=cdm>${esc(t('e_negh'))}</p><button class="btn btn-primary" style="width:100%" onclick="cl()">${t('e_ver')}</button>`,
+  );
 }
 /* PIN */
 const hs = (p) => btoa(p + 'ma');
@@ -843,6 +937,18 @@ addEventListener('focusin', (e) => {
     } catch (x) {}
   }, 320);
 });
+/* 1.21.23: Live-Prüfung eines Kontofelds beim Tippen (p = 'st' Einstellungen, 'ob' Onboarding) */
+function kLive(p, k) {
+  const i = $('#' + p + '_' + k),
+    m = $('#' + p + '_e_' + k);
+  if (!i || !m) return;
+  const s = i.value.trim(),
+    v = s ? num(s) : 0,
+    bad = v != null && HK.includes(k) && blk(v, bal(k));
+  i.style.borderColor = bad ? 'var(--rust)' : '';
+  m.hidden = !bad;
+  m.textContent = bad ? '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k)) : '';
+}
 /* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert */
 function ktoSave() {
   const vs = ['bank', 'bar', 'spar'].map((k) => {
@@ -853,6 +959,24 @@ function ktoSave() {
     return [k, v];
   });
   if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
+  /* 1.21.22: Bar/Gespart nicht negativ (ein unverändert gelassener Altbestand im Minus bleibt zulässig) */
+  const bad = vs.filter(([k, v]) => HK.includes(k) && blk(v, bal(k)));
+  HK.forEach((k) => {
+    const m = $('#st_e_' + k);
+    if (m) m.hidden = true;
+  });
+  if (bad.length) {
+    bad.forEach(([k]) => {
+      const e = $('#st_' + k),
+        m = $('#st_e_' + k);
+      if (e) e.style.borderColor = 'var(--rust)';
+      if (m) {
+        m.textContent = '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k));
+        m.hidden = false;
+      }
+    });
+    return;
+  }
   vs.forEach(([k, v]) => setAcc(k, v));
   P();
   toast(t('sav'));
@@ -870,7 +994,7 @@ function ob2() {
     `<h2>${t('obk')}</h2><p style="margin:.2rem 0 6px;color:var(--m)">${t('obkh')}</p>${['bank', 'bar', 'spar']
       .map(
         (k) =>
-          `<label class="form-label">${AV(k)} ${t('a_' + k)}${k == 'spar' ? ` <small>(${t('oopt')})</small>` : ''}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=ob_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="this.style.borderColor=''" autocomplete=off>`,
+          `<label class="form-label">${AV(k)} ${t('a_' + k)}${k == 'spar' ? ` <small>(${t('oopt')})</small>` : ''}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=ob_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('ob','${k}')" autocomplete=off><div class="em" id=ob_e_${k} hidden role=alert></div>`,
       )
       .join('')}<small style="display:block;margin-top:12px">${t('wset')}</small><div class=stkb><button class="btn btn-primary w-100" onclick="od(1)">${t('go')}</button><button type=button class="btn btn-link w-100" onclick="od(0)">${t('olat')}</button></div>`,
   );
@@ -888,6 +1012,24 @@ function od(sv) {
       })
     : [];
   if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
+  /* 1.21.22: Bar/Gespart dürfen nicht negativ starten */
+  const bad = vs.filter(([k, v, empty]) => !empty && HK.includes(k) && blk(v, bal(k)));
+  if (bad.length) {
+    HK.forEach((k) => {
+      const m = $('#ob_e_' + k);
+      if (m) m.hidden = true;
+    });
+    bad.forEach(([k]) => {
+      const e = $('#ob_' + k),
+        m = $('#ob_e_' + k);
+      if (e) e.style.borderColor = 'var(--rust)';
+      if (m) {
+        m.textContent = '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k));
+        m.hidden = false;
+      }
+    });
+    return;
+  }
   S.ob = 1;
   if (vs.some(([, , empty]) => !empty)) vs.forEach(([k, v]) => setAcc(k, v));
   X = {};
@@ -932,6 +1074,7 @@ addEventListener('beforeinstallprompt', (e) => {
   rd();
   if (!S.ob) ob();
   lk();
+  negHint();
   navigator.storage && navigator.storage.persist && navigator.storage.persist();
   upd();
 })();

@@ -991,3 +991,5 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .sh .card .row .ic{font-size:26px;line-height:1}
 .sh .card .seg .btn.sm{min-width:0;padding:8px 4px;font-size:min(var(--fs-s),3.5vw);line-height:1.15}
 .stkb .btn.pr,.stkb .btn.btn-primary{width:100%}
+/* ===== 1.21.22: Sperrmeldung (Bar/Gespart nie unter 0) ===== */
+.em.blk{background:color-mix(in srgb,var(--rust) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--rust) 45%,var(--surface));color:var(--text);border-radius:var(--r-s);padding:10px 12px;margin:12px 0 0}

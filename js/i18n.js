@@ -67,6 +67,36 @@ const T = {
     'An identical entry already exists on this day.',
   ],
   e_force: ['Trotzdem speichern', 'Save anyway'],
+  /* 1.21.22: Bar und Gespart dürfen nie unter 0 fallen */
+  e_blk: ['Auf {k} sind nur {v} verfügbar, dir fehlen {m}.', 'Only {v} available on {k}, you are {m} short.'],
+  e_blk0: ['Auf {k} ist kein Guthaben verfügbar, dir fehlen {m}.', 'No balance available on {k}, you are {m} short.'],
+  e_blkh: ['Buche zuerst Geld auf {k} um oder verringere den Betrag.', 'Transfer money to {k} first or reduce the amount.'],
+  e_blkd: [
+    'Buche zuerst Geld auf {k} um, ändere den Betrag oder überspringe die Buchung.',
+    'Transfer money to {k} first, change the amount or skip the entry.',
+  ],
+  e_delt: ['Löschen nicht möglich', 'Cannot delete'],
+  e_delb: [
+    'Diese Buchung kann nicht gelöscht werden: Danach hätte {k} {n}. Lösche oder ändere zuerst spätere Ausgaben von {k}.',
+    'This entry cannot be deleted: {k} would then be at {n}. Delete or change later expenses from {k} first.',
+  ],
+  e_impt: ['Import nicht möglich', 'Import not possible'],
+  e_impb: [
+    'Zusammenführen nicht möglich: Danach hätte {k} {n}. {k} darf nicht unter 0 fallen. Prüfe die Buchungen im Backup.',
+    'Merging is not possible: {k} would then be at {n}. {k} must not fall below 0. Please check the entries in the backup.',
+  ],
+  e_neg0: [
+    '{k} darf nicht kleiner als 0 sein. Trage den tatsächlichen Bestand ein.',
+    '{k} cannot be below 0. Please enter the actual amount.',
+  ],
+  e_negt: ['Kontostand prüfen', 'Check account balance'],
+  e_negm: ['Dein Konto „{k}“ liegt bei {v}.', 'Your “{k}” account is at {v}.'],
+  e_negh: [
+    'Bar und Gespart dürfen nicht unter 0 liegen. Bitte prüfe deine Buchungen oder trage den aktuellen Stand unter Einstellungen → Konten ein.',
+    'Cash and Saved must not be below 0. Please check your entries or enter the current amount under Settings → Accounts.',
+  ],
+  e_ver: ['Verstanden', 'Understood'],
+  e_back: ['Zurück', 'Back'],
   home: ['Start', 'Home'],
   list: ['Buchungen', 'Entries'],
   stats: ['Auswertung', 'Stats'],

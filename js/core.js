@@ -82,6 +82,36 @@ const svm = () =>
         : s,
     0,
   );
+/* 1.21.22: Bar und Gespart dürfen nie unter 0 fallen (Bank darf ins Minus, dort bleibt es bei der Warnung). Gesperrt wird, was einen Stand unter 0 ergibt UND ihn gegenüber vorher verschlechtert; ein schon negativer Altbestand lässt Verbesserungen zu. */
+const HK = ['bar', 'spar'];
+const blk = (v, b) => v < -0.004 && v < b - 0.004;
+/* fn verändert eine Kopie des Datenstands (Listen kopiert, Einträge nur ersetzen/anfügen/entfernen); Rückgabe: Konten, die dadurch unter 0 fielen [{k, n: neuer Stand, b: alter Stand}] */
+const chk = (fn) => {
+  const o = S,
+    b = {};
+  HK.forEach((k) => (b[k] = bal(k)));
+  S = { ...o, tx: o.tx.slice(), tr: o.tr.slice(), rec: o.rec.slice(), cats: o.cats.slice(), set: { ...o.set } };
+  try {
+    fn();
+    return HK.map((k) => ({ k, n: bal(k), b: b[k] })).filter((x) => blk(x.n, x.b));
+  } finally {
+    S = o;
+  }
+};
+/* Meldung zu einer gesperrten Buchung; a = Betrag der Buchung, h = Schlüssel des Lösungshinweises */
+const blkMsg = (r, a, h) =>
+  r
+    .map((x) => {
+      const m = -x.n,
+        v = a - m;
+      return t(v > 0.004 ? 'e_blk' : 'e_blk0')
+        .replace('{k}', t('a_' + x.k))
+        .replace('{v}', fmt(Math.max(v, 0)))
+        .replace('{m}', fmt(m));
+    })
+    .join(' ') +
+  ' ' +
+  t(h || 'e_blkh').replace('{k}', t('a_' + r[0].k));
 /* Zahl aus Eingabe lesen (1.250,50 / 1250,5 / 1,250.50) – null bei ungültig */
 const num = (s) => {
   s = String(s).trim().replace(/\s/g, '');
@@ -128,7 +158,7 @@ const DIR = () => {
       ['bar', 'bank', 'spar'].map((a) => [a, t('a_' + a)]),
       X[f],
     )}</select>`;
-  return `<div class=dir><div><label class="form-label">${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label class="form-label">${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}<div id=bn class=bn2></div>`;
+  return `<div class=dir><div><label class="form-label">${t('from')}</label>${ss('k')}</div><button class=swp aria-label="${t('swap')}" title="${t('swap')}" onclick="[X.k,X.to]=[X.to,X.k];op()">⇄</button><div><label class="form-label">${t('to')}</label>${ss('to')}</div></div>${X.k == X.to ? `<small class=neg>${t('same')}</small>` : ''}<div id=bn class=bn2></div><div class="em blk" id=eb hidden role=alert></div>`;
 };
 const ACC = () =>
   `<label class="form-label">${t(X.t == 'i' ? 'acc_i' : 'acc_e')}</label><div class="tp acct">${['bar', 'bank']
@@ -136,9 +166,15 @@ const ACC = () =>
       (k) =>
         `<button class="${X.k == k ? 'on' : ''}" aria-pressed="${X.k == k}" onclick="X.k='${k}';op()"><span class=al>${AV(k)} ${t('a_' + k)}</span>${balOn() ? `<small class=bl>${fmt(bal(k))}</small>` : ''}</button>`,
     )
-    .join('')}</div><small id=bn class=bn1 hidden></small>`;
+    .join('')}</div><small id=bn class=bn1 hidden></small><div class="em blk" id=eb hidden role=alert></div>`;
 /* Live-Vorschau: Kontostand jetzt und nach dieser Buchung (beim Bearbeiten ohne die alte Buchung gerechnet) */
 function bnu() {
+  const eb = $('#eb');
+  if (eb) {
+    const m = blq();
+    eb.hidden = !m;
+    eb.textContent = m ? '⚠ ' + m : '';
+  }
   const e = $('#bn');
   if (!e || !balOn()) return e && (e.hidden = true);
   const a = num(X.a) > 0 ? num(X.a) : 0,
@@ -173,4 +209,4 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.21.21'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.21.23'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

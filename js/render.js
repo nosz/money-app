@@ -485,7 +485,7 @@ const V = {
             const set = s[SK[k]] != null,
               b = bal(k);
             return bx(
-              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="this.style.borderColor=''" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}">`,
+              `<label class="form-label">${AV(k)} ${t('a_' + k)}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=st_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('st','${k}')" value="${set || Math.round(b * 100) ? String(Math.round(b * 100) / 100).replace('.', ',') : ''}"><div class="em" id=st_e_${k} hidden role=alert></div>`,
             );
           })
           .join('') +
