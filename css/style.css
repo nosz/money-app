@@ -899,5 +899,9 @@ mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;
 .rsb button.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--text);font-weight:700}
 .rsb button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
+/* ===== 1.21.6: Einstellungsmenü – schlichte einfarbige Symbole (Bootstrap Icons) ===== */
+.sec>button .ic{display:inline-flex;align-items:center;justify-content:center;color:var(--m)}
+.sec>button .ic svg{width:1.3rem;height:1.3rem;display:block}
+
 /* ===== 1.21.2: Platzhalter in allen Themes gut lesbar ===== */
 .form-control::placeholder{color:color-mix(in srgb,var(--text) 62%,var(--surface));opacity:1}
