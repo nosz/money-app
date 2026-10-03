@@ -497,8 +497,9 @@ const V = {
           })
           .join('') +
         `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
+      /* 1.25.0: Backup steht allein im Vordergrund; der CSV-Export (kein Backup) ist ausgeblendet, bis der Schalter eingeschaltet wird */
       dat = () =>
-        `<div class=dgrid><button class="btn btn-secondary s" onclick="bk('j')">${t('bk')}</button><button class="btn btn-secondary s" onclick="bk('c')">${t('csv')}</button><small>${t('bkj')}</small><small>${t('bkc')}</small></div><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
+        `<button type=button class="btn btn-secondary s w-100" onclick="bk('j')">${t('bk')}</button><small style="display:block;margin-top:8px">${t('bkj')}</small><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
         bx(
           lb(
             'bkr',
@@ -508,6 +509,14 @@ const V = {
             )}</select><small style="display:block;margin-top:8px">${brStatus()}</small><small style="display:block;margin-top:4px">${t('bkr_i')}</small>`,
           ),
         ) +
+        bx(
+          `<div class="form-check form-switch dsw"><input class="form-check-input" type="checkbox" role="switch" id="csv_sw" ${csvOn() ? 'checked' : ''} onchange="S.set.csv=this.checked;P()"><label class="form-check-label" for="csv_sw">${t('csvsw')}</label></div><small style="display:block;margin-top:8px">${t('csvsh')}</small>`,
+        ) +
+        (csvOn()
+          ? bx(
+              lb('csvt', `<button type=button class="btn btn-secondary s w-100" onclick="bk('c')">${t('csv')}</button><small style="display:block;margin-top:8px">${t('bkc')}</small>`),
+            )
+          : '') +
         bx(
           lb(
             'pin',

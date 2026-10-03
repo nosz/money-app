@@ -47,14 +47,14 @@ const af = (a) => {
   return (Number.isInteger(v) ? String(v) : v.toFixed(2)).replace('.', ',');
 };
 const hd = (ti) =>
-  `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">✕</button></div>`;
+  `<div class=sht><h2>${ti}</h2><button class=x onclick="cl()" aria-label="${t('x')}">${bi('x')}</button></div>`;
 /* Einheitliche Knopfzeile unter dem Hauptknopf: Abbrechen (schlicht), optional rote Aktion (Löschen/Ersetzen) */
 const acts = (cx, dx, dl, dh) =>
-  `<div class=acts><button class="btn btn-secondary s ghost" onclick="${cx}">${t('cancel')}</button>${dx ? `<button class="btn dlt" onclick="${dx}">${dl || '🗑 ' + t('del')}${dh ? `<small class=dh>${dh}</small>` : ''}</button>` : ''}</div>`;
+  `<div class=acts><button class="btn btn-secondary s ghost" onclick="${cx}">${t('cancel')}</button>${dx ? `<button class="btn dlt" onclick="${dx}">${dl || bi('trash') + ' ' + t('del')}${dh ? `<small class=dh>${dh}</small>` : ''}</button>` : ''}</div>`;
 /* Einheitliche Lösch-Rückfrage für Buchung, Kategorie und wiederkehrende Buchung */
 function cdel(ti, msg, yes, back) {
   sheet(
-    `${hd(ti)}<p class=cdm>${msg}</p><button class="btn btn-danger d cdy" onclick="${yes}">🗑 ${t('del')}</button><div class=acts><button class="btn btn-secondary s ghost" onclick="${back}">${t('cancel')}</button></div>`,
+    `${hd(ti)}<p class=cdm>${msg}</p><button class="btn btn-danger d cdy" onclick="${yes}">${bi('trash')} ${t('del')}</button><div class=acts><button class="btn btn-secondary s ghost" onclick="${back}">${t('cancel')}</button></div>`,
   );
 }
 function toast(m, f, l, k) {
@@ -151,7 +151,7 @@ function ghtml() {
     ? cs
         .map((c) => {
           const nameHit = !q || t(c.n).toLowerCase().includes(q),
-            sub = !nameHit && hn[c.id] ? `<small class=hn>📝 ${hl(exc(hn[c.id], q), q)}</small>` : '';
+            sub = !nameHit && hn[c.id] ? `<small class=hn>${bi('note')} ${hl(exc(hn[c.id], q), q)}</small>` : '';
           return `<button data-c="${c.id}" class="${X.c == c.id ? 'on' : ''}" aria-pressed="${X.c == c.id}" onclick="X.c='${c.id}';X.ac=0;op()"><b>${c.i}</b><span>${hl(t(c.n), q)}</span>${sub}</button>`;
         })
         .join('')
@@ -164,8 +164,8 @@ const fcat = () => {
   if (q) q.classList.toggle('fon', !!X.q);
 };
 function op() {
-  sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>⇄</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
-<input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control${X.q ? ' fon' : ''}" id=csi type=search placeholder="🔍 ${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><button type=button class="btn btn-secondary s nwc" onclick="ncs(1)">＋ ${t('newc')}</button><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
+  sheet(`${hd(t((X.id ? 'et_' : 'nt_') + X.t))}<div class=tp>${X.id && X.t == 'u' ? '' : `<button class="${X.t == 'e' ? 'on' : ''}" aria-pressed="${X.t == 'e'}" onclick="X.t='e';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=te>−</i> ${t('e')}</button><button class="${X.t == 'i' ? 'on' : ''}" aria-pressed="${X.t == 'i'}" onclick="X.t='i';X.c=null;X.ac=0;X.k=X.k=='spar'?'bar':X.k;op()"><i class=ti>+</i> ${t('i')}</button>`}${X.id && X.t != 'u' ? '' : `<button class="${X.t == 'u' ? 'on' : ''}" aria-pressed="${X.t == 'u'}" onclick="X.t='u';X.c=null;X.ac=0;X.to=X.k=='bank'?'bar':'bank';op()"><i class=tu>${bi('swap')}</i> ${t('tr')}</button>`}</div><small class=hint>${t('h_' + X.t)}</small>
+<input class="form-control amt" id=ia inputmode=decimal placeholder="0,00" value="${esc(X.a)}" oninput="am(this)" autocomplete=off><div class="em invalid-feedback" id=ea hidden role=alert></div>${X.t == 'u' ? DIR() + '<div class="em invalid-feedback" id=eu hidden role=alert></div>' : ACC() + `<input class="form-control${X.q ? ' fon' : ''}" id=csi type=search placeholder="${t('search')}" value="${esc(X.q || '')}" oninput="X.q=this.value;fcat()" autocomplete=off enterkeyhint=search><div class=grid id=cg>${ghtml()}</div><button type=button class="btn btn-secondary s nwc" onclick="ncs(1)">＋ ${t('newc')}</button><div class="em invalid-feedback" id=ec hidden role=alert></div>`}
 <details ${X.id || X.d || X.n || X.f ? 'open' : ''}><summary>${t('opts')}</summary><div class="seg d-flex gap-2"><button class="btn btn-secondary s sm" onclick="X.d='${iso(D)}';op()">${t('today')}</button><button class="btn btn-secondary s sm" onclick="X.d='${iso(new Date(D.getFullYear(), D.getMonth(), D.getDate() - 1))}';op()">${t('yest')}</button></div><input class="form-control" type=date value="${X.d || iso(D)}" onchange="X.d=this.value"><input class="form-control" id=ino placeholder="${t('note')}" value="${esc(X.n)}" oninput="ns(this.value)">${
     X.id || X.t == 'u'
       ? ''
@@ -206,7 +206,7 @@ function fm() {
     const e = $(q);
     if (!e) return;
     e.hidden = !m[k];
-    e.textContent = m[k] ? '⚠ ' + m[k] : '';
+    wm(e, m[k]);
   });
   const i = $('#ia');
   if (i) i.classList.toggle('bad', !!m.a);
@@ -297,7 +297,7 @@ function sv(force) {
     if (w.length) {
       const e = $('#ew');
       e.innerHTML =
-        w.map((x) => `<div>⚠ ${x}</div>`).join('') +
+        w.map((x) => `<div>${bi('warn')} ${x}</div>`).join('') +
         `<button class="btn btn-secondary s sm" onclick="sv(1)">${t('e_force')}</button>`;
       e.hidden = false;
       e.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -345,7 +345,7 @@ function dl() {
   });
   if (dq.length)
     return sheet(
-      `${hd(t('e_delt'))}<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(t('e_delb').replace(/\{k\}/g, t('a_' + dq[0].k)).replace('{n}', fmt(dq[0].n)))}</div><div class=acts><button class="btn btn-secondary s ghost" onclick="op()">${t('e_back')}</button></div>`,
+      `${hd(t('e_delt'))}<div class="em blk" role=alert style="margin:0 0 14px">${bi('warn')} ${esc(t('e_delb').replace(/\{k\}/g, t('a_' + dq[0].k)).replace('{n}', fmt(dq[0].n)))}</div><div class=acts><button class="btn btn-secondary s ghost" onclick="op()">${t('e_back')}</button></div>`,
     );
   const nm = X.t == 'u' ? t('tr') : X.n || t(cn(X.c).n);
   cdel(t('delt'), `<b>${esc(nm)} · ${fmt(num(X.a))}</b><br>${t('delm')}`, 'dlo()', 'op()');
@@ -368,9 +368,9 @@ function dsh() {
   }
   X.nc = 0;
   sheet(
-    `${hd('🔔 ' + t('due'))}${bstrip([...new Set(l.map((o) => o.r.ka || 'bank'))])}${l.map((o) => {
+    `${hd(bi('bell') + ' ' + t('due'))}${bstrip([...new Set(l.map((o) => o.r.ka || 'bank'))])}${l.map((o) => {
       const bm = recBlk(o.r);
-      return `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div>${bm ? `<div class="em blk" role=alert>⚠ ${esc(bm)}</div>` : ''}<div class="seg d-flex gap-2"><button class="btn sm" ${bm ? 'disabled' : ''} onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`;
+      return `<div class="card card-body"><div class=row style=border:0><span class=ic>${cn(o.r.c).i}</span><div class=g>${esc(o.r.n || t(cn(o.r.c).n))}<br><small>${o.d.slice(8)}.${o.d.slice(5, 7)}.</small></div><b class="${o.r.t == 'i' ? 'pos' : 'neg'}">${sg(o.r.a, o.r.t)}</b></div>${bm ? `<div class="em blk" role=alert>${bi('warn')} ${esc(bm)}</div>` : ''}<div class="seg d-flex gap-2"><button class="btn sm" ${bm ? 'disabled' : ''} onclick="cf('${o.r.id}')">${t('ok')}</button><button class="btn btn-secondary s sm" onclick="cfa('${o.r.id}')">${t('chg')}</button><button class="btn btn-secondary s sm" onclick="cf('${o.r.id}',0,1)">${t('skip')}</button></div></div>`;
     }).join('')}<button class="btn btn-primary" style=width:100% onclick="ca()">${t('all')}</button>`,
   );
 }
@@ -412,7 +412,8 @@ function caLive(id, el) {
     r = S.rec.find((x) => x.id == id),
     m = r && v > 0 ? recBlk(r, Math.round(v * 100) / 100) : '',
     e = $('#ca_e');
-  e.textContent = m ? '⚠ ' + m : t('e_amt0');
+  if (m) wm(e, m);
+  else e.textContent = t('e_amt0');
   e.classList.toggle('blk', !!m);
   e.hidden = !m;
 }
@@ -427,7 +428,7 @@ function cfs(id) {
   const r = S.rec.find((x) => x.id == id),
     m = r && recBlk(r, Math.round(v * 100) / 100);
   if (m) {
-    e.textContent = '⚠ ' + m;
+    wm(e, m);
     e.hidden = false;
     return;
   }
@@ -601,9 +602,9 @@ const gr = (v) => {
 /* Kategorie anlegen / bearbeiten: eigene Dialoge (aus der Buchung heraus oder aus den Einstellungen).
    NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet) } */
 const hdc = (ti) =>
-  `<div class="sht ns"><h2>${ti}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">✕</button></div>`;
+  `<div class="sht ns"><h2>${ti}</h2><button class=x onclick="ncx()" aria-label="${t('x')}">${bi('x')}</button></div>`;
 const cnm = () =>
-  `<div class=cn><button type=button class=cpi id=cpi aria-expanded=false aria-controls=cpp aria-label="${t('ico')}" onclick="ipt()"><span id=cpg>${NC.i}</span><i class=cpe aria-hidden=true>✎</i></button><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
+  `<div class=cn><button type=button class=cpi id=cpi aria-expanded=false aria-controls=cpp aria-label="${t('ico')}" onclick="ipt()"><span id=cpg>${NC.i}</span><i class=cpe aria-hidden=true>${bi('pencil')}</i></button><input class="form-control" id=nn placeholder="${t('name')}" value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done onkeydown="if(event.key=='Enter')${NC.id ? 'ecv' : 'ac'}()"></div><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div>`;
 const cip = () =>
   `<div id=cpp class=cpp hidden><label class="form-label">${t('ico')}</label><div class=ip>${ICONS.map((i) => `<button type=button class="${i == NC.i ? 'on' : ''}" aria-pressed="${i == NC.i}" onclick="pi('${i}',this)">${i}</button>`).join('')}</div><input class="form-control" id=ni placeholder="${t('ico2')}" oninput="cpv(this.value)" autocomplete=off></div>`;
 /* Symbolauswahl auf-/zuklappen (Tipp auf das Symbol oben links) */
@@ -789,7 +790,7 @@ function im(el) {
       const q = chk(() => mergeIn(d)),
         bm = q.length ? t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)) : '';
       sheet(
-        `${hd(t('imd'))}${bm ? `<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(bm)}</div>` : ''}<button class="btn btn-primary pr" style="width:100%" ${bm ? 'disabled' : ''} onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
+        `${hd(t('imd'))}${bm ? `<div class="em blk" role=alert style="margin:0 0 14px">${bi('warn')} ${esc(bm)}</div>` : ''}<button class="btn btn-primary pr" style="width:100%" ${bm ? 'disabled' : ''} onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
       );
     } catch (e) {
       X = {};
@@ -832,7 +833,7 @@ function ip(r) {
     const q = chk(() => mergeIn(d));
     if (q.length)
       return sheet(
-        `${hd(t('e_impt'))}<div class="em blk" role=alert style="margin:0 0 14px">⚠ ${esc(t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)))}</div><button class="btn btn-primary" style="width:100%" onclick="${S.ob ? 'cl()' : 'ob()'}">${t('e_ver')}</button>`,
+        `${hd(t('e_impt'))}<div class="em blk" role=alert style="margin:0 0 14px">${bi('warn')} ${esc(t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)))}</div><button class="btn btn-primary" style="width:100%" onclick="${S.ob ? 'cl()' : 'ob()'}">${t('e_ver')}</button>`,
       );
     mergeIn(d);
   }
@@ -878,7 +879,7 @@ function pns() {
     m = !/^\d{4,6}$/.test(a) ? t('e_pin') : a != b ? t('e_pin2') : '';
   if (m) {
     const e = $('#pne');
-    e.textContent = '⚠ ' + m;
+    wm(e, m);
     e.hidden = false;
     return;
   }
@@ -966,7 +967,7 @@ function kLive(p, k) {
     bad = v != null && HK.includes(k) && blk(v, bal(k));
   i.style.borderColor = bad ? 'var(--rust)' : '';
   m.hidden = !bad;
-  m.textContent = bad ? '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k)) : '';
+  wm(m, bad ? t('e_neg0').replace('{k}', t('a_' + k)) : '');
 }
 /* Konten-Bereich in den Einstellungen: leere Felder zählen als 0, ungültige Eingaben werden markiert */
 function ktoSave() {
@@ -990,7 +991,7 @@ function ktoSave() {
         m = $('#st_e_' + k);
       if (e) e.style.borderColor = 'var(--rust)';
       if (m) {
-        m.textContent = '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k));
+        wm(m, t('e_neg0').replace('{k}', t('a_' + k)));
         m.hidden = false;
       }
     });
@@ -1043,7 +1044,7 @@ function od(sv) {
         m = $('#ob_e_' + k);
       if (e) e.style.borderColor = 'var(--rust)';
       if (m) {
-        m.textContent = '⚠ ' + t('e_neg0').replace('{k}', t('a_' + k));
+        wm(m, t('e_neg0').replace('{k}', t('a_' + k)));
         m.hidden = false;
       }
     });

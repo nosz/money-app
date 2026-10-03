@@ -9,7 +9,8 @@
             --m: color-mix(in srgb, var(--text) 78%, var(--ink));
             --b: color-mix(in srgb, var(--text) 26%, var(--surface));
             --s2: color-mix(in srgb, var(--text) 7%, var(--surface));
-            --fd: Georgia, 'Times New Roman', serif
+            --ff: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --fd: var(--ff)
         }
 
         * {
@@ -21,7 +22,7 @@
             margin: 0;
             background: var(--ink);
             color: var(--text);
-            font: var(--fs-m)/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font: var(--fs-m)/1.4 var(--ff);
             padding-bottom: 140px
         }
 
@@ -281,7 +282,7 @@
 
         .tp i {
             font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             margin-right: 4px
         }
 
@@ -531,7 +532,7 @@
         }
 
         .mh summary small {
-            font: var(--fs-s) -apple-system, Roboto, sans-serif
+            font: var(--fs-s) var(--ff)
         }
 
         .hd {
@@ -760,7 +761,7 @@ nav .nb.on .nl { color: var(--gold) }
 .mh details[open]>summary::before{transform:rotate(90deg)}
 .mh details[open]>summary{border-bottom:1px solid var(--b);margin-bottom:4px}
 .mh summary .mt{flex:1;min-width:0;font-weight:700}
-.mh summary .mb{flex:none;font:700 var(--fs-s) -apple-system,Roboto,sans-serif;padding:3px 11px;border-radius:var(--r-l);font-variant-numeric:tabular-nums}
+.mh summary .mb{flex:none;font:700 var(--fs-s) var(--ff);padding:3px 11px;border-radius:var(--r-l);font-variant-numeric:tabular-nums}
 .mh summary .mb.pos{background:color-mix(in srgb,var(--sage) 22%,var(--surface))}
 .mh summary .mb.neg{background:color-mix(in srgb,var(--rust) 14%,var(--surface))}
 
@@ -821,8 +822,6 @@ nav .nb.on svg.ni{opacity:1}
 .form-control,.form-select,select{min-height:var(--h-ctl)}
 .seg{align-items:stretch}
 .seg button{min-width:0}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.dgrid small{display:block}
 
 /* Datei auswählen: Button in Farbschema statt weiß */
 .form-control[type=file]{padding:6px 8px;line-height:1.3;color:var(--text)}
@@ -974,7 +973,7 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .btot{margin-top:8px;display:flex;justify-content:space-between;align-items:baseline}
 .tp.acct button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.2;min-height:56px}
 .tp.acct .al{display:inline-flex;align-items:center;gap:4px}
-.tp.acct .bl{display:block;font-size:var(--fs-s);font-weight:500;opacity:.9;font-variant-numeric:tabular-nums}
+.tp.acct .bl{display:block;font-size:var(--fs-s);font-weight:600;opacity:.9;font-variant-numeric:tabular-nums}
 .bn1{display:block;margin:-2px 0 8px 2px;color:var(--m)}
 .bn1 b{color:var(--text)}
 .bn1 b.neg{color:var(--rust)}
@@ -1022,3 +1021,23 @@ button.bc:active{border-color:var(--gold)}
 details.gx[open]>summary,
 #res details[open]>summary{position:sticky;top:var(--stk);z-index:2;background:var(--surface)}
 details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(--b)}
+
+/* ===== 1.26.0: Eine Schriftfamilie für die ganze App (Systemschrift wie bei WhatsApp und Banking-Apps: SF auf iPhone, Roboto auf Android, Segoe UI auf Windows).
+   Keine Serifenschrift mehr. Hierarchie über Größe und Gewicht; Beträge in Ziffern gleicher Breite, damit sie sauber untereinander stehen. ===== */
+.big,.amt{font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.big{line-height:1.2}
+.bc b,.li>b,.mb,.kz b,.ar b,.btot b{font-variant-numeric:tabular-nums}
+
+/* 1.26.1: Nur drei Schriftgewichte in der ganzen App: 400 (Text), 600 (Betonung, Beträge), 700 (Titel). */
+
+/* ===== 1.27.0: Bootstrap Icons in Dialogen (inline-SVG, Größe und Farbe vom Text) =====
+   Alle Symbole in Dialogen kommen aus Bootstrap Icons (icons.getbootstrap.com, Dateien in img/), keine Emojis oder Sonderzeichen mehr. */
+.bi{display:inline-block;width:1em;height:1em;fill:currentColor;vertical-align:-.125em;flex:none}
+.x .bi{width:1.1em;height:1.1em;vertical-align:middle}
+.swp .bi{width:1.25em;height:1.25em;vertical-align:middle}
+.tp .tu .bi{vertical-align:-.15em}
+.cpe .bi{width:100%;height:100%;padding:.28rem}
+.sht h2 .bi{vertical-align:-.1em}
+.em .bi,.em>div .bi{margin-right:.3em}
+.btn .bi{margin-right:.35em;vertical-align:-.15em}
+.btn.dlt .bi,.cdy .bi{vertical-align:-.15em}
