@@ -210,4 +210,35 @@ const hm = (x) => (x.ts ? new Date(x.ts).toLocaleTimeString(loc(), { hour: '2-di
 const srt = (a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
 const O = (a, v) =>
   a.map(([k, l]) => `<option value="${k}" ${k == v ? 'selected' : ''}>${l}</option>`).join('');
-const APP_VERSION = '1.21.24'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+/* 1.22.0: Backup-Erinnerung (Karte oben auf der Startseite, Auswahl unter Einstellungen → Daten & Sicherheit)
+   S.set.br = Intervall: 'off' | 'w' (7 Tage) | 'b' (14 Tage) | 'm' (30 Tage); leer = 'm' (Standard: an)
+   S.set.lb = letztes JSON-Backup; S.set.b0 = erster Start mit Erinnerung (Zählbeginn für Nutzer ohne Backup)
+   S.set.bs = „Später“: Karte bis dahin ausgeblendet. Nur das JSON-Backup zählt (CSV lässt sich nicht wiederherstellen). */
+const BR = { w: 7, b: 14, m: 30 };
+let BKS = false; /* Karte war beim letzten Zeichnen der Startseite sichtbar */
+const brv = () => (S.set.br in BR || S.set.br == 'off' ? S.set.br : 'm');
+const brNext = () => {
+  const d = BR[brv()],
+    ref = S.set.lb || S.set.b0;
+  return d && ref ? ref + d * 864e5 : 0;
+};
+/* Ohne Buchungen gibt es nichts zu sichern: dann keine Karte */
+const brShow = () => {
+  const n = brNext(),
+    now = Date.now();
+  return !!n && now >= n && now >= (S.set.bs || 0) && (S.tx.length > 0 || S.rec.length > 0);
+};
+const brCard = () => {
+  BKS = brShow();
+  if (!BKS) return '';
+  const d = S.set.lb ? t('bkc_d').replace('{n}', Math.floor((Date.now() - S.set.lb) / 864e5)) : t('bkn0');
+  return `<div class="card card-body bkc" role=status><b>💾 ${t('bkc_t')}</b><small>${d}</small><div class="seg d-flex gap-2"><button class="btn btn-primary" onclick="bk('j')">${t('bkc_go')}</button><button class="btn btn-secondary s" onclick="bkl()">${t('bkc_later')}</button></div></div>`;
+};
+const brDate = (x) => new Date(x).toLocaleDateString(loc(), { day: '2-digit', month: '2-digit', year: 'numeric' });
+const brStatus = () => {
+  if (brv() == 'off') return t('bkr_s0');
+  const nx = Math.max(brNext(), S.set.bs || 0),
+    a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
+  return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
+};
+const APP_VERSION = '1.22.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

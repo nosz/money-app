@@ -768,9 +768,15 @@ async function bk(k) {
   }
   if (j) {
     S.set.lb = Date.now();
+    delete S.set.bs;
     P();
   }
   toast(t(j ? 'bkok' : 'csvok').replace('{n}', f.name));
+}
+/* 1.22.0: „Später“ auf der Backup-Karte blendet sie 1 Tag aus */
+function bkl() {
+  S.set.bs = Date.now() + 864e5;
+  P();
 }
 function im(el) {
   const f = el.files[0];
@@ -818,6 +824,9 @@ function ip(r) {
   const d = X.imp;
   if (r) {
     S = { ...blank(), ...d, set: { ...blank().set, ...d.set } };
+    /* 1.22.0: wiederhergestellte Daten sind in genau dieser Datei gesichert: Zähler der Backup-Erinnerung neu starten */
+    S.set.lb = Date.now();
+    delete S.set.bs;
   } else {
     /* 1.21.22: Zusammenführen darf Bar/Gespart nicht unter 0 bringen (Ersetzen übernimmt den Stand des Backups, Hinweis siehe negHint) */
     const q = chk(() => mergeIn(d));
@@ -942,6 +951,10 @@ addEventListener('focusin', (e) => {
       el.scrollIntoView({ block: el.id == 'csi' ? 'start' : 'center', behavior: 'smooth' });
     } catch (x) {}
   }, 320);
+});
+/* 1.22.0: Kommt die App nach Tagen wieder in den Vordergrund, kann die Backup-Karte fällig sein: Startseite neu zeichnen, aber nur bei Änderung und nie bei offenem Dialog */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && S && S.set && tab == 'home' && !$('#o') && brShow() != BKS) rd();
 });
 /* 1.21.23: Live-Prüfung eines Kontofelds beim Tippen (p = 'st' Einstellungen, 'ob' Onboarding) */
 function kLive(p, k) {
@@ -1076,6 +1089,11 @@ addEventListener('beforeinstallprompt', (e) => {
     if (c.n == 'c_sparen') c.n = 'Sparen';
   });
   S.set = Object.assign(blank().set, S.set);
+  /* 1.22.0: Zählbeginn der Backup-Erinnerung für alle ohne Backup (einmalig, wird gleich gespeichert) */
+  if (!S.set.lb && !S.set.b0) {
+    S.set.b0 = Date.now();
+    dbPut();
+  }
   ap({ theme: S.set.theme, font: S.set.font });
   rd();
   if (!S.ob) ob();

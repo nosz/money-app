@@ -194,7 +194,7 @@ const V = {
     const m = mt(ym),
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
-    let h = mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
+    let h = brCard() + mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
     /* solange es keine einzige Buchung gibt: große Karte, die direkt den Buchungsdialog öffnet */
     if (!S.tx.length)
       h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
@@ -492,6 +492,15 @@ const V = {
         `<div class="seg d-flex gap-2 stk"><button class="btn btn-primary w-100" onclick="ktoSave()">${t('save')}</button></div>`,
       dat = () =>
         `<div class=dgrid><button class="btn btn-secondary s" onclick="bk('j')">${t('bk')}</button><button class="btn btn-secondary s" onclick="bk('c')">${t('csv')}</button><small>${t('bkj')}</small><small>${t('bkc')}</small></div><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
+        bx(
+          lb(
+            'bkr',
+            `<select class="form-select" onchange="S.set.br=this.value;P()">${O(
+              ['off', 'w', 'b', 'm'].map((k) => [k, t('bkr_' + k)]),
+              brv(),
+            )}</select><small style="display:block;margin-top:8px">${brStatus()}</small><small style="display:block;margin-top:4px">${t('bkr_i')}</small>`,
+          ),
+        ) +
         bx(
           lb(
             'pin',

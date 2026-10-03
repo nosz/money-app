@@ -1000,3 +1000,7 @@ button.bc:active{border-color:var(--gold)}
 @keyframes kfl{0%,60%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 65%,transparent)}100%{box-shadow:0 0 0 3px transparent}}
 .form-control.kfl{animation:kfl 2s ease-out}
 @media (prefers-reduced-motion:reduce){.form-control.kfl{animation:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 65%,transparent)}}
+
+/* ===== 1.22.0: Backup-Erinnerung – Karte oben auf der Startseite ===== */
+.bkc{margin-bottom:12px;border-color:var(--gold)}
+.bkc small{display:block;margin:2px 0 10px}
