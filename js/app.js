@@ -286,13 +286,16 @@ const na = (s) => {
     },
   };
 /* Knopf in einen Zustand setzen (Haken plus Text, nie nur ein Symbol) */
-function sbs(b, s, lb) {
-  const k = s + '|' + lb;
+/* 1.60.0: Symbol je Zustand (Skill 5b): Diskette = es gibt etwas zu speichern bzw. noch nichts gespeichert, Haken NUR für „gespeichert“ (done, oder Konto mit unverändertem gespeichertem Wert).
+   ic: 'floppy' | 'check' | '' (kein Symbol, z. B. „OK“, wo nichts gespeichert wird). Ohne Angabe: done = Haken, sonst Diskette. */
+function sbs(b, s, lb, ic) {
+  if (ic == null) ic = s == 'done' ? 'check' : 'floppy';
+  const k = s + '|' + lb + '|' + ic;
   if (b.dataset.k == k) return;
   b.dataset.k = k;
   b.dataset.s = s;
   b.disabled = s == 'idle' || s == 'bad';
-  b.innerHTML = `${bi('check')}<span>${lb}</span>`;
+  b.innerHTML = `${ic ? bi(ic) : ''}<span>${lb}</span>`;
 }
 /* Zustand des Speichern-Knopfs der geöffneten Maske neu berechnen (live = true: auch Meldungen am Feld) */
 function svr(live) {
@@ -304,7 +307,7 @@ function svr(live) {
     lb = b.dataset.lb || '',
     st = nw ? (bad ? 'bad' : 'dirty') : !d ? 'idle' : bad ? 'bad' : 'dirty',
     txt = lb || t('save'); /* 1.40.0: auch unverändert (idle) „Speichern“, damit der Knopf beim Bearbeiten erkennbar ist */
-  sbs(b, st, txt);
+  sbs(b, st, txt, lb ? '' : 'floppy'); /* mit eigenem Text (lb, z. B. „OK“) wird nichts gespeichert: kein Symbol */
   const h = $('#dh');
   if (h) h.hidden = !(d && st == 'dirty');
 }
@@ -546,7 +549,7 @@ function dpk(v, el) {
    sx = Speichern-Aktion, cx = Abbrechen-Aktion (wie das ✕ oben), lb = Beschriftung des Hauptknopfs (Standard: Speichern) */
 /* 1.37.0: mk = Masken-Kürzel (Skill 5b). Mit mk: Abbrechen fragt bei ungespeicherten Änderungen nach, der Knopf bekommt Haken, Zustände (data-s) und die Zeile „Nicht gespeicherte Änderung“. */
 const svb = (sx, cx, lb, mk) =>
-  `<div class=stkb>${mk ? `<div class=dhint id=dh hidden><i></i>${t('unsv')}</div>` : ''}<div class=sbr><button type=button class="btn ghost cb" onclick="${mk ? `dcl(()=>${cx})` : cx}">${t('cancel')}</button><button type=button class="btn btn-primary pr sb"${mk ? ` data-mk="${mk}" data-lb="${lb || ''}" data-s=dirty` : ''} onclick="${sx}">${mk ? bi('check') + '<span>' + (lb || t('save')) + '</span>' : lb || t('save')}</button></div></div>`;
+  `<div class=stkb>${mk ? `<div class=dhint id=dh hidden><i></i>${t('unsv')}</div>` : ''}<div class=sbr><button type=button class="btn ghost cb" onclick="${mk ? `dcl(()=>${cx})` : cx}">${t('cancel')}</button><button type=button class="btn btn-primary pr sb"${mk ? ` data-mk="${mk}" data-lb="${lb || ''}" data-s=dirty` : ''} onclick="${sx}">${mk ? (lb ? '' : bi('floppy')) + '<span>' + (lb || t('save')) + '</span>' : lb || t('save')}</button></div></div>`;
 /* Löschen als dezenter Textlink in Rost am Ende der Maske (nur beim Bearbeiten) */
 const acts2 = (dx, h) =>
   `<div class=acts2>${h ? `<small class=dh2>${h}</small>` : ''}<button type=button class=lnk onclick="${dx}">${bi('trash')} ${t('del')}</button></div>`;
@@ -1603,7 +1606,8 @@ function kSt(k) {
     bad = inc || (s != '' && v == null) || (v != null && HK.includes(k) && blk(v, bal(k))),
     dirty = v != null && (Math.round(v * 100) != Math.round(o * 100) || (!sv && s != '')),
     st = bad ? 'bad' : dirty ? 'dirty' : 'idle';
-  sbs(b, st, st == 'idle' && sv ? t('sav') : t('save'));
+  const sd = st == 'idle' && sv; /* gespeicherter, unveränderter Wert: grauer Haken „Gespeichert“; sonst Diskette */
+  sbs(b, st, sd ? t('sav') : t('save'), sd ? 'check' : 'floppy');
   if (h) h.hidden = st != 'dirty';
 }
 /* Nach dem Speichern: etwa 2 Sekunden grün „✓ Gespeichert“, dann zurück zu idle */
