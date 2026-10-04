@@ -60,6 +60,7 @@ Danach `http://localhost:8080` im Browser öffnen. Der Service Worker und die In
 index.html          Einstiegsseite
 manifest.json       PWA-Manifest (Symbole getrennt als any und maskable)
 service-worker.js   Offline-Cache (CACHE_VERSION bei jedem Release hochzählen)
+tools/check.js      Automatische Prüfung vor jeder Lieferung (node tools/check.js)
 og-image.png        Vorschaubild für geteilte Links (1200 × 630)
 css/                Eigenes Design, Bootstrap (nur CSS)
 js/core.js          Hilfsfunktionen, Version (APP_VERSION), Icons
@@ -76,7 +77,8 @@ img/                Icon-Quelldateien (Bootstrap Icons)
 - Bei jedem Release `APP_VERSION` in `js/core.js` und `CACHE_VERSION` in `service-worker.js` auf denselben Wert setzen.
 - Alle sichtbaren Texte gehören in `js/i18n.js`, immer in Deutsch und Englisch.
 - Backup-Format und Datenformat bleiben abwärtskompatibel, damit alte Sicherungen lesbar bleiben.
-- Das Konzept für die Eingabemasken steht in `money_app_skill.md`, der Arbeitsstand in `NAECHSTE_SCHRITTE.md`.
+- Vor jeder Lieferung `node tools/check.js` ausführen (Version, Texte in Deutsch und Englisch, Service Worker, Manifest, Betragsfelder; mit `node tools/check.js <ZIP>` auch den ZIP-Inhalt).
+- Die Regeln für die Masken stehen in `money_app_skill.md` (Kern) und `money_app_referenz.md` (Aufbau der einzelnen Masken und Bereiche), der Arbeitsstand in `NAECHSTE_SCHRITTE.md`.
 
 ## Mitmachen
 
