@@ -60,6 +60,7 @@ const T = {
     'Auswertung nach Kategorien und Monaten.',
     'Charts by category and month.',
   ],
+  bzh: ['Tippe auf ein Konto, um deinen Kontostand einzutragen.', 'Tap an account to enter your balance.'],
   w4: [
     'Funktioniert auch ohne Internet.',
     'Works without an internet connection.',
@@ -68,10 +69,6 @@ const T = {
   wp: [
     'Alle Daten werden ausschließlich auf diesem Gerät gespeichert. Regelmäßige Backups unter „Einstellungen“ werden empfohlen.',
     'All data is stored exclusively on this device. Regular backups under “Settings” are recommended.',
-  ],
-  wset: [
-    'Währung und Sprache sind unter „Einstellungen“ änderbar.',
-    'Currency and language can be changed under “Settings”.',
   ],
   e_amt: ['Bitte einen Betrag eingeben', 'Please enter an amount'],
   e_amt0: ['Bitte einen Betrag größer als 0 eingeben', 'Please enter an amount greater than 0'],
@@ -297,15 +294,7 @@ const T = {
   kh_bar: ['Bargeld, zählt fürs Tagesbudget.', 'Cash, counts for daily budget.'],
   kh_spar: ['Rücklagen, zählt nicht fürs Tagesbudget.', 'Savings, not in daily budget.'],
   go: ['Speichern', 'Save'],
-  onx: ['Weiter', 'Next'],
-  obbk: ['Backup importieren', 'Import backup'],
-  obk: ['Kontostände', 'Account balances'],
-  obkh: [
-    'Grundlage für die Berechnung des Tagesbudgets. Unbekannte Beträge können leer bleiben.',
-    'Basis for calculating the daily budget. Unknown amounts can be left empty.',
-  ],
-  olat: ['Später eintragen', 'Add later'],
-  oopt: ['optional', 'optional'],
+  onx: ['Los geht’s', 'Get started'],
   ofirst: ['Erste Buchung erfassen', 'Add your first entry'],
   ofirst2: [
     'Weitere Buchungen über ＋ in der unteren Leiste.',
@@ -345,24 +334,6 @@ const T = {
   ],
   au_h4e: ['{c} macht {p} % der Ausgaben aus.', '{c} accounts for {p} % of expenses.'],
   au_h4i: ['{c} macht {p} % der Einnahmen aus.', '{c} accounts for {p} % of income.'],
-  inst: [
-    'Tipp: Zum Home-Bildschirm hinzufügen (iPhone: Teilen → „Zum Home-Bildschirm“).',
-    'Tip: add to home screen (iPhone: Share → “Add to Home Screen”).',
-  ],
-  ins: ['Installieren', 'Install'],
-  oit: ['App installieren', 'Install the app'],
-  oi_a: [
-    'Installiere die MoneyApp auf deinem Startbildschirm: schneller Start, Vollbild und auch ohne Internet nutzbar.',
-    'Install MoneyApp on your home screen: quick start, full screen, and it works without internet.',
-  ],
-  oi_m: [
-    'Tippe im Chrome-Menü (⋮) auf „App installieren“. So startest du die MoneyApp wie jede andere App, auch ohne Internet.',
-    'Tap “Install app” in the Chrome menu (⋮). MoneyApp then starts like any other app, even without internet.',
-  ],
-  oi_i: [
-    'Tippe in Safari auf Teilen und wähle „Zum Home-Bildschirm“. So startest du die MoneyApp wie jede andere App.',
-    'In Safari, tap Share and choose “Add to Home Screen”. MoneyApp then starts like any other app.',
-  ],
   x: ['Schließen', 'Close'],
   pi: ['PIN eingeben', 'Enter PIN'],
   wr: ['Falsch – bitte warten', 'Wrong – please wait'],

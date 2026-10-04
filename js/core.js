@@ -49,7 +49,6 @@ let S,
   HS = {},
   X = {},
   SE = { o: null },
-  DP,
   U;
 /* 1.27.0: Symbole in Dialogen = Bootstrap Icons 1.13.1 (Quelldateien in img/), inline, damit sie Farbe und Größe des Textes annehmen. Neue Symbole: SVG aus icons.getbootstrap.com nach img/ legen und den Pfad hier eintragen. */
 const BIP = {
@@ -167,7 +166,7 @@ const AP = {
   shield: `<path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/><path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415"/>`,
   plus: `<path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>`,
   lock: `<path fill-rule="evenodd" d="M8 0a4 4 0 0 1 4 4v2.05a2.5 2.5 0 0 1 2 2.45v5a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 13.5v-5a2.5 2.5 0 0 1 2-2.45V4a4 4 0 0 1 4-4M4.5 7A1.5 1.5 0 0 0 3 8.5v5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 11.5 7zM8 1a3 3 0 0 0-3 3v2h6V4a3 3 0 0 0-3-3"/>`,
-  inst: `<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>`,
+  pen: `<path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>`,
   off: `<path d="M10.706 3.294A12.6 12.6 0 0 0 8 3C5.259 3 2.723 3.882.663 5.379a.485.485 0 0 0-.048.736.52.52 0 0 0 .668.05A11.45 11.45 0 0 1 8 4q.946 0 1.852.148zM8 6c-1.905 0-3.68.56-5.166 1.526a.48.48 0 0 0-.063.745.525.525 0 0 0 .652.065 8.45 8.45 0 0 1 3.51-1.27zm2.596 1.404.785-.785q.947.362 1.785.907a.482.482 0 0 1 .063.745.525.525 0 0 1-.652.065 8.5 8.5 0 0 0-1.98-.932zM8 10l.933-.933a6.5 6.5 0 0 1 2.013.637c.285.145.326.524.1.75l-.015.015a.53.53 0 0 1-.611.09A5.5 5.5 0 0 0 8 10m4.905-4.905.747-.747q.886.451 1.685 1.03a.485.485 0 0 1 .047.737.52.52 0 0 1-.668.05 11.5 11.5 0 0 0-1.811-1.07M9.02 11.78c.238.14.236.464.04.66l-.707.706a.5.5 0 0 1-.707 0l-.707-.707c-.195-.195-.197-.518.04-.66A2 2 0 0 1 8 11.5c.381 0 .73.105 1.02.28m4.355-9.905a.53.53 0 0 1 .75.75l-10.75 10.75a.53.53 0 0 1-.75-.75z"/>`,
   info: `<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>`,
 };
@@ -179,12 +178,15 @@ const balOn = () => true; /* 1.37.1: Kontostände (Bar, Bank, Sparen) immer zeig
 const bstrip = (hi, nav) => {
   if (!balOn()) return '';
   const ks = ['bar', 'bank', 'spar'];
-  return `<div class=bstrip role=group aria-label="${t('kto')}">${ks
+  /* 1.57.0: Startseite (nav): je Kachel Kopfzeile (links Symbol, rechts Stift), darunter Name und Betrag, alles linksbündig.
+     Sind alle drei Konten 0: gestrichelter Rand in Hauptfarbe und zartes Banner mit Hinweistext darunter. */
+  const z = !!nav && ks.every((k) => Math.abs(bal(k)) < 0.005);
+  return `<div class="bstrip${nav ? ' nv' : ''}${z ? ' z' : ''}" role=group aria-label="${t('kto')}">${ks
     .map(
       (k) =>
-        `<${nav ? 'button type=button' : 'div'} class="bc${(hi || []).includes(k) ? ' on' : ''}"${nav ? ` onclick="gk('${k}')"` : ''}><span class=bcn>${AV(k)} ${t('a_' + k)}</span><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></${nav ? 'button' : 'div'}>`,
+        `<${nav ? 'button type=button' : 'div'} class="bc${(hi || []).includes(k) ? ' on' : ''}"${nav ? ` onclick="gk('${k}')"` : ''}>${nav ? `<span class=bch>${AV(k)}<i class=pen aria-hidden=true>${AV('pen')}</i></span><span class=bcn>${t('a_' + k)}</span>` : `<span class=bcn>${AV(k)} ${t('a_' + k)}</span>`}<b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></${nav ? 'button' : 'div'}>`,
     )
-    .join('')}</div>`;
+    .join('')}</div>${z ? `<div class=bzh>${AV('pen')}<span>${t('bzh')}</span></div>` : ''}`;
 };
 /* 1.30.0: Umbuchung – „Von“ und „Auf“ als Konto-Leisten (Bank, Bar, Sparen) untereinander, Tauschen-Knopf dazwischen */
 const DIR = () => {
@@ -277,7 +279,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.54.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.57.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 

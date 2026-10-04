@@ -247,12 +247,6 @@ const V = {
     if (n)
       h += `<div class="card card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
 
-    if (
-      !S.set.hd &&
-      !matchMedia('(display-mode:standalone)').matches &&
-      (DP || /iphone|ipad/i.test(navigator.userAgent))
-    )
-      h += `<div class="card card-body"><small>${DP ? '' : t('inst')}</small><div class="seg d-flex gap-2">${DP ? `<button class="btn btn-primary" onclick="ins()">${t('ins')}</button>` : ''}<button class="btn btn-secondary s" onclick="S.set.hd=1;P()">✕</button></div></div>`;
     return (
       h +
       '</div><div class="col-12 col-lg-7">' +

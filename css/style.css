@@ -1197,12 +1197,22 @@ body.fqf #v::after{content:'';display:block;height:60vh}
 .sec.open>button{padding-left:11px}
 .sec.open>button .ic,.sec.open>button .chev{color:var(--gold)}
 
-/* ===== 1.52.0: Installations-Hinweis im Willkommen-Fenster (Karte in Hauptfarbe, wie die Datenschutz-Karte aufgebaut) ===== */
-.pv.pi{background:color-mix(in srgb,var(--gold) 12%,var(--surface));border-color:color-mix(in srgb,var(--gold) 45%,var(--surface))}
-.pv.pi .btn{display:flex;align-items:center;justify-content:center}
-
 /* ===== 1.54.0: feste Elemente am unteren Rand über die Browser-Leiste heben (--nbo wird in js/core.js gemessen, sonst 0) ===== */
 nav{bottom:var(--nbo,0px)}
 .ov{bottom:var(--nbo,0px)}
 #toast{bottom:calc(120px + env(safe-area-inset-bottom) + var(--nbo,0px))}
 @media (min-width:768px){#toast{bottom:calc(100px + env(safe-area-inset-bottom) + var(--nbo,0px))}}
+
+/* ===== 1.57.0: Kacheln auf der Startseite (Banking-Look): Kopfzeile Symbol links, Stift rechts; darunter Name und Betrag; alle drei Konten 0: gestrichelter Rand + Banner ===== */
+.bstrip.nv{gap:6px}
+.bstrip.nv .bc{align-items:stretch;text-align:left;gap:1px;padding:8px 6px 8px 8px}
+.bstrip.nv .bch{display:flex;align-items:center;justify-content:space-between;color:var(--m)}
+.bstrip.nv .bch .ai{width:16px;height:16px}
+.bstrip.nv .bcn{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.bstrip.nv .bc b{font-size:min(var(--fs-m),3.9vw);letter-spacing:-.01em}
+.bstrip.nv .pen{display:inline-flex;flex:none;color:var(--m)}
+.bstrip.nv .pen svg{width:.8rem;height:.8rem;display:block}
+.bstrip.z .bc{border:1px dashed var(--gold)}
+.bstrip.z .pen{color:var(--gold)}
+.bzh{display:flex;align-items:center;gap:8px;margin:-4px 0 10px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--surface));border-radius:var(--r-m);background:color-mix(in srgb,var(--gold) 10%,var(--surface));color:var(--text);font-size:var(--fs-s)}
+.bzh svg{width:.95rem;height:.95rem;flex:none;color:var(--gold);display:block}

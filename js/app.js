@@ -1655,102 +1655,21 @@ function ktoSave(k) {
   kDone(k);
 }
 /* Erster Start (nur solange S.ob == 0): Schritt 1 Willkommen, Schritt 2 Kontostände. Beide Schritte lassen sich nicht wegtippen. */
-/* 1.52.0: Installations-Hinweis im Willkommen-Fenster (nur wenn die App noch nicht installiert ist).
-   Mit Installations-Angebot des Browsers (DP): Knopf „Installieren“. Sonst Anleitung für iPhone (Safari) bzw. Android (Chrome-Menü).
-   Auf dem Desktop ohne Angebot: kein Hinweis. Wird das Angebot erst nach dem Öffnen gemeldet, zeichnet der Listener die Karte neu. */
-function obi() {
-  if (matchMedia('(display-mode:standalone)').matches || navigator.standalone) return '';
-  const ua = navigator.userAgent,
-    ios = /iphone|ipad/i.test(ua),
-    and = /android/i.test(ua);
-  if (!DP && !ios && !and) return '';
-  return `<div id=obi class="pv pi"><b>${AV('inst')} ${t('oit')}</b><br><span>${DP ? t('oi_a') : ios ? t('oi_i') : t('oi_m')}</span>${DP ? `<button type=button class="btn btn-secondary s w-100" style="margin-top:10px;min-height:44px" onclick="obIns()">${t('ins')}</button>` : ''}</div>`;
-}
-function obIns() {
-  ins();
-  const e = $('#obi');
-  e && e.remove();
-}
 function ob() {
   X = { nc: 1 };
   sheet(
-    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>${AV('edit')}</i><span>${t('w1')}</span></li><li><i>${AV('bank')}</i><span>${t('w2')}</span></li><li><i>${AV('stats')}</i><span>${t('w3')}</span></li><li><i>${AV('off')}</i><span>${t('w4')}</span></li></ul><div class=pv><b>${AV('shield')} ${t('wpt')}</b><br><span>${t('wp')}</span></div>${obi()}<div class=cta style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ob2()">${t('onx')}</button><button type=button class="btn btn-link w-100" onclick="$('#obf').click()">${t('obbk')}</button><input id=obf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true></div>`,
+    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>${AV('edit')}</i><span>${t('w1')}</span></li><li><i>${AV('bank')}</i><span>${t('w2')}</span></li><li><i>${AV('stats')}</i><span>${t('w3')}</span></li><li><i>${AV('off')}</i><span>${t('w4')}</span></li></ul><div class=pv><b>${AV('shield')} ${t('wpt')}</b><br><span>${t('wp')}</span></div><div class=cta style="margin-top:14px"><button class="btn btn-primary w-100" onclick="od()">${t('onx')}</button></div>`,
   );
 }
-function ob2() {
-  X = { nc: 1 };
-  sheet(
-    `<h2>${t('obk')}</h2><p style="margin:.2rem 0 6px;color:var(--m)">${t('obkh')}</p>${['bank', 'bar', 'spar']
-      .map(
-        (k) =>
-          `<label class="form-label">${AV(k)} ${t('a_' + k)}${k == 'spar' ? ` <small>(${t('oopt')})</small>` : ''}</label><small style="display:block;margin-bottom:8px">${t('kh_' + k)}</small><input id=ob_${k} class="form-control" inputmode=decimal placeholder="${t('sbp0')}" oninput="kLive('ob','${k}')" autocomplete=off><div class="em" id=ob_e_${k} hidden role=alert></div>`,
-      )
-      .join('')}<small style="display:block;margin-top:12px">${t('wset')}</small><div class=stkb><button class="btn btn-primary w-100" onclick="od(1)">${t('go')}</button><button type=button class="btn btn-link w-100" onclick="od(0)">${t('olat')}</button></div>`,
-  );
-}
-/* sv = 1: eingegebene Stände übernehmen (leere Felder zählen dann als 0, sind alle leer, wird nichts gesetzt); sv = 0: später */
-function od(sv) {
-  const vs = sv
-    ? ['bank', 'bar', 'spar'].map((k) => {
-        const e = $('#ob_' + k),
-          s = e ? e.value.trim() : '';
-        if (!s) return [k, 0, 1];
-        const v = num(s);
-        if (v == null && e) e.style.borderColor = 'var(--rust)';
-        return [k, v, 0];
-      })
-    : [];
-  if (vs.some(([, v]) => v == null)) return toast(t('e_num'));
-  /* 1.21.22: Bar/Gespart dürfen nicht negativ starten */
-  const bad = vs.filter(([k, v, empty]) => !empty && HK.includes(k) && blk(v, bal(k)));
-  if (bad.length) {
-    HK.forEach((k) => {
-      const m = $('#ob_e_' + k);
-      if (m) m.hidden = true;
-    });
-    bad.forEach(([k]) => {
-      const e = $('#ob_' + k),
-        m = $('#ob_e_' + k);
-      if (e) e.style.borderColor = 'var(--rust)';
-      if (m) {
-        wm(m, t('e_neg0').replace('{k}', t('a_' + k)));
-        m.hidden = false;
-      }
-    });
-    return;
-  }
+/* 1.55.0: Willkommen-Fenster ist der einzige Onboarding-Schritt; Kontostände trägt man auf der Startseite ein (Kacheln antippen) */
+function od() {
   S.ob = 1;
-  if (vs.some(([, , empty]) => !empty)) vs.forEach(([k, v]) => setAcc(k, v));
   X = {};
   cl();
   P();
 }
-/* Installations-Hinweis: nach dem Tippen auf „Installieren“ (oder nach erfolgter Installation) nie wieder anzeigen */
-function ins() {
-  const p = DP;
-  p && p.prompt();
-  DP = null;
-  S.set.hd = 1;
-  P();
-}
-addEventListener('appinstalled', () => {
-  DP = null;
-  const o = $('#obi');
-  o && o.remove();
-  if (S) {
-    S.set.hd = 1;
-    P();
-  }
-});
-addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  DP = e;
-  const o = $('#obi'),
-    c = $('#obf') && $('.cta');
-  if (o) o.outerHTML = obi();
-  else if (c) c.insertAdjacentHTML('beforebegin', obi());
-  S && rd();
-});
+/* 1.55.0: keine eigenen Installations-Hinweise mehr. Das Browser-eigene Angebot (Mini-Leiste) bleibt unterdrückt, Installieren geht weiter über das Browser-Menü. */
+addEventListener('beforeinstallprompt', (e) => e.preventDefault());
 (async () => {
   try {
     S = await dbGet();
