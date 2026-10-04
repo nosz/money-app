@@ -68,6 +68,7 @@ Du bist HTML-, CSS- und JavaScript-Experte mit Spezialisierung auf PWA-Erstellun
 - Standardkategorien: `DC` in `js/core.js`
 - Eingabe-Filter und Prüfung: `amc()`, `amn()`, `dgc()`, `txc()`, `dvl()` in `js/app.js`, `num()` in `js/core.js`
 - Speichern-Zustände und Verwerfen-Rückfrage: `svb()`, `svr()`, `kSt()`, `kDone()`, `dirtyNow()`, `dcl()`, `dscAsk()`, `SN`, `CUR` in `js/app.js`
+- Weiterempfehlen und Info Open Source: `about()` in `V.set()` (`js/render.js`), `shr()` in `js/app.js`, `GITHUB_URL` in `js/core.js`, Icons `share` und `github` in `BIP`
 - Design: `css/style.css`
 - Offline-Cache: `service-worker.js` (neue Assets wie Icons dort aufnehmen)
 - Texte: `js/i18n.js` (immer Deutsch und Englisch)
@@ -186,6 +187,16 @@ Gilt für „Neue wiederkehrende Buchung“ (`nrd()`) und „Bearbeiten“ (`erd
 - Der Einstiegsknopf in den Einstellungen trägt das Bootstrap Icon `plus`, kein „＋“-Zeichen.
 - Keine Konto-Leiste (neu angelegte laufen über Bank). Logik, Datenformat und Fälligkeitsberechnung unverändert.
 
+# 7d. Einstellungen: Bereich „Über die App“ (Nutzer-Vorgabe ab 1.45.0)
+
+Letzter Bereich der Einstellungen (`sec('about', SI.about, t('about'), about)` in `V.set()`, `js/render.js`), Symbol `info-circle`. Von oben nach unten, Handy zuerst, nichts bricht um und kein Text wird abgeschnitten (390 und 320 px):
+1. **Weiterempfehlen:** Beschriftung „Weiterempfehlen“, kurzer Hinweis, Hauptknopf „App weiterempfehlen“ mit Bootstrap Icon `share` (`.btn-primary`, mindestens 48 px). `shr()` in `js/app.js`: öffnet das Teilen-Menü des Geräts (`navigator.share` mit Titel „MoneyApp“, kurzem Text `shr_t` und Link); fehlt es oder schlägt es fehl (außer Abbruch durch den Nutzer, der nichts auslöst), wird Text samt Link kopiert (Toast „Text und Link kopiert“, Rückfall über verstecktes Feld; Toast „Kopieren nicht möglich“, wenn auch das scheitert). Der Link ist die Adresse, unter der die App gerade läuft (`location.origin + location.pathname`, ohne `index.html`, Suchteil und `#`). Läuft die App nicht unter einer Web-Adresse (z. B. Datei lokal geöffnet), wird `GITHUB_URL` geteilt. Kein QR-Code (Variante verworfen).
+2. **Open Source:** Karte direkt im Bereich (kein Dialog): Beschriftung „Open Source“, Text, dass der Programmcode öffentlich auf GitHub liegt, Knopf „Auf GitHub ansehen“ mit Bootstrap Icon `github` (`.btn-secondary`, Link `<a>` mit `target=_blank rel="noopener noreferrer"`). Die Adresse steht nur einmal als Konstante `GITHUB_URL` in `js/core.js` (`https://github.com/nosz/money-app`).
+3. **Version:** Zeile „Version x.y.z“ (zog 1.45.0 aus „Allgemein“ hierher um).
+- Knöpfe tragen immer Icon plus Text; unter 360 px Breite etwas kleinere Schrift (`.abt .btn`, `css/style.css`), nie umbrechend.
+- Texte (Deutsch und Englisch) in `js/i18n.js`: `about`, `shr_h`, `shr_i`, `shr`, `shr_t`, `shr_c`, `shr_e`, `oss`, `oss_i`, `gh`.
+- Backup, Import und Datenformat bleiben unverändert (nichts davon wird gespeichert).
+
 # 8. Immer ohne Rückfrage einhalten
 
 - Gewählte Icons direkt in den Code einbetten (offline, inline) und im Service Worker cachen.
@@ -219,4 +230,5 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 - Liegt `NAECHSTE_SCHRITTE.md` aktualisiert im ZIP (nicht separat)?
 - Liegt `money_app_skill.md` in der aktuellen Fassung im ZIP?
 - Gibt es in Masken und Einstellungen-Karten (Buchungen, Konten, wiederkehrende Buchung) keine Emojis, keine umbrechenden Chip-Reihen und keinen abgeschnittenen Text am Handy (390 und 320 px)?
+- Bereich „Über die App“ (Abschnitt 7d): Weiterempfehlen öffnet das Teilen-Menü bzw. kopiert Text und Link, GitHub-Knopf öffnet `GITHUB_URL` in neuem Tab, Version steht dort (nicht mehr in „Allgemein“), Knöpfe bei 320 px einzeilig?
 - Wurde nur auf „bauen“ geliefert (0.3)?

@@ -1186,3 +1186,8 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 /* ===== 1.44.0: Suche in der Karte „Buchungen“: Feld beim Antippen unter die Kopfleiste und die Kopfzeile des Bereichs (--stk), Treffer darunter sichtbar ===== */
 #fq{scroll-margin-top:calc(var(--stk) + 8px)}
 body.fqf #v::after{content:'';display:block;height:60vh}
+
+/* ===== 1.45.0: Bereich „Über die App“ (Weiterempfehlen, Open Source, Version) ===== */
+.abt .btn{display:flex;align-items:center;justify-content:center;min-height:48px;text-decoration:none}
+.abt .btn .bi{width:1.1rem;height:1.1rem}
+@media (max-width:360px){.abt .btn{font-size:.9rem;padding-left:10px;padding-right:10px}}

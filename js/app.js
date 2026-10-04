@@ -81,6 +81,41 @@ function toast(m, f, l, k) {
   clearTimeout(toast.i);
   if (!k) toast.i = setTimeout(() => (e.style.display = 'none'), 5000);
 }
+/* 1.45.0: App weiterempfehlen (Einstellungen → Über die App). Teilen-Menü des Geräts mit Text und Link; ohne Teilen-Menü wird Text samt Link kopiert.
+   Link = Adresse, unter der die App gerade läuft (ohne Suchteil und ohne index.html). Läuft sie nicht unter einer Web-Adresse (z. B. Datei lokal geöffnet), gilt GITHUB_URL. */
+async function shr() {
+  const web = /^https?:$/.test(location.protocol),
+    url = web ? location.origin + location.pathname.replace(/index\.html$/, '') : GITHUB_URL,
+    txt = t('shr_t');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'MoneyApp', text: txt, url });
+      return;
+    } catch (e) {
+      /* Abbruch durch den Nutzer: nichts weiter tun; anderer Fehler: kopieren */
+      if (e && e.name == 'AbortError') return;
+    }
+  }
+  const all = txt + ' ' + url;
+  try {
+    await navigator.clipboard.writeText(all);
+  } catch (e) {
+    /* Ältere Browser ohne Zwischenablage-Zugriff: über ein verstecktes Feld kopieren */
+    const ta = document.createElement('textarea');
+    ta.value = all;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e2) {}
+    ta.remove();
+    if (!ok) return toast(t('shr_e'));
+  }
+  toast(t('shr_c'));
+}
 /* Buchung erfassen / bearbeiten */
 function ot(id) {
   const x = id && allT().find((y) => y.id == id);
