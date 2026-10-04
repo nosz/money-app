@@ -1148,3 +1148,6 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 @media (prefers-reduced-motion:reduce){.form-control.rej{animation:none}.btn[data-s]{transition:none}}
 #dsc{z-index:25}
 #dsc .sh{min-height:0}
+
+/* 1.37.2: Monat auf der Startseite aufklappen: Karte landet beim Scrollen unter dem Rand oben (--stk), nicht darunter versteckt */
+.mh{scroll-margin-top:calc(var(--stk) + 8px)}

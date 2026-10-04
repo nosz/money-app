@@ -1,13 +1,19 @@
-# MoneyApp – Nächste Schritte (Stand 1.37.1)
+# MoneyApp – Nächste Schritte (Stand 1.37.2)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.37.1** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.37.2** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.37.2: Monat auf der Startseite aufklappen, Buchungen sofort sichtbar.** Anlass: Nach dem Aufklappen eines Monats (Karte „Monatsliste“ unter „Monatsbilanz“ und „Bleibt bis Monatsende“) lagen die Buchungen unterhalb des sichtbaren Bereichs, der Nutzer musste erst scrollen.
+  Geändert: `js/render.js` (neue Funktion `mtg(m, el)` vor `mlist()`; `ontoggle` der Monats-`<details>` ruft sie statt direkt `HS.o[m]=this.open` auf), `css/style.css` (am Ende: `.mh{scroll-margin-top:calc(var(--stk) + 8px)}`), `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`).
+  Ablauf: `mtg()` merkt den Zustand in `HS.o[m]`. Öffnet der Nutzer den Monat (vorher zu, jetzt offen), scrollt `scrollIntoView({block:'start'})` nach einem Frame die Karte `.mh` nach oben, sanft (bei „Bewegung reduzieren“ ohne Animation). Beim Zuklappen und beim Neuzeichnen über `rd()` (Monat schon als offen gemerkt) wird nicht gescrollt. Der Abstand oben kommt aus `--stk` (Rand oben plus 8 px), damit die mitlaufende Monatszeile nichts verdeckt.
+  Logik, Datenformat, Backup, Filter und Sortierung unverändert. Keine neuen Texte.
+  Getestet in Chromium (390 px, Testbuchungen in zwei Monaten): Aufklappen setzt die Karte auf 8 px unter den oberen Rand, Zuklappen und `rd()` springen nicht, keine JS-Fehler.
 
 - **1.37.1: Korrektur „Konto-Kacheln fehlen bei überall 0“.** Fund: In der Karte „Monatsbilanz“ auf der Startseite fehlten die Kacheln Bar, Bank und Gespart (und die Zeile „Gesamtguthaben“), solange kein Startwert gespeichert, keine Umbuchung und keine Bar-Buchung vorhanden war.
   Ursache: `balOn()` in `js/core.js` war dann `false`, `bstrip()` lieferte leeren Text; `V.home()` in `js/render.js` zeigte die Kacheln nur bei `balOn()`, „Gesamtguthaben“ nur bei `hasSt()`; die Kachel „Gespart“ erschien nur bei gesetztem Sparwert oder Saldo ungleich 0.
@@ -149,6 +155,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Konto-Kacheln (1.37.1): Bar, Bank und Gespart sowie „Gesamtguthaben“ werden in der Monatsbilanz immer angezeigt, egal wie hoch die Werte sind (auch überall 0,00 €). Konto-Knöpfe in Buchung und Umbuchung zeigen die Kontostände ebenfalls immer.
 
+- Monat aufklappen (1.37.2): Die Ansicht scrollt sanft so, dass die Monatszeile oben steht; die Monatsliste bleibt unter den Karten der Startseite (Aufbau der Startseite unverändert, Variante 2 „Monatsliste ganz oben“ wurde verworfen).
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -193,6 +201,7 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] 1.37.2 am Handy: Startseite, Monat antippen: Monatszeile steht oben, Buchungen sofort sichtbar; Zuklappen springt nicht; mehrere Monate nacheinander; Filter über die Kacheln (Ausgaben/Einnahmen/Umbuchung) und Sortierung ändern die Position nicht; Deutsch und Englisch?
 - [ ] 1.37.1 am Handy: Neue Installation ohne Daten (alles 0): In der Monatsbilanz stehen Bar, Bank, Gespart und Gesamtguthaben; Buchungsmaske und Umbuchung zeigen Kontostände 0,00 €; Deutsch und Englisch?
 
 - [ ] 1.37.0 am Handy: In Konten, Buchung, wiederkehrender Buchung, „Betrag ändern“ und PIN Buchstaben tippen und einfügen (nichts kommt an), „1.234,56 €“ einfügen (ergibt 1234,56), Wert ändern und zurückändern (Knopf und Zeile „Nicht gespeicherte Änderung“ wechseln mit), Konto speichern (2 Sekunden grün, dann grau „Gespeichert“), Maske mit Änderung schließen (Rückfrage „Änderungen verwerfen?“, beide Knöpfe), Zurück-Geste mit Änderung, ohne Änderung schließt direkt, Deutsch und Englisch?

@@ -104,6 +104,21 @@ function mty(k) {
   HS.ty = HS.ty == k ? '' : k;
   rd();
 }
+/* 1.37.2: Monat aufklappen (Startseite): Zustand merken; öffnet der Nutzer den Monat, scrollt die Ansicht sanft so, dass die Monatszeile oben steht und die Buchungen sofort sichtbar sind.
+   Beim Neuzeichnen (rd()) ist der Monat schon als offen gemerkt, dann wird nicht gescrollt. */
+function mtg(m, el) {
+  const was = !!HS.o[m];
+  HS.o[m] = el.open;
+  if (!el.open || was) return;
+  const c = el.closest('.mh');
+  if (!c) return;
+  requestAnimationFrame(() =>
+    c.scrollIntoView({
+      block: 'start',
+      behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+    }),
+  );
+}
 const mlist = () => {
   const cur = iso(D).slice(0, 7),
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
@@ -120,7 +135,7 @@ const mlist = () => {
         g = sortL(gm, sc, dr).filter((x) => !ft || x.t == ft),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="HS.o['${m}']=this.open"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort') + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
+      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="mtg('${m}',this)"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort') + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
     })
     .join('');
 };
