@@ -1,15 +1,22 @@
-# MoneyApp – Nächste Schritte (Stand 1.40.0)
+# MoneyApp – Nächste Schritte (Stand 1.41.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.40.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.41.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
 
-- **1.40.0: Speichern-Knopf beim Bearbeiten erkennbar, Monatsleiste auf der Startseite.** Zwei Rückmeldungen des Nutzers am Handy (Version neu als Nebenversion, weil ein neues Bedienelement dazukommt).
+- **1.41.0: Karte „Buchungen“ (Einstellungen) professioneller, Monatsleiste der Startseite entfernt.** Zwei Rückmeldungen des Nutzers am Handy (Screenshots). Nur Darstellung und Bedienung, Logik der Filter (`fl()`, `rl()`, `fsm()`, `F`), Datenformat und Backup unverändert.
+  1) *Monatsleiste entfernt:* Die zweite Zeile der Kopfleiste (Chips wie „Okt“, `mbar()`, `mbu()`, `mgo()`, `mshort()`, `tbr()`-Teil) ist weg, die Kopfleiste ist wieder 48 px hoch (`--mbh` bleibt 0 px in `css/style.css`). Text `mbar` aus `js/i18n.js` entfernt. `mlms()` bleibt (wird von `mlist()` gebraucht), `mtg()` ruft kein `mbu()` mehr auf.
+  2) *Karte „Buchungen“ (`V.lb()` in `js/render.js`):* Von oben nach unten: Umschalter „Monat | Alle Monate“ (`.fmd`, `fmd(all)`, ersetzt die Checkbox `.allm`), Monatswahl `mn()` nur im Modus „Monat“, Suchfeld mit Bootstrap Icon `search` links, kürzerem Platzhalter (`search2`: „Notiz oder Kategorie suchen“) und ✕ zum Leeren (`#fqx`, `fqc()`, neuer Text `fqc`), Beschriftung „Kategorie“ mit Auswahlfeld `#fcb` (`.fsel`, zeigt `fcin()`), Ergebniszeile `fsm()` (Knopf „Filter zurücksetzen“ jetzt mit Icon `x` statt ✕-Zeichen), Liste. Die umbrechenden Kategorie-Chips (`.chips`, `.chip`, `fc()`) sind entfernt.
+  3) *Kategorie-Auswahl für den Filter* (`js/app.js`, vor `dpk()`): `fcp()` öffnet die Vollbild-Ansicht (`sheet(…, 'fs')`) mit Suche (`#fpi`, `fpf()`), oben „Alle Kategorien“, darunter Ausgaben und Einnahmen als Listen (`fpl()`, nur Kategorien mit Buchungen oder die gewählte, nach Häufigkeit sortiert, Linien-Icon über `ci()`, Anzahl der Buchungen rechts); `fcs(id)` setzt `F.c`, schließt die Ansicht und aktualisiert nur Feld, Ergebniszeile und Liste (`rs()`), ohne die Einstellungen neu zu zeichnen. Neue Texte `fpe`, `fpn` (Deutsch und Englisch). Gespeicherte Emojis eigener Kategorien bleiben als Emoji sichtbar (nur Darstellung).
+  Geändert: `js/render.js`, `js/app.js`, `js/core.js` (neues Icon `search` in `BIP`, `APP_VERSION`), `js/i18n.js`, `css/style.css` (Abschnitt „1.41.0“ am Ende; Regeln für Monatsleiste, `.allm`, `.chips`, `.chip` entfernt), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (Abschnitt 7b neu, 8a ersetzt, Abschnitt 10). Keine neuen Dateien.
+  Getestet in Chromium (390 px, Deutsch und Englisch, Testdaten): Kopfleiste 48 px ohne Monatsleiste; Karte zeigt Umschalter, Suchfeld ohne abgeschnittenen Platzhalter, Kategorie-Feld; Auswahl öffnet und schließt, Wahl setzt `F.c` und Feld, Suche in der Auswahl, ✕ leert die Suche, „Alle Monate“ blendet die Monatswahl aus, „Filter zurücksetzen“ setzt `F` zurück; keine JS-Fehler. Echte Geräte (iOS, Android) und das dunkle Theme wurden nicht gesondert geprüft.
+
+- **1.40.0: Speichern-Knopf beim Bearbeiten erkennbar, Monatsleiste auf der Startseite (Monatsleiste seit 1.41.0 wieder entfernt).** Zwei Rückmeldungen des Nutzers am Handy (Version neu als Nebenversion, weil ein neues Bedienelement dazukommt).
   1) *Speichern-Knopf:* Beim Öffnen einer bestehenden Buchung (und jeder Bearbeiten-Maske) stand der unveränderte Knopf im Zustand `idle` mit dem Text „Gespeichert“ (grau, deaktiviert), der Nutzer sah „den Speichern-Button nicht“. Jetzt heißt er in allen Masken auch im Zustand `idle` „Speichern“ / „Save“ (weiterhin grau und deaktiviert, wird bei einer Änderung aktiv). `svr()` in `js/app.js`: `txt = lb || t('save')`. Die Kontofelder (`kSt()`) behalten „Gespeichert“. Zustände, Hinweiszeile und Verwerfen-Rückfrage unverändert. Die Knopfzeile `.stkb` war auch mit simulierter Tastatur sichtbar (Chromium); echte Geräte weiter ungetestet.
   2) *Monatsleiste:* Anlass: Nach dem Antippen eines Monats scrollt die Ansicht nach oben, andere Monate waren dann nicht mehr erreichbar. Jetzt klebt in der Kopfleiste `#tb` eine zweite Zeile mit wischbaren Chips (`mbar()`, `.mbc`, 44 px hoch): ein Chip je Monat der Monatsliste, ältester links, immer sichtbar. Tipp auf einen Chip (`mgo(m)`): Monat öffnen, die anderen zuklappen, Monatskarte nach oben scrollen. Offene Monate sind im Chip markiert (`mbu()`, auch beim Öffnen über die Monatszeile in `mtg()`).
   Geändert: `js/render.js` (neu `mlms()` aus `mlist()` herausgezogen, `mshort()`, `mbar()`, `mbu()`, `mgo()`; `tbr()` baut zwei Zeilen und setzt `--mbh`; Monatskarte `.mh` bekommt `data-m`; `mtg()` ruft `mbu()`), `js/i18n.js` (neuer Text `mbar`, Deutsch und Englisch), `css/style.css` (`--mbh`, `--tbh` = 48 px + `--mbh`, `#tb` als Spalte, Abschnitt „1.40.0“: `.tbr1`, `.mbar`, `.mbc`), `js/app.js`, `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (5b und neuer Abschnitt 8a). Keine neuen Dateien, Datenformat und Backup unverändert.
@@ -182,7 +189,9 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Speichern-Knopf beim Bearbeiten (1.40.0): Der unveränderte Knopf bleibt grau und deaktiviert, heißt aber „Speichern“ statt „Gespeichert“ (Variante „bleibt Gespeichert“ verworfen). Gilt für alle Masken, nicht für die Kontofelder.
 
-- Monatsleiste (1.40.0): Wischbare Chips in einer zweiten Zeile der Kopfleiste, immer sichtbar auf der Startseite (Variante „Pfeile ‹ › in der Monatszeile“ verworfen). Tipp auf einen Chip öffnet diesen Monat, klappt die anderen zu und scrollt die Monatskarte nach oben (Variante „andere Monate bleiben offen“ verworfen). Chips = Monate der Monatsliste (aktueller und zwei davor, nur mit Buchungen).
+- Monatsleiste (1.40.0, **seit 1.41.0 entfernt** auf Wunsch des Nutzers, nicht wieder einbauen): Wischbare Chips in einer zweiten Zeile der Kopfleiste, immer sichtbar auf der Startseite (Variante „Pfeile ‹ › in der Monatszeile“ verworfen). Tipp auf einen Chip öffnet diesen Monat, klappt die anderen zu und scrollt die Monatskarte nach oben (Variante „andere Monate bleiben offen“ verworfen). Chips = Monate der Monatsliste (aktueller und zwei davor, nur mit Buchungen).
+
+- Karte „Buchungen“ (1.41.0): Kategorie-Filter als Auswahlfeld mit Vollbild-Auswahl wie in der Buchungsmaske (Variante „eine wischbare Chip-Zeile“ verworfen); „Alle Monate“ als Umschalter „Monat | Alle Monate“ (Variante „Checkbox schlichter gestalten“ verworfen); Suchfeld mit Icon `search`, kürzerem Platzhalter und ✕ zum Leeren (Variante „nur Emoji ersetzen“ verworfen); Ergebniszeile mit „Zurücksetzen“ bleibt direkt unter den Filtern, Knopf mit Icon `x` (Variante „Zusammenfassung über den Filtern“ verworfen).
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 

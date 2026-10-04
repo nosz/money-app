@@ -833,22 +833,10 @@ nav .nb.on svg.ni{opacity:1}
 mark.hl{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;font-weight:inherit;padding:0 .15em;margin:0 -.15em;border-radius:.3em;box-shadow:inset 0 -.15em 0 color-mix(in srgb,var(--gold) 65%,transparent);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .grid .hn{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(var(--fs-s) * .85);font-weight:400;color:var(--m)}
 
-/* ===== 1.20.1: „Alle Monate“ direkt unter der Monatsauswahl ===== */
-.allm{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-weight:400;color:var(--text);font-size:var(--fs-s)}
-.allm input{-webkit-appearance:none;appearance:none;display:grid;place-content:center;width:1.3rem;height:1.3rem;margin:0;border:2px solid var(--b);border-radius:6px;background:var(--surface);cursor:pointer}
-.allm input::after{content:'';width:.75rem;height:.75rem;background:var(--on);transform:scale(0);clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0,43% 62%)}
-.allm input:checked{background:var(--gold);border-color:var(--gold)}
-.allm input:checked::after{transform:scale(1)}
-
-/* ===== 1.21.0: Kategorie-Chips und Zusammenfassung über der Liste ===== */
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
-.chip{min-height:40px;padding:0 12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;border-radius:999px;border:2px solid var(--b);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-s);white-space:nowrap;cursor:pointer}
-.chip.ce{border-color:color-mix(in srgb,var(--rust) 40%,var(--b))}
-.chip.ci{border-color:color-mix(in srgb,var(--sage) 55%,var(--b))}
-.chip.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--surface));font-weight:700}
+/* ===== 1.21.0: Zusammenfassung über der Liste (Kategorie-Chips und Checkbox „Alle Monate“ seit 1.41.0 ersetzt) ===== */
 .fsum{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:2px 2px 4px;font-size:var(--fs-s);color:var(--m)}
 .fsum:empty{display:none}
-.fclr{min-height:44px;padding:0 6px;border:0;background:none;color:var(--gold);font:inherit;font-size:var(--fs-s);font-weight:700;cursor:pointer}
+.fclr{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 6px;border:0;background:none;color:var(--gold);font:inherit;font-size:var(--fs-s);font-weight:700;cursor:pointer}
 
 /* ===== 1.21.3: Zähler-Kacheln (Zahl über Label) als Typ-Filter im aufgeklappten Monat ===== */
 .mcnt{display:flex;gap:8px;margin:6px 0 4px}
@@ -1164,11 +1152,26 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .tbt{font-weight:700;font-size:var(--fs-m);color:var(--text)}
 #v.w{padding-top:12px}
 
-/* ===== 1.40.0: Monatsleiste in der Kopfleiste (Startseite) =====
-   Zweite Zeile in #tb, immer sichtbar (auch ganz oben). --mbh = Höhe (48 px, per JS in tbr() gesetzt, 0 ohne Leiste);
-   --tbh/--tbt wachsen mit, daher kleben Monatszeilen und Scroll-Ziele automatisch darunter. Chips mindestens 44 px hoch, wischbar. */
+/* ===== 1.40.0: Kopfleiste, erste Zeile (die Monatsleiste der zweiten Zeile ist seit 1.41.0 entfernt, --mbh bleibt 0) ===== */
 .tbr1{display:flex;align-items:center;gap:6px;height:48px;flex:none}
-.mbar{display:flex;align-items:center;gap:8px;height:var(--mbh);flex:none;margin:0 -14px;padding:0 14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.mbar::-webkit-scrollbar{display:none}
-.mbc{flex:none;min-width:60px;min-height:44px;padding:0 14px;border:1px solid var(--b);border-radius:999px;background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-s);font-weight:600;white-space:nowrap;cursor:pointer}
-.mbc.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface));font-weight:700}
+
+/* ===== 1.41.0: Karte „Buchungen“ (Einstellungen): Umschalter, Suchfeld mit Icon, Kategorie-Auswahlfeld, Auswahl-Ansicht ===== */
+.fmd{display:flex;gap:4px;padding:4px;margin:0 0 12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r-m)}
+.fmd button{flex:1;min-width:0;min-height:44px;padding:8px 6px;border:0;border-radius:var(--r-s);background:transparent;color:var(--m);font:inherit;font-size:var(--fs-m);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.fmd button.on{background:var(--surface);color:var(--text);box-shadow:inset 0 -3px 0 var(--gold),0 1px 2px #0002}
+.fsr{position:relative;margin:0 0 12px}
+.fsr .form-control{padding-left:2.6rem;padding-right:12px;min-height:48px;text-overflow:ellipsis}
+.fsr .form-control.fon{padding-right:2.9rem}
+.fsr .fsi{position:absolute;left:14px;top:50%;transform:translateY(-50%);display:flex;color:var(--m);pointer-events:none}
+.fsr .fsi .bi{width:1.1rem;height:1.1rem}
+.fsr .fsx{position:absolute;right:2px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;background:none;color:var(--m);cursor:pointer}
+.fsr .fsx .bi{width:1rem;height:1rem}
+#fq::-webkit-search-cancel-button,#fq::-webkit-search-decoration{-webkit-appearance:none;display:none}
+.fld .fl{display:block;margin:0 2px 4px;font-size:var(--fs-s);font-weight:400;color:var(--m);line-height:1.3}
+#v .fld{margin:0 0 8px}
+.fsel{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--b);border-radius:var(--r-s);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);text-align:left;cursor:pointer}
+.fsel::after{content:'›';flex:none;color:var(--m);font:var(--fs-l)/1 var(--fd)}
+.fsel .ckv{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsel .ckv b{font-weight:400}
+.fsel em{font-style:normal;color:var(--m)}
+.sh .pk .pc{flex:none;color:var(--m);font-size:var(--fs-s);font-variant-numeric:tabular-nums}

@@ -109,7 +109,6 @@ function mty(k) {
 function mtg(m, el) {
   const was = !!HS.o[m];
   HS.o[m] = el.open;
-  mbu();
   if (!el.open || was) return;
   const c = el.closest('.mh');
   if (!c) return;
@@ -120,7 +119,7 @@ function mtg(m, el) {
     }),
   );
 }
-/* 1.40.0: Monate der Monatsliste (aktueller und die zwei Monate davor, nur mit Buchungen), gemeinsam für Liste und Monatsleiste */
+/* Monate der Monatsliste (aktueller und die zwei Monate davor, nur mit Buchungen) */
 const mlms = () => {
   const cur = iso(D).slice(0, 7),
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
@@ -186,29 +185,39 @@ const fsm = () => {
     act = !!(F.q || F.c || F.all),
     net = l.reduce((s, x) => (x.t == 'i' ? s + x.a : x.t == 'e' ? s - x.a : s), 0),
     has = l.some((x) => x.t != 'u');
-  return `<span>${l.length ? `<b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${has ? ` · <b class="${net < 0 ? 'neg' : 'pos'}">${sg(net)}</b>` : ''}` : ''}</span>${act ? `<button type=button class=fclr onclick="frs()">✕ ${t('frs')}</button>` : ''}`;
+  return `<span>${l.length ? `<b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${has ? ` · <b class="${net < 0 ? 'neg' : 'pos'}">${sg(net)}</b>` : ''}` : ''}</span>${act ? `<button type=button class=fclr onclick="frs()">${bi('x')} ${t('frs')}</button>` : ''}`;
 };
 const rs = () => {
   $('#res').innerHTML = rl();
   $('#fsum').innerHTML = fsm();
 };
-const fr = () => $('#fq').classList.toggle('fon', !!F.q);
+const fr = () => {
+  $('#fq').classList.toggle('fon', !!F.q);
+  const x = $('#fqx');
+  if (x) x.hidden = !F.q;
+};
+/* 1.41.0: Suche leeren (✕ im Feld) */
+function fqc() {
+  F.q = '';
+  const e = $('#fq');
+  if (e) {
+    e.value = '';
+    e.focus();
+  }
+  rs();
+  fr();
+}
+/* 1.41.0: Umschalter „Monat | Alle Monate“ */
+function fmd(all) {
+  F.all = all ? 1 : 0;
+  rd();
+}
 const frs = () => {
   F.q = '';
   F.c = '';
   F.all = 0;
   rd();
 };
-/* Kategorie-Chips: Tipp setzt den Filter, erneuter Tipp hebt ihn auf */
-function fc(id) {
-  F.c = F.c == id ? '' : id;
-  document.querySelectorAll('.chips .chip').forEach((b) => {
-    const on = b.dataset.c == F.c;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on);
-  });
-  rs();
-}
 /* Ansichten */
 const V = {
   home() {
@@ -250,11 +259,8 @@ const V = {
     );
   },
   lb() {
-    const used = new Set(S.tx.map((x) => x.c)),
-      cs = S.cats.filter((c) => used.has(c.id) || c.id == F.c),
-      chip = (id, cls, lbl) =>
-        `<button type=button class="chip ${cls}${F.c == id ? ' on' : ''}" data-c="${id}" aria-pressed="${F.c == id}" onclick="fc('${id}')">${lbl}</button>`;
-    return `${F.all ? '' : mn()}<label class=allm><input type=checkbox ${F.all ? 'checked' : ''} onchange="F.all=this.checked;rd()">${t('allm')}</label><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="🔍 ${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="txc(this);F.q=this.value;rs();fr()" maxlength=60><div class=chips role=group aria-label="${t('fcat')}">${chip('', '', t('allk'))}${cs.map((c) => chip(c.id, c.t == 'i' ? 'ci' : 'ce', `${c.i} ${esc(t(c.n))}`)).join('')}</div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
+    /* 1.41.0: Umschalter Monat | Alle Monate, Monatswahl nur im Modus „Monat“, Suchfeld mit Icon, Kategorie als Auswahlfeld (Ansicht fcp() in js/app.js), Ergebniszeile, Liste */
+    return `<div class=fmd role=group aria-label="${t('month')}"><button type=button class="${F.all ? '' : 'on'}" aria-pressed="${!F.all}" onclick="fmd(0)">${t('month')}</button><button type=button class="${F.all ? 'on' : ''}" aria-pressed="${!!F.all}" onclick="fmd(1)">${t('allm')}</button></div>${F.all ? '' : mn()}<div class=fsr><span class=fsi>${bi('search')}</span><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="txc(this);F.q=this.value;rs();fr()" maxlength=60 autocomplete=off><button type=button id=fqx class=fsx ${F.q ? '' : 'hidden '}onclick="fqc()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button id=fcb class="fsel${F.c ? ' fon' : ''}" onclick="fcp()" aria-label="${t('fcat')}"><span class=ckv id=fcv>${fcin()}</span></button></div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,
@@ -564,50 +570,10 @@ const stk = () => {
   document.documentElement.style.setProperty('--sech', (b ? b.offsetHeight : 0) + 'px');
 };
 addEventListener('resize', stk);
-/* 1.40.0: Monatsleiste in der Kopfleiste (nur Startseite): ein Chip je Monat der Liste, immer sichtbar */
-const mshort = (p) => {
-  const d = new Date(p + '-01T00:00');
-  return d.toLocaleDateString(loc(), d.getFullYear() == D.getFullYear() ? { month: 'short' } : { month: 'short', year: '2-digit' });
-};
-const mbar = (ms) =>
-  `<div class=mbar role=group aria-label="${t('mbar')}">${ms
-    .map((m) => {
-      const on = !!(HS.o && HS.o[m]);
-      return `<button type=button class="mbc${on ? ' on' : ''}" data-m="${m}" aria-pressed="${on}" aria-label="${mlab(m)}" onclick="mgo('${m}')">${mshort(m)}</button>`;
-    })
-    .join('')}</div>`;
-/* Chips an den Zustand der Monate anpassen (offen = markiert) */
-function mbu() {
-  document.querySelectorAll('#tb .mbc').forEach((b) => {
-    const on = !!(HS.o && HS.o[b.dataset.m]);
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on);
-  });
-}
-/* Tipp auf einen Monat: diesen Monat öffnen, die anderen zuklappen, Monatskarte nach oben scrollen (Entscheidung 1.40.0) */
-function mgo(m) {
-  HS.o = HS.o || {};
-  document.querySelectorAll('.mh[data-m]').forEach((c) => {
-    const k = c.dataset.m,
-      d = c.querySelector('details');
-    HS.o[k] = k == m;
-    if (d) d.open = k == m;
-  });
-  mbu();
-  const c = document.querySelector('.mh[data-m="' + m + '"]');
-  if (c)
-    c.scrollIntoView({
-      block: 'start',
-      behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
-    });
-}
 /* 1.38.0: Kopfleiste oben (Startseite und Einstellungen): Home-Symbol links, bleibt beim Scrollen und bei offener Tastatur sichtbar */
 function tbr() {
-  const h = tab == 'home',
-    ms = h ? mlms().ms : [];
-  /* --mbh = Höhe der Monatsleiste; --tbt (Kopfleiste) wächst mit, alle mitlaufenden Überschriften kleben darunter */
-  document.documentElement.style.setProperty('--mbh', ms.length ? '48px' : '0px');
-  $('#tb').innerHTML = `<div class=tbr1><button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span></div>${ms.length ? mbar(ms) : ''}`;
+  const h = tab == 'home';
+  $('#tb').innerHTML = `<div class=tbr1><button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span></div>`;
 }
 function rd() {
   tbr();

@@ -155,6 +155,18 @@ Ziel: Der Knopf zeigt jederzeit, ob es etwas zu speichern gibt, und die Nutzerf�
 - Speicherung: ein gewähltes Bootstrap Icon wird im bestehenden Feld `i` als Kürzel gespeichert, z. B. `bi:cart`. Es gibt kein neues Datenfeld.
 - Bestehende Emojis bleiben unverändert erhalten. Standardkategorien behalten ihr gespeichertes Emoji und bekommen in der Anzeige das passende Linien-Icon (Emoji → nächstpassendes Icon, nur Darstellung, gespeicherte Daten bleiben unverändert).
 
+# 7b. Einstellungen: Karte „Buchungen“ (Nutzer-Vorgabe ab 1.41.0)
+
+Aufbau von oben nach unten (`V.lb()` in `js/render.js`), Handy zuerst, nichts bricht um und kein Text wird abgeschnitten:
+1. Umschalter „Monat | Alle Monate“ (`.fmd`, `fmd(all)`), gleicher Stil wie die Typ-Leiste der Buchungsmaske (Unterstrich in Hauptfarbe). Keine Checkbox.
+2. Monatswahl `mn()` mit Pfeilen, nur im Modus „Monat“.
+3. Suchfeld: Bootstrap Icon `search` links im Feld, Platzhalter „Notiz oder Kategorie suchen“ (einzeilig), ✕ zum Leeren (`#fqx`, `fqc()`, erscheint nur bei Eingabe, 44 px). Kein Emoji. Feldart Suche (Abschnitt 5a).
+4. Kategorie: kleine graue Beschriftung oben, darunter Auswahlfeld `#fcb` (`.fsel`). Tipp öffnet `fcp()`: Vollbild-Ansicht mit Titel „Kategorie“ und ✕, Suche, Zeile „Alle Kategorien“, darunter Ausgaben und Einnahmen als Listen mit Linien-Icon (`ci()`) und Anzahl der Buchungen. Keine Kategorie-Chips.
+5. Ergebniszeile (`fsm()`): Anzahl und Summe, rechts „Filter zurücksetzen“ mit Icon `x` (nur bei aktivem Filter). Direkt unter den Filtern.
+6. Liste der Buchungen.
+- Symbole in dieser Karte sind Bootstrap Icons, keine Emojis oder Sonderzeichen (gespeicherte Emojis eigener Kategorien bleiben als Emoji sichtbar).
+- Änderungen am Filter zeichnen nur die betroffenen Teile neu (`rs()`, `fr()`, `fcs()`), damit die Ansicht nicht springt; nur der Umschalter zeichnet die Ansicht neu (`rd()`).
+
 # 7a. Konten in den Einstellungen
 
 - Jedes Konto (Bank, Bar, Gespart) hat einen eigenen Speichern-Knopf neben dem Feld (`kto()` in `js/render.js`, `ktoSave(k)` in `js/app.js`). Er speichert nur dieses Konto, der gemeinsame Knopf unten entfällt.
@@ -167,11 +179,10 @@ Ziel: Der Knopf zeigt jederzeit, ob es etwas zu speichern gibt, und die Nutzerf�
 - Backup, Import und Datenformat unverändert lassen, damit alte Sicherungen weiter lesbar sind.
 - Bestehende Prüfungen unverändert übernehmen: Betrag 0, gleiches Konto, Konto-Minus, mögliche Doppelbuchung. Neue Live-Prüfungen (Abschnitt 5a) kommen dazu, sie ersetzen keine bestehende Prüfung.
 
-# 8a. Startseite: Monatsleiste (Nutzer-Vorgabe ab 1.40.0)
+# 8a. Startseite: keine Monatsleiste (Nutzer-Vorgabe ab 1.41.0)
 
-- In der Kopfleiste `#tb` steht auf der Startseite eine zweite Zeile mit einer Monatsleiste (`mbar()` in `js/render.js`): wischbare Chips (`.mbc`, mindestens 44 px hoch), ein Chip je Monat der Monatsliste (`mlms()`, aktueller Monat und die zwei davor, nur mit Buchungen), ältester links. Sie ist immer sichtbar, auch ganz oben und beim Scrollen. In den Einstellungen und ohne Buchungen gibt es keine Leiste.
-- Die Höhe der Leiste steht in `--mbh` (48 px, per `tbr()` gesetzt, sonst 0). `--tbh` und `--tbt` wachsen mit, mitlaufende Überschriften und Scroll-Ziele kleben darunter.
-- Tipp auf einen Chip (`mgo(m)`): diesen Monat öffnen, alle anderen zuklappen, die Monatskarte nach oben scrollen. Offene Monate sind im Chip markiert (`mbu()`), auch wenn der Nutzer sie über die Monatszeile öffnet.
+- Die Monatsleiste (wischbare Chips in einer zweiten Zeile der Kopfleiste, 1.40.0) ist entfernt und wird nicht wieder eingebaut. Die Kopfleiste `#tb` besteht nur aus Home-Symbol und Titel (48 px, `--mbh` bleibt 0).
+- Monate auf der Startseite werden über die Monatszeilen der Monatsliste geöffnet (`mtg()`), die Karte scrollt nach oben (1.37.2).
 
 # 9. Reihenfolge der Umsetzung (Maske für Maske, je eine Version)
 
@@ -194,4 +205,5 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 - Sind alte Backups weiter importierbar?
 - Liegt `NAECHSTE_SCHRITTE.md` aktualisiert im ZIP (nicht separat)?
 - Liegt `money_app_skill.md` in der aktuellen Fassung im ZIP?
+- Gibt es in den Einstellungen-Karten (Buchungen, Konten) keine Emojis, keine umbrechenden Chip-Reihen und keinen abgeschnittenen Text am Handy (390 und 320 px)?
 - Wurde nur auf „bauen“ geliefert (0.3)?

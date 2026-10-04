@@ -436,6 +436,57 @@ function clist() {
   );
 }
 
+/* 1.41.0: Kategorie-Filter der Karte „Buchungen“ (Einstellungen). Auswahlfeld #fcb, Auswahl-Ansicht wie in der Buchungsmaske:
+   Suche, „Alle Kategorien“ oben, Ausgaben und Einnahmen als Listen mit Linien-Icon und Anzahl der Buchungen. Gewählt wird F.c. */
+let FQ = '';
+const fcin = () => {
+  const c = S.cats.find((x) => x.id == F.c);
+  return c ? `<b>${ci(c)}</b> ${esc(t(c.n))}` : `<em>${t('bk_all')}</em>`;
+};
+function fcp() {
+  FQ = '';
+  sheet(
+    `<div class=sht><h2>${t('bk_cat')}</h2><button class=x onclick="cl()" aria-label="${t('x')}">${bi('x')}</button></div><input class="form-control" id=fpi type=search placeholder="${t('search')}" aria-label="${t('search')}" oninput="txc(this);FQ=this.value;fpf()" maxlength=60 autocomplete=off enterkeyhint=search><div class=cpl id=fpl>${fpl()}</div>`,
+    'fs',
+  );
+  const sh = $('.sh');
+  if (sh) sh.scrollTop = 0;
+}
+function fpf() {
+  const l = $('#fpl'),
+    q = $('#fpi');
+  if (l) l.innerHTML = fpl();
+  if (q) q.classList.toggle('fon', !!FQ);
+}
+function fpl() {
+  const q = FQ.trim().toLowerCase(),
+    n = {};
+  S.tx.forEach((x) => {
+    n[x.c] = (n[x.c] || 0) + 1;
+  });
+  const cs = S.cats.filter((c) => (n[c.id] || c.id == F.c) && (!q || t(c.n).toLowerCase().includes(q))),
+    row = (c) =>
+      `<button type=button class="pk${F.c == c.id ? ' on' : ''}" aria-pressed="${F.c == c.id}" onclick="fcs('${c.id}')"><b>${ci(c)}</b><span>${hl(t(c.n), q)}</span><small class=pc>${n[c.id] || 0}</small></button>`,
+    grp = (ty, ti) => {
+      const g = cs.filter((c) => c.t == ty).sort((a, b) => (n[b.id] || 0) - (n[a.id] || 0));
+      return g.length ? `<h3 class=ph>${t(ti)}</h3><div class=pl>${g.map(row).join('')}</div>` : '';
+    },
+    all = q
+      ? ''
+      : `<div class=pl><button type=button class="pk${F.c ? '' : ' on'}" aria-pressed="${!F.c}" onclick="fcs('')"><span>${t('bk_all')}</span></button></div>`,
+    body = grp('e', 'fpe') + grp('i', 'fpn');
+  return all + (body || (q ? `<div class=nr><small>${t('nores')}</small></div>` : ''));
+}
+function fcs(id) {
+  F.c = id;
+  cl();
+  const v = $('#fcv'),
+    b = $('#fcb');
+  if (v) v.innerHTML = fcin();
+  if (b) b.classList.toggle('fon', !!F.c);
+  rs();
+}
+
 /* Buchungsdatum: Kurzwahl Heute/Gestern und Datumsfeld bleiben synchron, ohne die Maske neu zu zeichnen */
 function dpk(v, el) {
   /* 1.37.0: ungültiges oder unvollständiges Datum wird gemeldet, das letzte gültige bleibt gespeichert */
