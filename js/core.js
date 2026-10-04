@@ -168,12 +168,12 @@ const AP = {
 };
 const AV = (k) => `<svg class=ai viewBox="0 0 16 16" fill=currentColor aria-hidden=true focusable=false>${AP[k]}</svg>`;
 /* Kontostände: nur zeigen, wenn sie aussagekräftig sind (Startwert eingetragen, Umbuchung oder Bar-Buchung vorhanden) */
-const balOn = () => hasSt() || S.tr.length > 0 || S.tx.some((x) => x.k == 'bar');
+const balOn = () => true; /* 1.37.1: Kontostände (Bar, Bank, Sparen) immer zeigen, auch bei überall 0 */
 /* Kontoleiste für Geld-Dialoge und Startseite; hi = hervorgehobene Konten */
 /* 1.21.24: nav = Kacheln sind Knöpfe und springen zum Konto-Feld in den Einstellungen (nur Startseite, nicht in den Dialogen) */
 const bstrip = (hi, nav) => {
   if (!balOn()) return '';
-  const ks = ['bar', 'bank'].concat(S.set[SK.spar] != null || Math.abs(bal('spar')) > 0.004 ? ['spar'] : []);
+  const ks = ['bar', 'bank', 'spar'];
   return `<div class=bstrip role=group aria-label="${t('kto')}">${ks
     .map(
       (k) =>
@@ -272,4 +272,4 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.37.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.37.1'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */

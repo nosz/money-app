@@ -1,13 +1,19 @@
-# MoneyApp – Nächste Schritte (Stand 1.37.0)
+# MoneyApp – Nächste Schritte (Stand 1.37.1)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.37.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.37.1** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.37.1: Korrektur „Konto-Kacheln fehlen bei überall 0“.** Fund: In der Karte „Monatsbilanz“ auf der Startseite fehlten die Kacheln Bar, Bank und Gespart (und die Zeile „Gesamtguthaben“), solange kein Startwert gespeichert, keine Umbuchung und keine Bar-Buchung vorhanden war.
+  Ursache: `balOn()` in `js/core.js` war dann `false`, `bstrip()` lieferte leeren Text; `V.home()` in `js/render.js` zeigte die Kacheln nur bei `balOn()`, „Gesamtguthaben“ nur bei `hasSt()`; die Kachel „Gespart“ erschien nur bei gesetztem Sparwert oder Saldo ungleich 0.
+  Geändert: `js/core.js` (`balOn()` liefert immer `true`; `bstrip()` zeigt immer `bar`, `bank`, `spar`; `APP_VERSION`), `js/render.js` (`V.home()`: Kacheln und „Gesamtguthaben“ immer), `service-worker.js` (nur `CACHE_VERSION`).
+  Folge von `balOn() = true`: Kontostände erscheinen auch an den Konto-Knöpfen in Buchung und Umbuchung, in der Live-Vorschau `bnu()` („Danach“) und im Toast nach dem Speichern, auch bei 0,00 €. Berechnung (`bal()`, `hasSt()` für „Bleibt bis Monatsende“), Datenformat, Backup und Import unverändert.
+  Getestet in Chromium (390 px, ohne Daten): Startseite zeigt Bar, Bank, Gespart je 0,00 € und Gesamtguthaben 0,00 €, Buchungsmaske öffnet, keine JS-Fehler.
 
 - **1.37.0: Validierung aller Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage** (Skill 5a und 5b, Spezifikation siehe Abschnitt 3, Schritt 1).
   Geändert: `js/app.js` (neuer Block nach `rej()`: `amn()`, `amc(el, neg)`, `dgc()`, `txc()`, `dvl()`, `typed()`, `SN`, `CUR`, `NW`, `BADF`, `sbs()`, `svr()`, `dcl()`, `dscAsk()`/`dscN()`/`dscY()`;
@@ -141,6 +147,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 - Konten-Einstellungen (1.36.0): Ein Speichern-Knopf pro Konto neben dem Feld (speichert nur dieses Konto), mit beschriftetem Knopf (Haken plus Text „Speichern“, ab 1.36.1; ein reiner Haken war nicht erkennbar, mindestens 44 px); der gemeinsame Knopf unten entfällt; der Willkommen-Dialog `ob2()` bleibt unverändert
   (dort speichert „Los“ alle Felder).
 
+- Konto-Kacheln (1.37.1): Bar, Bank und Gespart sowie „Gesamtguthaben“ werden in der Monatsbilanz immer angezeigt, egal wie hoch die Werte sind (auch überall 0,00 €). Konto-Knöpfe in Buchung und Umbuchung zeigen die Kontostände ebenfalls immer.
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -184,6 +192,8 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
   (`service-worker.js`) eintragen, ZIP nach der Version benennen (`money_app_<x_y_z>.zip`).
 
 ## 5. Prüfliste nach jeder Lieferung
+
+- [ ] 1.37.1 am Handy: Neue Installation ohne Daten (alles 0): In der Monatsbilanz stehen Bar, Bank, Gespart und Gesamtguthaben; Buchungsmaske und Umbuchung zeigen Kontostände 0,00 €; Deutsch und Englisch?
 
 - [ ] 1.37.0 am Handy: In Konten, Buchung, wiederkehrender Buchung, „Betrag ändern“ und PIN Buchstaben tippen und einfügen (nichts kommt an), „1.234,56 €“ einfügen (ergibt 1234,56), Wert ändern und zurückändern (Knopf und Zeile „Nicht gespeicherte Änderung“ wechseln mit), Konto speichern (2 Sekunden grün, dann grau „Gespeichert“), Maske mit Änderung schließen (Rückfrage „Änderungen verwerfen?“, beide Knöpfe), Zurück-Geste mit Änderung, ohne Änderung schließt direkt, Deutsch und Englisch?
 
