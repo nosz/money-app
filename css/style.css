@@ -1182,3 +1182,7 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 /* ===== 1.43.0: Wiederholung der wiederkehrenden Buchung: vier Einträge in zwei Reihen mit je zwei Feldern ===== */
 .sh .tp.rtp{flex-wrap:wrap}
 .sh .tp.rtp button{flex:1 1 calc(50% - 2px);min-width:0}
+
+/* ===== 1.44.0: Suche in der Karte „Buchungen“: Feld beim Antippen unter die Kopfleiste und die Kopfzeile des Bereichs (--stk), Treffer darunter sichtbar ===== */
+#fq{scroll-margin-top:calc(var(--stk) + 8px)}
+body.fqf #v::after{content:'';display:block;height:60vh}

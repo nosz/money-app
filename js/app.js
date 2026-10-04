@@ -1519,11 +1519,20 @@ addEventListener('orientationchange', () => {
 addEventListener('focusin', (e) => {
   const el = e.target;
   if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return;
+  /* 1.44.0: Suchfeld der Karte „Buchungen“ (#fq): Feld oben unter die Kopfleiste (scroll-margin im CSS), damit Kategorie, Ergebniszeile und
+     erste Treffer über der Tastatur stehen. Die Klasse fqf schafft Platz unten, damit das Scrollen auch bei wenigen Treffern bis oben reicht. */
+  if (el.id == 'fq') document.body.classList.add('fqf');
   setTimeout(() => {
     try {
-      el.scrollIntoView({ block: el.id == 'csi' ? 'start' : 'center', behavior: 'smooth' });
+      el.scrollIntoView({ block: el.id == 'csi' || el.id == 'fq' ? 'start' : 'center', behavior: 'smooth' });
     } catch (x) {}
   }, 320);
+});
+addEventListener('focusout', (e) => {
+  if (!e.target || e.target.id != 'fq') return;
+  setTimeout(() => {
+    if (!document.activeElement || document.activeElement.id != 'fq') document.body.classList.remove('fqf');
+  }, 300);
 });
 /* 1.22.0: Kommt die App nach Tagen wieder in den Vordergrund, kann die Backup-Karte fällig sein: Startseite neu zeichnen, aber nur bei Änderung und nie bei offenem Dialog */
 document.addEventListener('visibilitychange', () => {

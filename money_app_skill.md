@@ -164,6 +164,7 @@ Aufbau von oben nach unten (`V.lb()` in `js/render.js`), Handy zuerst, nichts br
 4. Kategorie: kleine graue Beschriftung oben, darunter Auswahlfeld `#fcb` (`.fsel`). Tipp öffnet `fcp()`: Vollbild-Ansicht mit Titel „Kategorie“ und ✕, Suche, Zeile „Alle Kategorien“, darunter Ausgaben und Einnahmen als Listen mit Linien-Icon (`ci()`) und Anzahl der Buchungen. Keine Kategorie-Chips.
 5. Ergebniszeile (`fsm()`): Anzahl und Summe, rechts „Filter zurücksetzen“ mit Icon `x` (nur bei aktivem Filter). Direkt unter den Filtern.
 6. Liste der Buchungen.
+- Suche am Handy (ab 1.44.0): Tippt der Nutzer ins Suchfeld `#fq`, rutscht es direkt unter die Kopfleiste und die Kopfzeile des Bereichs (`scroll-margin-top` auf `#fq` mit `--stk`, Fokus-Handler in `js/app.js`), damit Kategorie, Ergebniszeile (Anzahl und Summe) und die ersten Treffer über der Tastatur stehen. Die Klasse `fqf` am `body` schafft unten Platz (`#v::after`, 60vh), solange das Feld den Fokus hat, damit das Scrollen auch bei wenigen Treffern bis oben reicht. Nur dieses Feld, alle anderen Felder behalten die Zentrierung.
 - Symbole in dieser Karte sind Bootstrap Icons, keine Emojis oder Sonderzeichen (gespeicherte Emojis eigener Kategorien bleiben als Emoji sichtbar).
 - Änderungen am Filter zeichnen nur die betroffenen Teile neu (`rs()`, `fr()`, `fcs()`), damit die Ansicht nicht springt; nur der Umschalter zeichnet die Ansicht neu (`rd()`).
 

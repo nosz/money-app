@@ -1,13 +1,20 @@
-# MoneyApp – Nächste Schritte (Stand 1.43.0)
+# MoneyApp – Nächste Schritte (Stand 1.44.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.43.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.44.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.44.0: Suche in der Karte „Buchungen“ am Handy: Treffer sofort sichtbar.** Anlass (Screenshot des Nutzers): Bei offener Tastatur zentrierte `focusin` das Suchfeld mitten im Bild, Kategorie, Ergebniszeile und Treffer lagen hinter der Tastatur, der Nutzer musste scrollen. Nur Darstellung und Bedienung; Filterlogik (`fl()`, `rl()`, `fsm()`, `rs()`, `F`), Datenformat und Backup unverändert.
+  1) *Fokus-Handler* (`addEventListener('focusin', …)` in `js/app.js`): Für `#fq` wird `scrollIntoView({block:'start'})` statt `center` benutzt (wie schon bei `#csi`), alle anderen Felder bleiben bei `center`. Beim Fokus bekommt der `body` die Klasse `fqf`; ein neuer `focusout`-Handler nimmt sie nach 300 ms wieder weg, wenn `#fq` den Fokus nicht mehr hat (✕ im Feld holt den Fokus zurück, die Klasse bleibt dann).
+  2) *CSS* (Abschnitt „1.44.0“): `#fq{scroll-margin-top:calc(var(--stk) + 8px)}` (--stk = Kopfleiste plus Kopfzeile des geöffneten Bereichs, im `.sec` gesetzt, damit das Feld nicht unter den mitlaufenden Zeilen verschwindet) und `body.fqf #v::after{content:'';display:block;height:60vh}` (Platz unten, damit das Scrollen auch bei wenigen Treffern bis oben reicht, nur solange das Feld den Fokus hat).
+  Geändert: `js/app.js`, `css/style.css`, `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (Abschnitt 7b), `NAECHSTE_SCHRITTE.md`. Keine neuen Dateien, keine neuen Texte.
+  Getestet in Chromium (390 und 320 px, Handy-Emulation, Deutsch und Englisch, 4 bis 40 Testbuchungen): Suchfeld steht nach dem Antippen bei 118 px direkt unter Kopfleiste (48 px) und Bereichskopf (62 px), auch bei nur vier Treffern; Klasse `fqf` nur bei Fokus im Suchfeld, weg nach dem Verlassen; ✕ leert die Suche, Feld bleibt oben; Kontofeld (anderes Feld) bekommt die Klasse nicht; keine Seitenbreite über Fenster, keine JS-Fehler. Die echte Tastatur wurde nicht simuliert: Auf dem Handy prüfen, wie viele Zeilen oberhalb der Tastatur sichtbar sind (erwartet: Suchfeld, Kategorie, Ergebniszeile mit Anzahl und Summe, Gruppenkopf und der Anfang des ersten Treffers).
+  Offen/Hinweis: Reicht die Höhe bei kleinen Handys nicht für einen Treffer, wäre eine nächste Stufe, die Kategorie bei offener Tastatur auszublenden (nicht entschieden, nur auf Wunsch).
 
 - **1.43.0: Wiederholung „Vierteljährlich“ bei wiederkehrenden Buchungen.** Neues Kürzel `q` in `r.f` (alle 3 Monate); Datenformat sonst unverändert, alte Backups bleiben lesbar (`m`, `w`, `y` wie bisher).
   1) *Fälligkeit:* `dateK(r, k)` in `js/store.js`: Monatsschritt `3 * k` bei `r.f == 'q'`. Monatsende bleibt wie bei monatlich (31.01. → 30.04. → 31.07., immer vom Startdatum `r.s` aus gerechnet).
@@ -216,6 +223,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Wiederholung „Vierteljährlich“ (1.43.0): Neues Kürzel `q` (alle 3 Monate); Leiste der wiederkehrenden Buchung in zwei Reihen mit je zwei Feldern (Variante „eine Reihe mit vier Feldern“ verworfen); Reihenfolge „Monatlich | Wöchentlich“ oben, „Vierteljährlich | Jährlich“ unten (Variante „nach Rhythmus sortiert“ verworfen). Die Auswahl in „Weitere Angaben“ der Buchungsmaske bekommt den Eintrag ebenfalls.
 
+- Suche in der Karte „Buchungen“ am Handy (1.44.0): Suchfeld rutscht beim Antippen direkt unter die Kopfleiste, darunter sofort Kategorie, Ergebniszeile und erste Treffer (Variante „Vollbild-Suchansicht“ verworfen, Grund: zusätzlicher Bildschirm, Monat und Kategorie dort nicht sichtbar). Gilt nur für `#fq`.
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -260,6 +269,7 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] 1.44.0 am Handy (iOS und Android): Einstellungen → Buchungen, Suchfeld antippen: es rutscht unter die Kopfleiste und den Bereichskopf „Buchungen“, über der Tastatur stehen Kategorie, Ergebniszeile (Anzahl und Summe) und der Anfang der Treffer; Tippen ändert die Position nicht; ✕ leert die Suche, Feld bleibt oben; Tastatur schließen: Seite springt nicht unruhig; bei sehr wenigen Treffern keine große Leerfläche nach dem Schließen; andere Felder (Konten, Masken) verhalten sich wie vorher; Deutsch und Englisch?
 - [ ] 1.43.0 am Handy: Neue wiederkehrende Buchung: Leiste zeigt zwei Reihen („Monatlich | Wöchentlich“, „Vierteljährlich | Jährlich“), voller Text auch bei kleinem Handy; „Vierteljährlich“ wählen, Hinweiszeile „… danach vierteljährlich“; speichern, in den Einstellungen erscheint „Vierteljährlich“ in der Liste; Fälligkeit nach 3 Monaten; bearbeiten und Rhythmus wechseln; in der Buchungsmaske unter „Weitere Angaben“ „Vierteljährlich“ wählbar; Deutsch und Englisch?
 - [ ] 1.40.0 am Handy: Buchung antippen (Bearbeiten): Knopf unten heißt „Speichern“ (grau), nach einer Änderung aktiv mit „Nicht gespeicherte Änderung“, auch bei offener Tastatur sichtbar (iOS und Android); Startseite: Monatsleiste unter „Start“ sichtbar, Tipp auf einen Monat öffnet ihn und klappt die anderen zu, Leiste bleibt beim Scrollen und ganz oben; Monatszeile klebt direkt unter der Leiste; Einstellungen ohne Leiste; Notch/Statusleiste (iPhone) überdeckt nichts; Deutsch und Englisch?
 - [ ] 1.39.0 am Handy: Home oben sieht aus wie „Start“ unten; anderen Monat wählen, dann Home oben und „Start“ unten antippen: aktueller Monat erscheint, Ansicht springt nach oben; aus den Einstellungen ebenso; Deutsch und Englisch?
