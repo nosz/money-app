@@ -122,7 +122,7 @@ const T = {
   dat: ['Daten & Sicherheit', 'Data & security'],
   kto: ['Konten', 'Accounts'],
   ver: ['Version', 'Version'],
-  about: ['Über die App', 'About the app'],
+  about: ['App-Info / Weiterempfehlen', 'App info / Recommend'],
   shr_h: ['Weiterempfehlen', 'Recommend'],
   shr_i: [
     'Gefällt dir die MoneyApp? Schick sie an Freunde oder Familie. Der Link führt direkt zur App.',

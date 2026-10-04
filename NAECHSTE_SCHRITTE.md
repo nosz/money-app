@@ -1,13 +1,15 @@
-# MoneyApp – Nächste Schritte (Stand 1.45.0)
+# MoneyApp – Nächste Schritte (Stand 1.46.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.45.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.46.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.46.0: Bereich „Über die App“ umbenannt in „App-Info / Weiterempfehlen“ (Englisch: „App info / Recommend“).** Nur der Titel (Textschlüssel `about` in `js/i18n.js`); Inhalt, Logik, Datenformat und Backup unverändert. Geändert: `js/i18n.js`, `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (Abschnitt 7d, 10), `NAECHSTE_SCHRITTE.md`. Zu prüfen: Titel am Handy (390 und 320 px, Deutsch und Englisch) einzeilig bzw. nicht abgeschnitten.
 
 - **1.45.0: Neuer Bereich „Über die App“ (Weiterempfehlen, Info Open Source/GitHub, Version).** Zwei Wünsche des Nutzers: App professionell weiterempfehlen, und eine Info, dass die App Open Source ist und auf GitHub liegt. Datenformat, Backup, Import und alle bestehenden Masken unverändert, nichts davon wird gespeichert.
   1) *Bereich* (`V.set()` in `js/render.js`): `sec('about', SI.about, t('about'), about)` als letzter Bereich nach „Daten & Sicherheit“, Symbol `info-circle` (`SI.about`). `about()` baut von oben nach unten: Beschriftung „Weiterempfehlen“ mit Hinweis und Hauptknopf „App weiterempfehlen“ (Icon `share`), dann (`bx()`) „Open Source“ mit Text und Knopf „Auf GitHub ansehen“ (Icon `github`, `<a target=_blank rel="noopener noreferrer">`), dann die Zeile „Version x.y.z“. Die Versionszeile stand vorher am Ende von „Allgemein“ und ist dort entfernt.
@@ -236,7 +238,7 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Suche in der Karte „Buchungen“ am Handy (1.44.0): Suchfeld rutscht beim Antippen direkt unter die Kopfleiste, darunter sofort Kategorie, Ergebniszeile und erste Treffer (Variante „Vollbild-Suchansicht“ verworfen, Grund: zusätzlicher Bildschirm, Monat und Kategorie dort nicht sichtbar). Gilt nur für `#fq`.
 
-- Über die App (1.45.0): Neuer Bereich „Über die App“ als letzter Bereich der Einstellungen mit Info, Version und Weiterempfehlen an einem Ort (Variante „alles in Allgemein“ verworfen). Weiterempfehlen über das Teilen-Menü des Geräts, ohne Menü Kopieren von Text und Link (Variante QR-Code-Dialog verworfen). Mitgeschickt wird die Adresse, unter der die App gerade läuft (Variante GitHub-Link verworfen). Info „Open Source, GitHub“ als Karte direkt im Bereich (Variante Dialog „Info zur App“ verworfen). GitHub-Adresse `https://github.com/nosz/money-app` fest als eine Konstante (Variante Platzhalter ohne Link verworfen).
+- Über die App (1.45.0, seit 1.46.0 Titel „App-Info / Weiterempfehlen“): Neuer Bereich „Über die App“ als letzter Bereich der Einstellungen mit Info, Version und Weiterempfehlen an einem Ort (Variante „alles in Allgemein“ verworfen). Weiterempfehlen über das Teilen-Menü des Geräts, ohne Menü Kopieren von Text und Link (Variante QR-Code-Dialog verworfen). Mitgeschickt wird die Adresse, unter der die App gerade läuft (Variante GitHub-Link verworfen). Info „Open Source, GitHub“ als Karte direkt im Bereich (Variante Dialog „Info zur App“ verworfen). GitHub-Adresse `https://github.com/nosz/money-app` fest als eine Konstante (Variante Platzhalter ohne Link verworfen).
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
