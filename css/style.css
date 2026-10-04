@@ -985,7 +985,7 @@ button.bc:active{border-color:var(--gold)}
    --stk = Abstand nach oben, unter dem die jeweilige Kopfzeile klebt. Auf der Startseite nur der Rand oben;
    in den Einstellungen zusätzlich die Höhe der Bereichs-Kopfzeile (--sech, wird in rd() gemessen).
    Gestapelt: Bereichs-Kopfzeile (z 4) > Umschalter Ausgaben/Einnahmen (z 3) > Gruppen und Monate (z 2). */
-:root{--sech:0px;--tbh:48px;--tbt:calc(env(safe-area-inset-top,0px) + var(--tbh));--stk:var(--tbt)}
+:root{--sech:0px;--mbh:0px;--tbh:calc(48px + var(--mbh));--tbt:calc(env(safe-area-inset-top,0px) + var(--tbh));--stk:var(--tbt)}
 .sec{--stk:calc(var(--tbt) + var(--sech,62px));scroll-margin-top:calc(var(--tbt) + 4px)}
 .sec.open>button{position:sticky;top:var(--tbt);z-index:4;background:var(--surface);border-radius:var(--r-m) var(--r-m) 0 0}
 .sec .tps{top:var(--stk)}
@@ -1155,7 +1155,7 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 /* ===== 1.38.0: Kopfleiste mit Home-Symbol oben links (Startseite und Einstellungen) =====
    Bleibt beim Scrollen und bei offener Tastatur sichtbar. Dialoge (.ov, z 9) liegen darüber und behalten nur das ✕.
    --tbt = Höhe der Kopfleiste inkl. Rand oben; alle mitlaufenden Überschriften kleben darunter (--stk). */
-#tb{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:6px;height:var(--tbt);padding-top:env(safe-area-inset-top,0px);background:var(--ink);border-bottom:1px solid var(--b)}
+#tb{position:sticky;top:0;z-index:6;display:flex;flex-direction:column;align-items:stretch;height:var(--tbt);padding-top:env(safe-area-inset-top,0px);background:var(--ink);border-bottom:1px solid var(--b)}
 /* 1.39.0: Home-Symbol wie in der unteren Leiste (gleiches Symbol, gleiche Größe, gleiche Farben, aktuelle Seite mit hellem Hintergrund) */
 .tbh{display:inline-flex;align-items:center;justify-content:center;flex:none;width:48px;height:44px;margin-left:-8px;padding:0;border:0;border-radius:var(--r-m);background:none;color:var(--m);cursor:pointer}
 .tbh svg.ni{display:block;width:32px;height:32px;opacity:.75}
@@ -1163,3 +1163,12 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .tbh[aria-current=page] svg.ni{opacity:1}
 .tbt{font-weight:700;font-size:var(--fs-m);color:var(--text)}
 #v.w{padding-top:12px}
+
+/* ===== 1.40.0: Monatsleiste in der Kopfleiste (Startseite) =====
+   Zweite Zeile in #tb, immer sichtbar (auch ganz oben). --mbh = Höhe (48 px, per JS in tbr() gesetzt, 0 ohne Leiste);
+   --tbh/--tbt wachsen mit, daher kleben Monatszeilen und Scroll-Ziele automatisch darunter. Chips mindestens 44 px hoch, wischbar. */
+.tbr1{display:flex;align-items:center;gap:6px;height:48px;flex:none}
+.mbar{display:flex;align-items:center;gap:8px;height:var(--mbh);flex:none;margin:0 -14px;padding:0 14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mbar::-webkit-scrollbar{display:none}
+.mbc{flex:none;min-width:60px;min-height:44px;padding:0 14px;border:1px solid var(--b);border-radius:999px;background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-s);font-weight:600;white-space:nowrap;cursor:pointer}
+.mbc.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface));font-weight:700}

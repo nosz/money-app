@@ -1,13 +1,20 @@
-# MoneyApp – Nächste Schritte (Stand 1.39.0)
+# MoneyApp – Nächste Schritte (Stand 1.40.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.39.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.40.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.40.0: Speichern-Knopf beim Bearbeiten erkennbar, Monatsleiste auf der Startseite.** Zwei Rückmeldungen des Nutzers am Handy (Version neu als Nebenversion, weil ein neues Bedienelement dazukommt).
+  1) *Speichern-Knopf:* Beim Öffnen einer bestehenden Buchung (und jeder Bearbeiten-Maske) stand der unveränderte Knopf im Zustand `idle` mit dem Text „Gespeichert“ (grau, deaktiviert), der Nutzer sah „den Speichern-Button nicht“. Jetzt heißt er in allen Masken auch im Zustand `idle` „Speichern“ / „Save“ (weiterhin grau und deaktiviert, wird bei einer Änderung aktiv). `svr()` in `js/app.js`: `txt = lb || t('save')`. Die Kontofelder (`kSt()`) behalten „Gespeichert“. Zustände, Hinweiszeile und Verwerfen-Rückfrage unverändert. Die Knopfzeile `.stkb` war auch mit simulierter Tastatur sichtbar (Chromium); echte Geräte weiter ungetestet.
+  2) *Monatsleiste:* Anlass: Nach dem Antippen eines Monats scrollt die Ansicht nach oben, andere Monate waren dann nicht mehr erreichbar. Jetzt klebt in der Kopfleiste `#tb` eine zweite Zeile mit wischbaren Chips (`mbar()`, `.mbc`, 44 px hoch): ein Chip je Monat der Monatsliste, ältester links, immer sichtbar. Tipp auf einen Chip (`mgo(m)`): Monat öffnen, die anderen zuklappen, Monatskarte nach oben scrollen. Offene Monate sind im Chip markiert (`mbu()`, auch beim Öffnen über die Monatszeile in `mtg()`).
+  Geändert: `js/render.js` (neu `mlms()` aus `mlist()` herausgezogen, `mshort()`, `mbar()`, `mbu()`, `mgo()`; `tbr()` baut zwei Zeilen und setzt `--mbh`; Monatskarte `.mh` bekommt `data-m`; `mtg()` ruft `mbu()`), `js/i18n.js` (neuer Text `mbar`, Deutsch und Englisch), `css/style.css` (`--mbh`, `--tbh` = 48 px + `--mbh`, `#tb` als Spalte, Abschnitt „1.40.0“: `.tbr1`, `.mbar`, `.mbc`), `js/app.js`, `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (5b und neuer Abschnitt 8a). Keine neuen Dateien, Datenformat und Backup unverändert.
+  Da `--tbt` mitwächst, kleben Monatszeilen, Einstellungs-Bereiche und Scroll-Ziele automatisch unter der größeren Kopfleiste (nur auf der Startseite, in den Einstellungen bleibt sie 48 px).
+  Getestet in Chromium (390 px Deutsch, 320 px Englisch, drei Monate mit Testbuchungen): drei Chips (44 px), Kopfleiste 96 px; Tipp auf ältesten und neuesten Monat öffnet nur diesen, schließt die anderen und setzt die Monatskarte direkt unter die Leiste; beim Scrollen bleiben Leiste und Monatszeile oben; manuelles Öffnen markiert den Chip; Einstellungen ohne Leiste (48 px); Bearbeiten-Maske zeigt „Speichern“ / „Save“ (idle, nach Änderung dirty, nach Zurückändern wieder idle); keine JS-Fehler.
 
 - **1.39.0: Home-Symbol oben wie unten, Home springt zum aktuellen Monat.**
   1) Das Home-Symbol in der Kopfleiste ist jetzt dasselbe wie in der unteren Leiste (`NI.home`, Haus mit €, 32 px), mit denselben Farben (`var(--m)` mit 75 % Deckkraft, auf der Startseite `var(--gold)` mit hellem Hintergrund 14 %). Das Bootstrap Icon `house` (1.38.0) ist wieder aus `BIP` entfernt.
@@ -173,6 +180,10 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Home (1.39.0): Das Symbol oben ist das gleiche wie unten (gleiche Größe und Farben). Home oben und „Start“ unten verhalten sich gleich: Startseite und aktueller Monat.
 
+- Speichern-Knopf beim Bearbeiten (1.40.0): Der unveränderte Knopf bleibt grau und deaktiviert, heißt aber „Speichern“ statt „Gespeichert“ (Variante „bleibt Gespeichert“ verworfen). Gilt für alle Masken, nicht für die Kontofelder.
+
+- Monatsleiste (1.40.0): Wischbare Chips in einer zweiten Zeile der Kopfleiste, immer sichtbar auf der Startseite (Variante „Pfeile ‹ › in der Monatszeile“ verworfen). Tipp auf einen Chip öffnet diesen Monat, klappt die anderen zu und scrollt die Monatskarte nach oben (Variante „andere Monate bleiben offen“ verworfen). Chips = Monate der Monatsliste (aktueller und zwei davor, nur mit Buchungen).
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -217,6 +228,7 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] 1.40.0 am Handy: Buchung antippen (Bearbeiten): Knopf unten heißt „Speichern“ (grau), nach einer Änderung aktiv mit „Nicht gespeicherte Änderung“, auch bei offener Tastatur sichtbar (iOS und Android); Startseite: Monatsleiste unter „Start“ sichtbar, Tipp auf einen Monat öffnet ihn und klappt die anderen zu, Leiste bleibt beim Scrollen und ganz oben; Monatszeile klebt direkt unter der Leiste; Einstellungen ohne Leiste; Notch/Statusleiste (iPhone) überdeckt nichts; Deutsch und Englisch?
 - [ ] 1.39.0 am Handy: Home oben sieht aus wie „Start“ unten; anderen Monat wählen, dann Home oben und „Start“ unten antippen: aktueller Monat erscheint, Ansicht springt nach oben; aus den Einstellungen ebenso; Deutsch und Englisch?
 - [ ] 1.38.0 am Handy: Home-Symbol oben links auf Start und in Einstellungen, bleibt beim Scrollen; in Einstellungen → Konten bei offener Tastatur (Bar, Bank, Gespart) sichtbar und antippbar; Tipp führt zur Startseite; Monat aufklappen, mitlaufende Überschriften und Auswertungs-Umschalter kleben unter der Leiste (nicht dahinter); Notch/Statusleiste (iPhone) überdeckt nichts; Dialoge zeigen keine Leiste; Deutsch und Englisch?
 - [ ] 1.37.2 am Handy: Startseite, Monat antippen: Monatszeile steht oben, Buchungen sofort sichtbar; Zuklappen springt nicht; mehrere Monate nacheinander; Filter über die Kacheln (Ausgaben/Einnahmen/Umbuchung) und Sortierung ändern die Position nicht; Deutsch und Englisch?

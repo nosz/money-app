@@ -109,6 +109,7 @@ function mty(k) {
 function mtg(m, el) {
   const was = !!HS.o[m];
   HS.o[m] = el.open;
+  mbu();
   if (!el.open || was) return;
   const c = el.closest('.mh');
   if (!c) return;
@@ -119,11 +120,16 @@ function mtg(m, el) {
     }),
   );
 }
-const mlist = () => {
+/* 1.40.0: Monate der Monatsliste (aktueller und die zwei Monate davor, nur mit Buchungen), gemeinsam für Liste und Monatsleiste */
+const mlms = () => {
   const cur = iso(D).slice(0, 7),
     from = iso(new Date(D.getFullYear(), D.getMonth() - 2, 1)).slice(0, 7),
     all = allT().filter((x) => x.d.slice(0, 7) >= from && x.d.slice(0, 7) <= cur),
     ms = [...new Set(all.map((x) => x.d.slice(0, 7)))].sort();
+  return { all, ms };
+};
+const mlist = () => {
+  const { all, ms } = mlms();
   if (!ms.length) return `<div class="card card-body"><small>${t('none')}</small></div>`;
   HS.o = HS.o || {};
   const sc = HS.sc || 'd',
@@ -135,7 +141,7 @@ const mlist = () => {
         g = sortL(gm, sc, dr).filter((x) => !ft || x.t == ft),
         b = mt(m).b,
         op = HS.o[m] != null ? HS.o[m] : false; /* 1.19.0: beim Start alle Monate eingeklappt */
-      return `<div class="card card-body mh"><details ${op ? 'open' : ''} ontoggle="mtg('${m}',this)"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort') + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
+      return `<div class="card card-body mh" data-m="${m}"><details ${op ? 'open' : ''} ontoggle="mtg('${m}',this)"><summary><span class=mt>${mlab(m)}</span><span class="mb ${b < 0 ? 'neg' : 'pos'}">${sg(b)}</span></summary>${mcn(gm)}${g.length ? hrow(sc, dr, 'hsort') + g.map((x) => trow(x)).join('') : `<div class=mno>${t('no_' + ft)}</div>`}</details></div>`;
     })
     .join('');
 };
@@ -558,10 +564,50 @@ const stk = () => {
   document.documentElement.style.setProperty('--sech', (b ? b.offsetHeight : 0) + 'px');
 };
 addEventListener('resize', stk);
+/* 1.40.0: Monatsleiste in der Kopfleiste (nur Startseite): ein Chip je Monat der Liste, immer sichtbar */
+const mshort = (p) => {
+  const d = new Date(p + '-01T00:00');
+  return d.toLocaleDateString(loc(), d.getFullYear() == D.getFullYear() ? { month: 'short' } : { month: 'short', year: '2-digit' });
+};
+const mbar = (ms) =>
+  `<div class=mbar role=group aria-label="${t('mbar')}">${ms
+    .map((m) => {
+      const on = !!(HS.o && HS.o[m]);
+      return `<button type=button class="mbc${on ? ' on' : ''}" data-m="${m}" aria-pressed="${on}" aria-label="${mlab(m)}" onclick="mgo('${m}')">${mshort(m)}</button>`;
+    })
+    .join('')}</div>`;
+/* Chips an den Zustand der Monate anpassen (offen = markiert) */
+function mbu() {
+  document.querySelectorAll('#tb .mbc').forEach((b) => {
+    const on = !!(HS.o && HS.o[b.dataset.m]);
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+}
+/* Tipp auf einen Monat: diesen Monat öffnen, die anderen zuklappen, Monatskarte nach oben scrollen (Entscheidung 1.40.0) */
+function mgo(m) {
+  HS.o = HS.o || {};
+  document.querySelectorAll('.mh[data-m]').forEach((c) => {
+    const k = c.dataset.m,
+      d = c.querySelector('details');
+    HS.o[k] = k == m;
+    if (d) d.open = k == m;
+  });
+  mbu();
+  const c = document.querySelector('.mh[data-m="' + m + '"]');
+  if (c)
+    c.scrollIntoView({
+      block: 'start',
+      behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth',
+    });
+}
 /* 1.38.0: Kopfleiste oben (Startseite und Einstellungen): Home-Symbol links, bleibt beim Scrollen und bei offener Tastatur sichtbar */
 function tbr() {
-  const h = tab == 'home';
-  $('#tb').innerHTML = `<button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span>`;
+  const h = tab == 'home',
+    ms = h ? mlms().ms : [];
+  /* --mbh = Höhe der Monatsleiste; --tbt (Kopfleiste) wächst mit, alle mitlaufenden Überschriften kleben darunter */
+  document.documentElement.style.setProperty('--mbh', ms.length ? '48px' : '0px');
+  $('#tb').innerHTML = `<div class=tbr1><button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span></div>${ms.length ? mbar(ms) : ''}`;
 }
 function rd() {
   tbr();

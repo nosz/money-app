@@ -124,7 +124,7 @@ Jedes Eingabefeld der App (Masken, Dialoge, Einstellungen, Suchfelder, Willkomme
 Ziel: Der Knopf zeigt jederzeit, ob es etwas zu speichern gibt, und die Nutzerführung schützt vor Datenverlust.
 
 1. **Zustände des Knopfs** (immer beschriftet, Haken plus Text, Attribut `data-s` am Knopf, Zustandsfunktion `svr()` für Masken, `kSt(k)` für Kontofelder):
-   - `idle` (Wert unverändert): deaktiviert, schlicht (Ghost). Text „Gespeichert“ / „Saved“, wenn der Wert schon gespeichert ist, sonst „Speichern“ / „Save“. Beim Betrag-ändern-Dialog bleibt der Text „Bestätigen“ (dort wird nichts gespeichert).
+   - `idle` (Wert unverändert): deaktiviert, schlicht (Ghost). Text in Masken (`svr()`) immer „Speichern“ / „Save“, damit der Knopf beim Bearbeiten als Speichern-Knopf erkennbar ist (Nutzer-Vorgabe ab 1.40.0, Anlass: Knopf „Gespeichert“ wurde am Handy nicht als Speichern-Knopf erkannt). Nur bei Kontofeldern (`kSt()`) bleibt „Gespeichert“ / „Saved“, wenn der Wert schon gespeichert ist. Beim Betrag-ändern-Dialog bleibt der Text „OK“ (dort wird nichts gespeichert).
    - `dirty` (geändert und gültig): aktiv, Hauptfarbe, „Speichern“ / „Save“.
    - `bad` (geändert, aber ungültig): deaktiviert, Meldung am Feld (siehe 5a).
    - `done` (gerade gespeichert, nur bei Knöpfen, die nach dem Speichern sichtbar bleiben, z. B. Konten): etwa 2 Sekunden „✓ Gespeichert“ in Grün, dann zurück zu `idle`. Ändert der Nutzer das Feld in dieser Zeit, wechselt der Knopf sofort in `dirty` oder `bad`. Masken, die sich beim Speichern schließen, bestätigen weiter mit dem Toast „Gespeichert“.
@@ -166,6 +166,12 @@ Ziel: Der Knopf zeigt jederzeit, ob es etwas zu speichern gibt, und die Nutzerf�
 - Gewählte Icons direkt in den Code einbetten (offline, inline) und im Service Worker cachen.
 - Backup, Import und Datenformat unverändert lassen, damit alte Sicherungen weiter lesbar sind.
 - Bestehende Prüfungen unverändert übernehmen: Betrag 0, gleiches Konto, Konto-Minus, mögliche Doppelbuchung. Neue Live-Prüfungen (Abschnitt 5a) kommen dazu, sie ersetzen keine bestehende Prüfung.
+
+# 8a. Startseite: Monatsleiste (Nutzer-Vorgabe ab 1.40.0)
+
+- In der Kopfleiste `#tb` steht auf der Startseite eine zweite Zeile mit einer Monatsleiste (`mbar()` in `js/render.js`): wischbare Chips (`.mbc`, mindestens 44 px hoch), ein Chip je Monat der Monatsliste (`mlms()`, aktueller Monat und die zwei davor, nur mit Buchungen), ältester links. Sie ist immer sichtbar, auch ganz oben und beim Scrollen. In den Einstellungen und ohne Buchungen gibt es keine Leiste.
+- Die Höhe der Leiste steht in `--mbh` (48 px, per `tbr()` gesetzt, sonst 0). `--tbh` und `--tbt` wachsen mit, mitlaufende Überschriften und Scroll-Ziele kleben darunter.
+- Tipp auf einen Chip (`mgo(m)`): diesen Monat öffnen, alle anderen zuklappen, die Monatskarte nach oben scrollen. Offene Monate sind im Chip markiert (`mbu()`), auch wenn der Nutzer sie über die Monatszeile öffnet.
 
 # 9. Reihenfolge der Umsetzung (Maske für Maske, je eine Version)
 

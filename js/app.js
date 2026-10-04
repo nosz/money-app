@@ -268,7 +268,7 @@ function svr(live) {
     nw = NW[MK](),
     lb = b.dataset.lb || '',
     st = nw ? (bad ? 'bad' : 'dirty') : !d ? 'idle' : bad ? 'bad' : 'dirty',
-    txt = st == 'idle' ? lb || t('sav') : lb || t('save');
+    txt = lb || t('save'); /* 1.40.0: auch unverändert (idle) „Speichern“, damit der Knopf beim Bearbeiten erkennbar ist */
   sbs(b, st, txt);
   const h = $('#dh');
   if (h) h.hidden = !(d && st == 'dirty');

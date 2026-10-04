@@ -206,6 +206,7 @@ const T = {
   hit1: ['Buchung', 'entry'],
   hitn: ['Buchungen', 'entries'],
   allm: ['Alle Monate', 'All months'],
+  mbar: ['Monat wählen', 'Choose month'],
   trend: ['Letzte 6 Monate', 'Last 6 months'],
   year: ['Jahr', 'Year'],
   month: ['Monat', 'Month'],
