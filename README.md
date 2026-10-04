@@ -60,6 +60,7 @@ Danach `http://localhost:8080` im Browser öffnen. Der Service Worker und die In
 index.html          Einstiegsseite
 manifest.json       PWA-Manifest (Symbole getrennt als any und maskable)
 service-worker.js   Offline-Cache (CACHE_VERSION bei jedem Release hochzählen)
+og-image.png        Vorschaubild für geteilte Links (1200 × 630)
 css/                Eigenes Design, Bootstrap (nur CSS)
 js/core.js          Hilfsfunktionen, Version (APP_VERSION), Icons
 js/store.js         Speicherung (IndexedDB) und Fälligkeitslogik
