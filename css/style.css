@@ -1196,3 +1196,7 @@ body.fqf #v::after{content:'';display:block;height:60vh}
 .sec.open{border-left:4px solid var(--gold)}
 .sec.open>button{padding-left:11px}
 .sec.open>button .ic,.sec.open>button .chev{color:var(--gold)}
+
+/* ===== 1.52.0: Installations-Hinweis im Willkommen-Fenster (Karte in Hauptfarbe, wie die Datenschutz-Karte aufgebaut) ===== */
+.pv.pi{background:color-mix(in srgb,var(--gold) 12%,var(--surface));border-color:color-mix(in srgb,var(--gold) 45%,var(--surface))}
+.pv.pi .btn{display:flex;align-items:center;justify-content:center}

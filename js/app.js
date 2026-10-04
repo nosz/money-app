@@ -1655,10 +1655,26 @@ function ktoSave(k) {
   kDone(k);
 }
 /* Erster Start (nur solange S.ob == 0): Schritt 1 Willkommen, Schritt 2 Kontostände. Beide Schritte lassen sich nicht wegtippen. */
+/* 1.52.0: Installations-Hinweis im Willkommen-Fenster (nur wenn die App noch nicht installiert ist).
+   Mit Installations-Angebot des Browsers (DP): Knopf „Installieren“. Sonst Anleitung für iPhone (Safari) bzw. Android (Chrome-Menü).
+   Auf dem Desktop ohne Angebot: kein Hinweis. Wird das Angebot erst nach dem Öffnen gemeldet, zeichnet der Listener die Karte neu. */
+function obi() {
+  if (matchMedia('(display-mode:standalone)').matches || navigator.standalone) return '';
+  const ua = navigator.userAgent,
+    ios = /iphone|ipad/i.test(ua),
+    and = /android/i.test(ua);
+  if (!DP && !ios && !and) return '';
+  return `<div id=obi class="pv pi"><b>${AV('inst')} ${t('oit')}</b><br><span>${DP ? t('oi_a') : ios ? t('oi_i') : t('oi_m')}</span>${DP ? `<button type=button class="btn btn-secondary s w-100" style="margin-top:10px;min-height:44px" onclick="obIns()">${t('ins')}</button>` : ''}</div>`;
+}
+function obIns() {
+  ins();
+  const e = $('#obi');
+  e && e.remove();
+}
 function ob() {
   X = { nc: 1 };
   sheet(
-    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>${AV('edit')}</i><span>${t('w1')}</span></li><li><i>${AV('bank')}</i><span>${t('w2')}</span></li><li><i>${AV('stats')}</i><span>${t('w3')}</span></li></ul><div class=pv><b>${AV('shield')} ${t('wpt')}</b><br><span>${t('wp')}</span></div><div class=cta style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ob2()">${t('onx')}</button><button type=button class="btn btn-link w-100" onclick="$('#obf').click()">${t('obbk')}</button><input id=obf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true></div>`,
+    `<h2>${t('hi')}</h2><p style="margin:.2rem 0 0;color:var(--m)">${t('wl')}</p><ul class=wl><li><i>${AV('edit')}</i><span>${t('w1')}</span></li><li><i>${AV('bank')}</i><span>${t('w2')}</span></li><li><i>${AV('stats')}</i><span>${t('w3')}</span></li></ul><div class=pv><b>${AV('shield')} ${t('wpt')}</b><br><span>${t('wp')}</span></div>${obi()}<div class=cta style="margin-top:14px"><button class="btn btn-primary w-100" onclick="ob2()">${t('onx')}</button><button type=button class="btn btn-link w-100" onclick="$('#obf').click()">${t('obbk')}</button><input id=obf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true></div>`,
   );
 }
 function ob2() {
@@ -1719,6 +1735,8 @@ function ins() {
 }
 addEventListener('appinstalled', () => {
   DP = null;
+  const o = $('#obi');
+  o && o.remove();
   if (S) {
     S.set.hd = 1;
     P();
@@ -1727,6 +1745,10 @@ addEventListener('appinstalled', () => {
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   DP = e;
+  const o = $('#obi'),
+    c = $('#obf') && $('.cta');
+  if (o) o.outerHTML = obi();
+  else if (c) c.insertAdjacentHTML('beforebegin', obi());
   S && rd();
 });
 (async () => {

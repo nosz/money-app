@@ -346,6 +346,19 @@ const T = {
     'Tip: add to home screen (iPhone: Share → “Add to Home Screen”).',
   ],
   ins: ['Installieren', 'Install'],
+  oit: ['App installieren', 'Install the app'],
+  oi_a: [
+    'Installiere die MoneyApp auf deinem Startbildschirm: schneller Start, Vollbild und auch ohne Internet nutzbar.',
+    'Install MoneyApp on your home screen: quick start, full screen, and it works without internet.',
+  ],
+  oi_m: [
+    'Tippe im Chrome-Menü (⋮) auf „App installieren“. So startest du die MoneyApp wie jede andere App, auch ohne Internet.',
+    'Tap “Install app” in the Chrome menu (⋮). MoneyApp then starts like any other app, even without internet.',
+  ],
+  oi_i: [
+    'Tippe in Safari auf Teilen und wähle „Zum Home-Bildschirm“. So startest du die MoneyApp wie jede andere App.',
+    'In Safari, tap Share and choose “Add to Home Screen”. MoneyApp then starts like any other app.',
+  ],
   x: ['Schließen', 'Close'],
   pi: ['PIN eingeben', 'Enter PIN'],
   wr: ['Falsch – bitte warten', 'Wrong – please wait'],
