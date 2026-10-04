@@ -129,7 +129,7 @@ const T = {
     'Like MoneyApp? Send it to friends or family. The link leads straight to the app.',
   ],
   shr: ['App weiterempfehlen', 'Recommend the app'],
-  shr_t: ['Ich führe mein Haushaltsbuch mit der MoneyApp: kostenlos, ohne Konto, meine Daten bleiben nur auf meinem Handy. Probier sie aus:', 'I keep my household budget with MoneyApp: free, no account, and my data stays on my phone only. Give it a try:'],
+  shr_t: ['Die MoneyApp: Haushaltsbuch fürs Handy. Kostenlos, ohne Konto, ohne Werbung. Deine Daten bleiben nur auf deinem Gerät. Hier kannst du sie ansehen:', 'MoneyApp: a household budget app for your phone. Free, no account, no ads. Your data stays only on your device. Take a look here:'],
   shr_c: ['Text und Link kopiert', 'Text and link copied'],
   shr_e: ['Kopieren nicht möglich', 'Copying not possible'],
   loc_h: ['Datenschutz', 'Privacy'],
