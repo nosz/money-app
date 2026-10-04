@@ -1,13 +1,25 @@
-# MoneyApp – Nächste Schritte (Stand 1.37.2)
+# MoneyApp – Nächste Schritte (Stand 1.39.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.37.2** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.39.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.39.0: Home-Symbol oben wie unten, Home springt zum aktuellen Monat.**
+  1) Das Home-Symbol in der Kopfleiste ist jetzt dasselbe wie in der unteren Leiste (`NI.home`, Haus mit €, 32 px), mit denselben Farben (`var(--m)` mit 75 % Deckkraft, auf der Startseite `var(--gold)` mit hellem Hintergrund 14 %). Das Bootstrap Icon `house` (1.38.0) ist wieder aus `BIP` entfernt.
+  2) `go(x)` in `js/render.js` setzt bei `x == 'home'` den Monat `ym` auf den aktuellen Monat (`iso(D).slice(0, 7)`), springt nach oben und zeichnet neu. Das gilt für das Symbol oben und für „Start“ unten (beide rufen `go('home')`). Gilt auch, wenn man schon auf der Startseite ist.
+  Geändert: `js/render.js` (`tbr()`, `go()`), `js/core.js` (`BIP.house` entfernt, `APP_VERSION`), `css/style.css` (Abschnitt „1.38.0“: `.tbh` 48 × 44 px, `svg.ni`, aktueller Zustand), `service-worker.js` (nur `CACHE_VERSION`). Keine neuen Texte, Datenformat und Backup unverändert.
+  Getestet in Chromium (390 px): Monat 2 Mal zurück, Tipp auf Home oben stellt den aktuellen Monat ein; „Start“ unten aus den Einstellungen mit anderem Monat ebenso; Icon oben und unten je 32 px; Einstellungen ohne Markierung; keine JS-Fehler.
+
+- **1.38.0: Kopfleiste mit Home-Symbol oben links (Startseite und Einstellungen).** Anlass: Wer in Einstellungen → Konten ein Feld bearbeitet (z. B. Bar nach Tipp auf die Kachel), sieht bei offener Tastatur keinen Weg zur Startseite, weil die untere Leiste dann ausgeblendet wird (`.kb #nav`).
+  Geändert: `index.html` (neues `<header class="w" id="tb">` vor `#v`), `js/render.js` (neue Funktion `tbr()`, wird am Anfang von `rd()` aufgerufen; Home-Knopf ruft `go('home')`, daneben der Titel der Ansicht `t('home')` / `t('set')`), `js/core.js` (neues Icon `house` in `BIP`, `APP_VERSION`), `css/style.css` (Abschnitt „1.38.0“ am Ende; Variablen `--tbh` 48 px und `--tbt` = Höhe plus Rand oben; `--stk`, `.sec`, `.sec.open>button` und `.tps` kleben jetzt unter der Leiste; `#v.w` oben nur noch 12 px, weil die Leiste den Rand oben übernimmt), `service-worker.js` (nur `CACHE_VERSION`). Keine neuen Dateien, keine neuen Texte.
+  Verhalten: Die Leiste ist `position:sticky`, bleibt beim Scrollen und bei offener Tastatur sichtbar, Knopf mindestens 44 × 44 px. Auf der Startseite ist das Symbol als aktuelle Seite markiert (`aria-current=page`, Hauptfarbe), ein Tipp dort springt nach oben. Dialoge (`.ov`, z-index 9) liegen über der Leiste und behalten nur das ✕ (Entscheidung, siehe Abschnitt 2).
+  Mitlaufende Überschriften (Monate, Bereiche, Gruppen, Umschalter der Auswertung) und Scroll-Ziele (`.mh`, `.sec`) berücksichtigen die Leiste über `--tbt`. Logik, Datenformat und Backup unverändert.
+  Getestet in Chromium (390 und 320 px): Leiste oben fix, Monat aufklappen landet bei 56 px (unter der Leiste), Konten mit simulierter Tastatur zeigen Home, Home-Tipp aus den Einstellungen führt zur Startseite, Dialog liegt über der Leiste, keine JS-Fehler. Echte Tastatur auf iOS und Android nicht getestet.
 
 - **1.37.2: Monat auf der Startseite aufklappen, Buchungen sofort sichtbar.** Anlass: Nach dem Aufklappen eines Monats (Karte „Monatsliste“ unter „Monatsbilanz“ und „Bleibt bis Monatsende“) lagen die Buchungen unterhalb des sichtbaren Bereichs, der Nutzer musste erst scrollen.
   Geändert: `js/render.js` (neue Funktion `mtg(m, el)` vor `mlist()`; `ontoggle` der Monats-`<details>` ruft sie statt direkt `HS.o[m]=this.open` auf), `css/style.css` (am Ende: `.mh{scroll-margin-top:calc(var(--stk) + 8px)}`), `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`).
@@ -157,6 +169,10 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Monat aufklappen (1.37.2): Die Ansicht scrollt sanft so, dass die Monatszeile oben steht; die Monatsliste bleibt unter den Karten der Startseite (Aufbau der Startseite unverändert, Variante 2 „Monatsliste ganz oben“ wurde verworfen).
 
+- Home-Symbol (1.38.0): oben links in den Hauptansichten (Start und Einstellungen), fest und beim Scrollen sichtbar; auf der Startseite als aktuelle Seite markiert. Kein Home in den Dialogen (Variante „Home auch im Dialog“ wurde verworfen, Grund: Verwechslung mit ✕, Datenverlust-Risiko, verschachtelte Fenster).
+
+- Home (1.39.0): Das Symbol oben ist das gleiche wie unten (gleiche Größe und Farben). Home oben und „Start“ unten verhalten sich gleich: Startseite und aktueller Monat.
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -201,6 +217,8 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] 1.39.0 am Handy: Home oben sieht aus wie „Start“ unten; anderen Monat wählen, dann Home oben und „Start“ unten antippen: aktueller Monat erscheint, Ansicht springt nach oben; aus den Einstellungen ebenso; Deutsch und Englisch?
+- [ ] 1.38.0 am Handy: Home-Symbol oben links auf Start und in Einstellungen, bleibt beim Scrollen; in Einstellungen → Konten bei offener Tastatur (Bar, Bank, Gespart) sichtbar und antippbar; Tipp führt zur Startseite; Monat aufklappen, mitlaufende Überschriften und Auswertungs-Umschalter kleben unter der Leiste (nicht dahinter); Notch/Statusleiste (iPhone) überdeckt nichts; Dialoge zeigen keine Leiste; Deutsch und Englisch?
 - [ ] 1.37.2 am Handy: Startseite, Monat antippen: Monatszeile steht oben, Buchungen sofort sichtbar; Zuklappen springt nicht; mehrere Monate nacheinander; Filter über die Kacheln (Ausgaben/Einnahmen/Umbuchung) und Sortierung ändern die Position nicht; Deutsch und Englisch?
 - [ ] 1.37.1 am Handy: Neue Installation ohne Daten (alles 0): In der Monatsbilanz stehen Bar, Bank, Gespart und Gesamtguthaben; Buchungsmaske und Umbuchung zeigen Kontostände 0,00 €; Deutsch und Englisch?
 

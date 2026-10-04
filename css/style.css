@@ -909,7 +909,7 @@ svg.ai{width:1.2em;height:1.2em;vertical-align:-.2em;margin-right:.25em;flex:non
 .tp button.on[data-ty=i]{--tc:color-mix(in srgb,var(--sage) 70%,var(--text));--tcx:var(--ong,#fff)}
 
 /* ===== 1.21.16: Auswertung – Umschalter Ausgaben/Einnahmen bleibt beim Scrollen oben ===== */
-.tps{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0 -14px 6px;padding:6px 14px 4px;background:var(--surface);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
+.tps{position:sticky;top:var(--tbt);z-index:3;margin:0 -14px 6px;padding:6px 14px 4px;background:var(--surface);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
 .tps .tp{margin:0}
 
 /* ===== 1.21.18: neue Buchung leuchtet nach dem Sprung zur Startseite kurz auf (Klasse wird per JS nach 5 s entfernt; 1.21.24: vorher 2 s) ===== */
@@ -985,9 +985,9 @@ button.bc:active{border-color:var(--gold)}
    --stk = Abstand nach oben, unter dem die jeweilige Kopfzeile klebt. Auf der Startseite nur der Rand oben;
    in den Einstellungen zusätzlich die Höhe der Bereichs-Kopfzeile (--sech, wird in rd() gemessen).
    Gestapelt: Bereichs-Kopfzeile (z 4) > Umschalter Ausgaben/Einnahmen (z 3) > Gruppen und Monate (z 2). */
-:root{--sech:0px;--stk:env(safe-area-inset-top,0px)}
-.sec{--stk:calc(env(safe-area-inset-top,0px) + var(--sech,62px))}
-.sec.open>button{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--surface);border-radius:var(--r-m) var(--r-m) 0 0}
+:root{--sech:0px;--tbh:48px;--tbt:calc(env(safe-area-inset-top,0px) + var(--tbh));--stk:var(--tbt)}
+.sec{--stk:calc(var(--tbt) + var(--sech,62px));scroll-margin-top:calc(var(--tbt) + 4px)}
+.sec.open>button{position:sticky;top:var(--tbt);z-index:4;background:var(--surface);border-radius:var(--r-m) var(--r-m) 0 0}
 .sec .tps{top:var(--stk)}
 .mh details[open]>summary,
 details.gx[open]>summary,
@@ -1151,3 +1151,15 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 
 /* 1.37.2: Monat auf der Startseite aufklappen: Karte landet beim Scrollen unter dem Rand oben (--stk), nicht darunter versteckt */
 .mh{scroll-margin-top:calc(var(--stk) + 8px)}
+
+/* ===== 1.38.0: Kopfleiste mit Home-Symbol oben links (Startseite und Einstellungen) =====
+   Bleibt beim Scrollen und bei offener Tastatur sichtbar. Dialoge (.ov, z 9) liegen darüber und behalten nur das ✕.
+   --tbt = Höhe der Kopfleiste inkl. Rand oben; alle mitlaufenden Überschriften kleben darunter (--stk). */
+#tb{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:6px;height:var(--tbt);padding-top:env(safe-area-inset-top,0px);background:var(--ink);border-bottom:1px solid var(--b)}
+/* 1.39.0: Home-Symbol wie in der unteren Leiste (gleiches Symbol, gleiche Größe, gleiche Farben, aktuelle Seite mit hellem Hintergrund) */
+.tbh{display:inline-flex;align-items:center;justify-content:center;flex:none;width:48px;height:44px;margin-left:-8px;padding:0;border:0;border-radius:var(--r-m);background:none;color:var(--m);cursor:pointer}
+.tbh svg.ni{display:block;width:32px;height:32px;opacity:.75}
+.tbh[aria-current=page]{color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.tbh[aria-current=page] svg.ni{opacity:1}
+.tbt{font-weight:700;font-size:var(--fs-m);color:var(--text)}
+#v.w{padding-top:12px}

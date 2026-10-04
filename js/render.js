@@ -558,7 +558,13 @@ const stk = () => {
   document.documentElement.style.setProperty('--sech', (b ? b.offsetHeight : 0) + 'px');
 };
 addEventListener('resize', stk);
+/* 1.38.0: Kopfleiste oben (Startseite und Einstellungen): Home-Symbol links, bleibt beim Scrollen und bei offener Tastatur sichtbar */
+function tbr() {
+  const h = tab == 'home';
+  $('#tb').innerHTML = `<button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span>`;
+}
 function rd() {
+  tbr();
   $('#v').innerHTML = V[tab]();
   $('#nav').innerHTML =
     `<button class="nb${tab == 'home' ? ' on' : ''}" ${tab == 'home' ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}<span class=nl>${t('home')}</span></button><button id=fab onclick="ot()" aria-label="${t('new')}"><svg viewBox="0 0 24 24" width=36 height=36 aria-hidden=true><path d="M12 4.5v15M4.5 12h15" stroke="currentColor" stroke-width=3 stroke-linecap=round fill=none /></svg></button><button class="nb${tab == 'set' ? ' on' : ''}" ${tab == 'set' ? 'aria-current=page ' : ''}onclick="go('set')" aria-label="${t('set')}">${NI.set}<span class=nl>${t('set')}</span></button>`;
@@ -612,8 +618,10 @@ function se(k) {
     if (e && e.getBoundingClientRect().top < 0) fx(k);
   }
 }
+/* 1.39.0: Home (oben in der Kopfleiste und unten „Start“) springt zusätzlich zum aktuellen Monat */
 function go(x) {
   tab = x;
+  if (x == 'home') ym = iso(D).slice(0, 7);
   scrollTo(0, 0);
   rd();
 }
