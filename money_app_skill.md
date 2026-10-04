@@ -179,7 +179,7 @@ Gilt für „Neue wiederkehrende Buchung“ (`nrd()`) und „Bearbeiten“ (`erd
 1. Typ-Leiste Ausgabe/Einnahme (nur beim Anlegen; beim Bearbeiten nur Anzeige).
 2. Betrag: groß, zentriert, mit Währungssymbol (wie die Buchungsmaske).
 3. Kategorie: Auswahlfeld, das die Vollbild-Ansicht `rcp()` öffnet (Suche, Liste mit Linien-Icon, „Kategorie hinzufügen“ am Ende; `ncs(2)` kehrt mit der neuen Kategorie zurück). Kein Dropdown.
-4. Wiederholung als Leiste „Monatlich | Wöchentlich | Jährlich“, kein Dropdown.
+4. Wiederholung als Leiste in zwei Reihen mit je zwei Feldern: „Monatlich | Wöchentlich“ oben, „Vierteljährlich | Jährlich“ unten (ab 1.43.0, voller Text auch bei 320 px), kein Dropdown. Kürzel in `r.f`: `m`, `w`, `q` (alle 3 Monate), `y`. Die Auswahl „Wiederholen“ in „Weitere Angaben“ der Buchungsmaske enthält ebenfalls „Vierteljährlich“.
 5. Erste bzw. Nächste Fälligkeit (Datumsfeld) mit Hinweiszeile live darunter: „Erste Buchung am {Datum}, danach {Rhythmus}.“ (Bearbeiten: „Nächste Buchung …“); liegt das Datum heute oder früher, kommt „Bereits fällig, erscheint auf der Startseite.“ dazu.
 6. Notiz zuletzt (optional).
 - Der Einstiegsknopf in den Einstellungen trägt das Bootstrap Icon `plus`, kein „＋“-Zeichen.

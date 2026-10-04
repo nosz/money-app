@@ -41,7 +41,7 @@ const blank = () => ({
 const dateK = (r, k) => {
   const s = new Date(r.s + 'T00:00');
   if (r.f == 'w') return new Date(s.getFullYear(), s.getMonth(), s.getDate() + 7 * k);
-  const mo = s.getMonth() + (r.f == 'y' ? 12 * k : k),
+  const mo = s.getMonth() + (r.f == 'y' ? 12 * k : r.f == 'q' ? 3 * k : k),
     dim = new Date(s.getFullYear(), mo + 1, 0).getDate();
   return new Date(s.getFullYear(), mo, Math.min(s.getDate(), dim));
 };

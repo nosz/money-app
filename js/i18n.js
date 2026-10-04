@@ -172,6 +172,7 @@ const T = {
   m: ['Monatlich', 'Monthly'],
   w: ['Wöchentlich', 'Weekly'],
   y: ['Jährlich', 'Yearly'],
+  q: ['Vierteljährlich', 'Quarterly'],
   save: ['Speichern', 'Save'],
   del: ['Löschen', 'Delete'],
   undo: ['Rückgängig', 'Undo'],

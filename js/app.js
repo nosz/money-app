@@ -545,6 +545,7 @@ function op() {
               ['', t('nr')],
               ['m', t('m')],
               ['w', t('w')],
+              ['q', t('q')],
               ['y', t('y')],
             ],
             X.f,
@@ -864,7 +865,7 @@ function rfm(r, nw) {
   const fb = (k) =>
     `<button type=button data-f="${k}" class="${r.f == k ? 'on' : ''}" aria-pressed="${r.f == k}" onclick="rft('${k}')">${t(k)}</button>`,
     hx = rhtx();
-  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button class=sel id=rck aria-haspopup=dialog onclick="rcp()">${rckin()}</button><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><span class=fl>${t('rep')}</span><div class="tp typ rtp" role=group aria-label="${t('rep')}">${['m', 'w', 'y'].map(fb).join('')}</div></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div><small class=hint id=rhint${hx ? '' : ' hidden'}>${hx}</small></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div>`;
+  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button class=sel id=rck aria-haspopup=dialog onclick="rcp()">${rckin()}</button><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><span class=fl>${t('rep')}</span><div class="tp typ rtp" role=group aria-label="${t('rep')}">${['m', 'w', 'q', 'y'].map(fb).join('')}</div></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div><small class=hint id=rhint${hx ? '' : ' hidden'}>${hx}</small></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div>`;
 }
 /* 1.42.0: Kategorie-Auswahl der wiederkehrenden Buchung: eigene Ansicht über der Maske (wie cpk() der Buchung), Suche, Liste mit Linien-Icon,
    „Neue Kategorie“ am Listenende (ncs(2), Rückkehr mit der neuen Kategorie). RE bleibt erhalten, Rückkehr immer mit rback(). */

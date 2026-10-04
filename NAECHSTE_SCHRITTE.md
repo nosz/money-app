@@ -1,13 +1,21 @@
-# MoneyApp – Nächste Schritte (Stand 1.42.0)
+# MoneyApp – Nächste Schritte (Stand 1.43.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.42.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.43.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.43.0: Wiederholung „Vierteljährlich“ bei wiederkehrenden Buchungen.** Neues Kürzel `q` in `r.f` (alle 3 Monate); Datenformat sonst unverändert, alte Backups bleiben lesbar (`m`, `w`, `y` wie bisher).
+  1) *Fälligkeit:* `dateK(r, k)` in `js/store.js`: Monatsschritt `3 * k` bei `r.f == 'q'`. Monatsende bleibt wie bei monatlich (31.01. → 30.04. → 31.07., immer vom Startdatum `r.s` aus gerechnet).
+  2) *Leiste* in `rfm()` (`js/app.js`): `['m', 'w', 'q', 'y']`, in zwei Reihen mit je zwei Feldern (`.sh .tp.rtp{flex-wrap:wrap}`, Felder `flex:1 1 calc(50% - 2px)`): „Monatlich | Wöchentlich“ oben, „Vierteljährlich | Jährlich“ unten.
+  3) *Buchungsmaske* `op()`: Auswahl „Wiederholen“ unter „Weitere Angaben“ enthält „Vierteljährlich“ (Reihenfolge Nie, Monatlich, Wöchentlich, Vierteljährlich, Jährlich).
+  4) *Texte:* `q` in `js/i18n.js` („Vierteljährlich“ / „Quarterly“); Hinweiszeile und Liste der wiederkehrenden Buchungen nutzen `t(r.f)` und zeigen den Text automatisch.
+  Geändert: `js/store.js`, `js/app.js`, `js/i18n.js`, `css/style.css` (Abschnitt „1.43.0“), `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (Abschnitt 7c), `NAECHSTE_SCHRITTE.md`. Keine neuen Dateien.
+  Getestet in Chromium (390 px Deutsch, 320 px Englisch): vier Felder in zwei Reihen ohne abgeschnittenen Text, keine Seitenbreite über Fenster; Hinweiszeile „… danach vierteljährlich“ / „… then quarterly“; Fälligkeiten (01.12.2026 → 01.03.2027 …, 30.11. → 28.02., 31.01. → 30.04.); Anlegen (richtiger Wert `q` in `S.rec`), Bearbeiten (`idle` → `dirty` bei Wechsel, zurück auf `idle`), Speichern, Auswahl in der Buchungsmaske, `dues()` mit Start in der Vergangenheit; keine JS-Fehler. Echte Geräte nicht getestet.
 
 - **1.42.0: Neue wiederkehrende Buchung (und Bearbeiten) verbessert.** Nur Darstellung und Bedienung; `nrs()`, `rsv()`, Datenformat, Backup und Fälligkeitslogik unverändert.
   1) *Feldreihenfolge* (`rfm(r, nw)` in `js/app.js`, gilt für `nrd()` und `erd()`): Typ-Leiste (nur neu), Betrag, Kategorie, Wiederholung, Erste bzw. Nächste Fälligkeit mit Hinweiszeile, Notiz zuletzt.
@@ -206,6 +214,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 
 - Wiederkehrende Buchung (1.42.0, ersetzt die Entscheidung aus 1.31.0 „Kategorie als normales Auswahlfeld, keine Vollbild-Kategorieliste“): Maske selbst verbessern (Variante „nur Einstieg und Ablauf“ verworfen); Kategorie mit Auswahl-Ansicht inklusive „Kategorie hinzufügen“; Wiederholung als Leiste; Hinweiszeile unter der Fälligkeit (Variante „nur Datumsfeld“ verworfen); Reihenfolge Typ, Betrag, Kategorie, Wiederholung, Fälligkeit, Notiz zuletzt (Variante „unverändert“ verworfen). Keine Konto-Leiste (Entscheidung 1.31.0 gilt weiter).
 
+- Wiederholung „Vierteljährlich“ (1.43.0): Neues Kürzel `q` (alle 3 Monate); Leiste der wiederkehrenden Buchung in zwei Reihen mit je zwei Feldern (Variante „eine Reihe mit vier Feldern“ verworfen); Reihenfolge „Monatlich | Wöchentlich“ oben, „Vierteljährlich | Jährlich“ unten (Variante „nach Rhythmus sortiert“ verworfen). Die Auswahl in „Weitere Angaben“ der Buchungsmaske bekommt den Eintrag ebenfalls.
+
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 
 ### ERLEDIGT in 1.37.0 – Professionelle Validierung ALLER Eingabefelder, Speichern-Zustände, Verwerfen-Rückfrage [Nutzer-Vorgabe, Skill 5a und 5b]
@@ -250,6 +260,7 @@ Anlass: In Zahlenfelder ließen sich Buchstaben einfügen (Konto-Felder `#st_<k>
 
 ## 5. Prüfliste nach jeder Lieferung
 
+- [ ] 1.43.0 am Handy: Neue wiederkehrende Buchung: Leiste zeigt zwei Reihen („Monatlich | Wöchentlich“, „Vierteljährlich | Jährlich“), voller Text auch bei kleinem Handy; „Vierteljährlich“ wählen, Hinweiszeile „… danach vierteljährlich“; speichern, in den Einstellungen erscheint „Vierteljährlich“ in der Liste; Fälligkeit nach 3 Monaten; bearbeiten und Rhythmus wechseln; in der Buchungsmaske unter „Weitere Angaben“ „Vierteljährlich“ wählbar; Deutsch und Englisch?
 - [ ] 1.40.0 am Handy: Buchung antippen (Bearbeiten): Knopf unten heißt „Speichern“ (grau), nach einer Änderung aktiv mit „Nicht gespeicherte Änderung“, auch bei offener Tastatur sichtbar (iOS und Android); Startseite: Monatsleiste unter „Start“ sichtbar, Tipp auf einen Monat öffnet ihn und klappt die anderen zu, Leiste bleibt beim Scrollen und ganz oben; Monatszeile klebt direkt unter der Leiste; Einstellungen ohne Leiste; Notch/Statusleiste (iPhone) überdeckt nichts; Deutsch und Englisch?
 - [ ] 1.39.0 am Handy: Home oben sieht aus wie „Start“ unten; anderen Monat wählen, dann Home oben und „Start“ unten antippen: aktueller Monat erscheint, Ansicht springt nach oben; aus den Einstellungen ebenso; Deutsch und Englisch?
 - [ ] 1.38.0 am Handy: Home-Symbol oben links auf Start und in Einstellungen, bleibt beim Scrollen; in Einstellungen → Konten bei offener Tastatur (Bar, Bank, Gespart) sichtbar und antippbar; Tipp führt zur Startseite; Monat aufklappen, mitlaufende Überschriften und Auswertungs-Umschalter kleben unter der Leiste (nicht dahinter); Notch/Statusleiste (iPhone) überdeckt nichts; Dialoge zeigen keine Leiste; Deutsch und Englisch?

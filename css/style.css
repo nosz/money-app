@@ -1178,3 +1178,7 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 
 /* ===== 1.42.0: Wiederkehrende Buchung: Abstand zwischen Symbol und Name im Kategorie-Feld ===== */
 .sh .sel .ckv b{display:inline-block;margin-right:8px;vertical-align:middle}
+
+/* ===== 1.43.0: Wiederholung der wiederkehrenden Buchung: vier Einträge in zwei Reihen mit je zwei Feldern ===== */
+.sh .tp.rtp{flex-wrap:wrap}
+.sh .tp.rtp button{flex:1 1 calc(50% - 2px);min-width:0}
