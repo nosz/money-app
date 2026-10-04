@@ -58,7 +58,7 @@ Danach `http://localhost:8080` im Browser öffnen. Der Service Worker und die In
 
 ```
 index.html          Einstiegsseite
-manifest.json       PWA-Manifest
+manifest.json       PWA-Manifest (Symbole getrennt als any und maskable)
 service-worker.js   Offline-Cache (CACHE_VERSION bei jedem Release hochzählen)
 css/                Eigenes Design, Bootstrap (nur CSS)
 js/core.js          Hilfsfunktionen, Version (APP_VERSION), Icons
