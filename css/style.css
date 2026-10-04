@@ -1200,3 +1200,9 @@ body.fqf #v::after{content:'';display:block;height:60vh}
 /* ===== 1.52.0: Installations-Hinweis im Willkommen-Fenster (Karte in Hauptfarbe, wie die Datenschutz-Karte aufgebaut) ===== */
 .pv.pi{background:color-mix(in srgb,var(--gold) 12%,var(--surface));border-color:color-mix(in srgb,var(--gold) 45%,var(--surface))}
 .pv.pi .btn{display:flex;align-items:center;justify-content:center}
+
+/* ===== 1.54.0: feste Elemente am unteren Rand über die Browser-Leiste heben (--nbo wird in js/core.js gemessen, sonst 0) ===== */
+nav{bottom:var(--nbo,0px)}
+.ov{bottom:var(--nbo,0px)}
+#toast{bottom:calc(120px + env(safe-area-inset-bottom) + var(--nbo,0px))}
+@media (min-width:768px){#toast{bottom:calc(100px + env(safe-area-inset-bottom) + var(--nbo,0px))}}

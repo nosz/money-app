@@ -130,7 +130,8 @@ const mlms = () => {
 };
 const mlist = () => {
   const { all, ms } = mlms();
-  if (!ms.length) return `<div class="card card-body"><small>${t('none')}</small></div>`;
+  /* 1.54.0: ohne jede Buchung steht oben schon die Karte „Erste Buchung erfassen“, dann kein zweiter Hinweis */
+  if (!ms.length) return S.tx.length ? `<div class="card card-body"><small>${t('none')}</small></div>` : '';
   HS.o = HS.o || {};
   const sc = HS.sc || 'd',
     dr = HS.dir || -1;

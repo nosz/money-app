@@ -277,6 +277,30 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.53.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.54.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
+
+/* 1.54.0: Browser-Leiste unten (z. B. Samsung Internet) überdeckt feste Elemente am unteren Rand, bis man scrollt.
+   --nbo = Höhe des verdeckten Bereichs: Layout-Viewport minus sichtbarer Bereich. Nur bei normalem Zoom und nur bis 120 px
+   (größere Werte sind die Tastatur, kleiner Zoom oder Fehlmessung), in der installierten App immer 0. */
+function nbo() {
+  const v = window.visualViewport,
+    r = document.documentElement;
+  let o = 0;
+  if (v && v.scale <= 1.01 && !matchMedia('(display-mode:standalone)').matches && !navigator.standalone) {
+    o = Math.round(r.clientHeight - v.height - v.offsetTop);
+    if (o < 0 || o > 120) o = 0;
+  }
+  r.style.setProperty('--nbo', o + 'px');
+}
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', nbo);
+  visualViewport.addEventListener('scroll', nbo);
+}
+addEventListener('resize', nbo);
+addEventListener('orientationchange', () => setTimeout(nbo, 300));
+addEventListener('load', () => {
+  nbo();
+  setTimeout(nbo, 400);
+});
