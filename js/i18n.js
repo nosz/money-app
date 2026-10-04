@@ -132,6 +132,11 @@ const T = {
   shr_t: ['Ich führe mein Haushaltsbuch mit der MoneyApp. Probier sie aus:', 'I keep my household budget with MoneyApp. Give it a try:'],
   shr_c: ['Text und Link kopiert', 'Text and link copied'],
   shr_e: ['Kopieren nicht möglich', 'Copying not possible'],
+  loc_h: ['Datenschutz', 'Privacy'],
+  loc_i: [
+    'Deine Daten werden nur lokal auf diesem Gerät gespeichert. Es gibt kein Konto, keine Cloud und keine Übertragung an einen Server. Weil nichts online gesichert wird, erstelle regelmäßig ein Backup unter „Daten & Sicherheit“.',
+    'Your data is stored only locally on this device. There is no account, no cloud and no transfer to a server. Because nothing is backed up online, create a backup regularly under “Data & security”.',
+  ],
   oss: ['Open Source', 'Open source'],
   oss_i: [
     'Die MoneyApp ist Open Source. Der Programmcode liegt öffentlich auf GitHub und kann dort eingesehen werden.',

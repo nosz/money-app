@@ -1,0 +1,26 @@
+# ZIP-Dateien (Lieferungen, z. B. money_app_1_47_0.zip)
+*.zip
+money_app_skill.md  
+NAECHSTE_SCHRITTE.md    
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Abhängigkeiten, Logs, lokale Umgebung
+node_modules/
+*.log
+.env
+.env.*
+
+# Temporäre Dateien und Sicherungen
+*.tmp
+*.bak
+*.orig

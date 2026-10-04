@@ -512,10 +512,11 @@ const V = {
             s.lang,
           )}</select>`,
         ),
-      /* 1.45.0: Bereich „Über die App“: Weiterempfehlen, Info Open Source (GitHub), Version */
+      /* 1.45.0: Bereich „App-Info / Weiterempfehlen“: Weiterempfehlen, Datenschutz (nur lokal, 1.47.0), Info Open Source (GitHub), Version */
       about = () =>
         `<div class=abt>` +
         lb('shr_h', `<small style="display:block;margin-bottom:8px">${t('shr_i')}</small><button type=button class="btn btn-primary w-100" onclick="shr()">${bi('share')} ${t('shr')}</button>`) +
+        bx(lb('loc_h', `<small>${t('loc_i')}</small>`)) +
         bx(
           lb('oss', `<small style="display:block;margin-bottom:8px">${t('oss_i')}</small><a class="btn btn-secondary s w-100" href="${GITHUB_URL}" target=_blank rel="noopener noreferrer">${bi('github')} ${t('gh')}</a>`),
         ) +
