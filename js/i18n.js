@@ -60,6 +60,10 @@ const T = {
     'Auswertung nach Kategorien und Monaten.',
     'Charts by category and month.',
   ],
+  w4: [
+    'Funktioniert auch ohne Internet.',
+    'Works without an internet connection.',
+  ],
   wpt: ['Datenspeicherung nur auf diesem Gerät', 'Data stored on this device only'],
   wp: [
     'Alle Daten werden ausschließlich auf diesem Gerät gespeichert. Regelmäßige Backups unter „Einstellungen“ werden empfohlen.',
@@ -129,13 +133,13 @@ const T = {
     'Like MoneyApp? Send it to friends or family. The link leads straight to the app.',
   ],
   shr: ['App weiterempfehlen', 'Recommend the app'],
-  shr_t: ['Die MoneyApp: Haushaltsbuch fürs Handy. Kostenlos, ohne Konto, ohne Werbung. Deine Daten bleiben nur auf deinem Gerät. Hier kannst du sie ansehen:', 'MoneyApp: a household budget app for your phone. Free, no account, no ads. Your data stays only on your device. Take a look here:'],
+  shr_t: ['Die MoneyApp: Haushaltsbuch fürs Handy. Kostenlos, ohne Konto, ohne Werbung, auch offline nutzbar. Deine Daten bleiben nur auf deinem Gerät. Hier kannst du sie ansehen:', 'MoneyApp: a household budget app for your phone. Free, no account, no ads, works offline too. Your data stays only on your device. Take a look here:'],
   shr_c: ['Text und Link kopiert', 'Text and link copied'],
   shr_e: ['Kopieren nicht möglich', 'Copying not possible'],
   loc_h: ['Datenschutz', 'Privacy'],
   loc_i: [
-    'Deine Daten werden nur lokal auf diesem Gerät gespeichert. Es gibt kein Konto, keine Cloud und keine Übertragung an einen Server. Weil nichts online gesichert wird, erstelle regelmäßig ein Backup unter „Daten & Sicherheit“.',
-    'Your data is stored only locally on this device. There is no account, no cloud and no transfer to a server. Because nothing is backed up online, create a backup regularly under “Data & security”.',
+    'Deine Daten werden nur lokal auf diesem Gerät gespeichert. Es gibt kein Konto, keine Cloud und keine Übertragung an einen Server. Nach dem ersten Laden funktioniert die App auch ohne Internetverbindung. Weil nichts online gesichert wird, erstelle regelmäßig ein Backup unter „Daten & Sicherheit“.',
+    'Your data is stored only locally on this device. There is no account, no cloud and no transfer to a server. After the first load, the app also works without an internet connection. Because nothing is backed up online, create a backup regularly under “Data & security”.',
   ],
   oss: ['Open Source', 'Open source'],
   oss_i: [
