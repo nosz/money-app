@@ -173,6 +173,18 @@ Aufbau von oben nach unten (`V.lb()` in `js/render.js`), Handy zuerst, nichts br
 - Der Knopf trägt Haken und Text (siehe Abschnitt 5) und folgt den Zuständen aus Abschnitt 5b: unverändert deaktiviert („Gespeichert“, wenn schon ein Wert gespeichert ist), geändert und gültig aktiv („Speichern“) mit Zeile „Nicht gespeicherte Änderung“, ungültig deaktiviert mit Meldung, nach dem Speichern 2 Sekunden grün „✓ Gespeichert“ (ohne Toast). Die Felder lassen nur Ziffern, einen Dezimaltrenner, 2 Nachkommastellen und ein führendes Minus zu (Bank und ein Altbestand im Minus). Prüfungen unverändert (Bar/Gespart nie unter 0, Altbestand im Minus zulässig). Nicht gespeicherte Eingaben in den anderen Feldern bleiben nach dem Speichern erhalten. Enter im Feld speichert nur, wenn der Knopf aktiv ist.
 - Der Willkommen-Dialog (`ob2()`) bleibt unverändert: dort speichert „Los“ alle Felder.
 
+# 7c. Wiederkehrende Buchung (Nutzer-Vorgabe ab 1.42.0, ersetzt „Kategorie als normales Auswahlfeld“)
+
+Gilt für „Neue wiederkehrende Buchung“ (`nrd()`) und „Bearbeiten“ (`erd()`), gemeinsamer Aufbau über `rfm()` in `js/app.js`. Von oben nach unten:
+1. Typ-Leiste Ausgabe/Einnahme (nur beim Anlegen; beim Bearbeiten nur Anzeige).
+2. Betrag: groß, zentriert, mit Währungssymbol (wie die Buchungsmaske).
+3. Kategorie: Auswahlfeld, das die Vollbild-Ansicht `rcp()` öffnet (Suche, Liste mit Linien-Icon, „Kategorie hinzufügen“ am Ende; `ncs(2)` kehrt mit der neuen Kategorie zurück). Kein Dropdown.
+4. Wiederholung als Leiste „Monatlich | Wöchentlich | Jährlich“, kein Dropdown.
+5. Erste bzw. Nächste Fälligkeit (Datumsfeld) mit Hinweiszeile live darunter: „Erste Buchung am {Datum}, danach {Rhythmus}.“ (Bearbeiten: „Nächste Buchung …“); liegt das Datum heute oder früher, kommt „Bereits fällig, erscheint auf der Startseite.“ dazu.
+6. Notiz zuletzt (optional).
+- Der Einstiegsknopf in den Einstellungen trägt das Bootstrap Icon `plus`, kein „＋“-Zeichen.
+- Keine Konto-Leiste (neu angelegte laufen über Bank). Logik, Datenformat und Fälligkeitsberechnung unverändert.
+
 # 8. Immer ohne Rückfrage einhalten
 
 - Gewählte Icons direkt in den Code einbetten (offline, inline) und im Service Worker cachen.
@@ -205,5 +217,5 @@ Pro Schritt: betroffene Funktionen und CSS lesen, Maske umbauen, Version erhöhe
 - Sind alte Backups weiter importierbar?
 - Liegt `NAECHSTE_SCHRITTE.md` aktualisiert im ZIP (nicht separat)?
 - Liegt `money_app_skill.md` in der aktuellen Fassung im ZIP?
-- Gibt es in den Einstellungen-Karten (Buchungen, Konten) keine Emojis, keine umbrechenden Chip-Reihen und keinen abgeschnittenen Text am Handy (390 und 320 px)?
+- Gibt es in Masken und Einstellungen-Karten (Buchungen, Konten, wiederkehrende Buchung) keine Emojis, keine umbrechenden Chip-Reihen und keinen abgeschnittenen Text am Handy (390 und 320 px)?
 - Wurde nur auf „bauen“ geliefert (0.3)?

@@ -828,15 +828,86 @@ function er(id) {
   erd();
 }
 /* 1.31.0: Wiederkehrende Buchung im Banking-Look (gleiche Klassen wie die Buchungsmaske: .fld .fl .amw .sel-Optik .acts2); Logik unverändert */
-function rfm(r, nw) {
-  const cats = O(
-    S.cats.filter((c) => c.t == r.t).map((c) => [c.id, (cit(c) ? cit(c) + ' ' : '') + esc(t(c.n))]),
-    r.c,
+/* 1.42.0: Aufbau der Maske (neu und bearbeiten): Betrag, Kategorie (Auswahl-Ansicht rcp()), Wiederholung als Leiste, Fälligkeit mit Hinweiszeile, Notiz zuletzt */
+const rckin = () => {
+  const c = S.cats.find((x) => x.id == RE.c);
+  return `<span class=ckv>${c ? `<b>${ci(c)}</b> ${esc(t(c.n))}` : `<em>${t('bk_catsel')}</em>`}</span>`;
+};
+/* Hinweiszeile unter der Fälligkeit: sagt, wann die erste (bzw. nächste) Buchung entsteht; leer bei ungültigem Datum */
+const rhtx = () => {
+  const d = RE.d;
+  if (!d || RE.dbad || !dvl(d)) return '';
+  const ds = new Date(d + 'T00:00').toLocaleDateString(loc(), { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return (
+    t(RE.id ? 'rh_n' : 'rh_1').replace('{d}', ds).replace('{f}', t(RE.f || 'm').toLowerCase()) +
+    (d <= iso(D) ? ' ' + t('rh_p') : '')
   );
-  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><label class=fl for=rc>${t('bk_cat')}</label><select class="form-select" id=rc onchange="RE.c=this.value;$('#rec')&&($('#rec').hidden=true)">${cats}</select><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div><div class=fld><label class=fl for=rr>${t('rep')}</label><select class="form-select" id=rr onchange="RE.f=this.value">${O(
-    ['m', 'w', 'y'].map((k) => [k, t(k)]),
-    r.f,
-  )}</select></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div></div>`;
+};
+function rhf() {
+  const h = $('#rhint');
+  if (!h) return;
+  const x = rhtx();
+  h.textContent = x;
+  h.hidden = !x;
+}
+/* Wiederholung gewählt (Leiste), ohne die Maske neu zu zeichnen */
+function rft(k) {
+  RE.f = k;
+  document.querySelectorAll('.rtp button').forEach((b) => {
+    const on = b.dataset.f == k;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  rhf();
+}
+function rfm(r, nw) {
+  const fb = (k) =>
+    `<button type=button data-f="${k}" class="${r.f == k ? 'on' : ''}" aria-pressed="${r.f == k}" onclick="rft('${k}')">${t(k)}</button>`,
+    hx = rhtx();
+  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button class=sel id=rck aria-haspopup=dialog onclick="rcp()">${rckin()}</button><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><span class=fl>${t('rep')}</span><div class="tp typ rtp" role=group aria-label="${t('rep')}">${['m', 'w', 'y'].map(fb).join('')}</div></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div><small class=hint id=rhint${hx ? '' : ' hidden'}>${hx}</small></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div>`;
+}
+/* 1.42.0: Kategorie-Auswahl der wiederkehrenden Buchung: eigene Ansicht über der Maske (wie cpk() der Buchung), Suche, Liste mit Linien-Icon,
+   „Neue Kategorie“ am Listenende (ncs(2), Rückkehr mit der neuen Kategorie). RE bleibt erhalten, Rückkehr immer mit rback(). */
+function rback() {
+  RE.dbad = 0; /* das Datumsfeld wird mit dem letzten gültigen Wert neu gezeichnet */
+  RE.id ? erd() : nrd();
+}
+function rcp() {
+  RE.q = '';
+  sheet(
+    `<div class=sht><h2>${t('bk_cat')}</h2><button class=x onclick="rback()" aria-label="${t('x')}">${bi('x')}</button></div><input class="form-control" id=rqi type=search placeholder="${t('search')}" aria-label="${t('search')}" oninput="txc(this);RE.q=this.value;rcf()" maxlength=60 autocomplete=off enterkeyhint=search><div class=cpl id=rql>${rcl()}</div>`,
+    'fs',
+    'r',
+  );
+  const sh = $('.sh');
+  if (sh) {
+    sh.dataset.t = RE.t;
+    sh.scrollTop = 0;
+  }
+}
+function rcf() {
+  const l = $('#rql'),
+    q = $('#rqi');
+  if (l) l.innerHTML = rcl();
+  if (q) q.classList.toggle('fon', !!RE.q);
+}
+function rcl() {
+  const q = (RE.q || '').trim().toLowerCase(),
+    cnt = (c) => S.tx.filter((x) => x.c == c.id).length + S.rec.filter((x) => x.c == c.id).length,
+    cs = S.cats.filter((c) => c.t == RE.t && (!q || t(c.n).toLowerCase().includes(q))).sort((a, b) => cnt(b) - cnt(a)),
+    row = (c) =>
+      `<button type=button class="pk${RE.c == c.id ? ' on' : ''}" aria-pressed="${RE.c == c.id}" onclick="rcpick('${c.id}')"><b>${ci(c)}</b><span>${hl(t(c.n), q)}</span></button>`;
+  return (
+    (cs.length
+      ? `<h3 class=ph>${t(RE.t == 'i' ? 'fpn' : 'fpe')}</h3><div class=pl>${cs.map(row).join('')}</div>`
+      : `<div class=nr><small>${t('nores')}</small></div>`) +
+    `<button type=button class="pk pn" onclick="ncs(2)">${bi('plus')}<span>${t('newc')}</span></button>`
+  );
+}
+function rcpick(id) {
+  RE.c = id;
+  RE.q = '';
+  rback();
 }
 function erd() {
   const r = RE;
@@ -854,6 +925,7 @@ function rdc(el) {
   say('#red', bad ? t('e_date') : '');
   el.classList.toggle('bad', bad);
   if (!bad) RE.d = el.value;
+  rhf();
 }
 function rdBad() {
   const e = $('#red');
@@ -1004,7 +1076,7 @@ const gr = (v) => {
 };
 /* Kategorie anlegen / bearbeiten (1.29.0, Banking-Look): Vollbild-Maske mit Art, Bezeichnung und Symbol.
    Das Symbol wird in einer eigenen Vollbild-Ansicht gewählt (Suche, Reiter „Symbole | Emoji“).
-   NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung heraus geöffnet), tab ('s' | 'e'), q, nodel, dh }
+   NC = { id (nur beim Bearbeiten), t, n, i, from (1 = aus der Buchung, 2 = aus der wiederkehrenden Buchung heraus geöffnet), tab ('s' | 'e'), q, nodel, dh }
    NC.i: Emoji oder 'bi:<name>' (Bootstrap-Icon, siehe js/icons.js). Datenformat bleibt unverändert (Feld i). */
 const hdc = (ti, js) =>
   `<div class=sht><h2>${ti}</h2><button class=x onclick="${js || 'dcl(()=>ncx())'}" aria-label="${t('x')}">${bi('x')}</button></div>`;
@@ -1017,7 +1089,7 @@ function ncm() {
       `<button type=button data-t="${ty}" class="${NC.t == ty ? 'on' : ''}" aria-pressed="${NC.t == ty}" onclick="cty('${ty}')">${lb}</button>`,
     /* Art: wählbar nur beim Anlegen aus den Einstellungen; aus der Buchung heraus und beim Bearbeiten nur Anzeige */
     art = lock
-      ? `<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(NC.t)}</div><small class=hint>${t(NC.from ? 'cty_lock' : 'h_' + NC.t)}</small></div>`
+      ? `<div class=fld><span class=fl>${t('cty')}</span><div class=ro>${t(NC.t)}</div><small class=hint>${t(NC.from == 2 ? 'cty_lockr' : NC.from ? 'cty_lock' : 'h_' + NC.t)}</small></div>`
       : `<div class=fld><span class=fl>${t('cty')}</span><div class="tp typ ctp" role=group aria-label="${t('cty')}">${tb('e', t('e'))}${tb('i', t('i'))}</div><small class=hint id=cth>${t('h_' + NC.t)}</small></div>`,
     nm = `<div class=fld><label class=fl for=nn>${t('cat_nm')}</label><input class="form-control" id=nn value="${esc(NC.n)}" autocomplete=off maxlength=30 enterkeyhint=done oninput="txc(this);NC.n=this.value;this.style.borderColor='';$('#en').hidden=true" onkeydown="if(event.key=='Enter'&&!$('#o .sb').disabled)${save}"><div class="em invalid-feedback" id=en hidden role=alert>${t('e_name')}</div></div>`,
     sy = `<div class=fld><span class=fl>${t('sym')}</span><button type=button class=sel id=cpi aria-haspopup=dialog onclick="ipk()"><span class=ckv><span class=cvp id=cpg>${ci(NC)}</span>${t('sym_chg')}</span></button></div>`;
@@ -1107,13 +1179,19 @@ function cty(ty) {
   if (s) s.dataset.t = ty;
 }
 function ncs(entry) {
-  NC = { t: entry && X.t == 'i' ? 'i' : 'e', n: entry ? (X.q || '').trim() : '', i: 'bi:tag', from: entry ? 1 : 0 };
+  /* entry: 1 = aus der Buchung, 2 = aus der wiederkehrenden Buchung (1.42.0), sonst aus den Einstellungen */
+  NC = {
+    t: entry == 2 ? RE.t : entry && X.t == 'i' ? 'i' : 'e',
+    n: entry == 2 ? (RE.q || '').trim() : entry ? (X.q || '').trim() : '',
+    i: 'bi:tag',
+    from: entry || 0,
+  };
   SN.n = CUR.n();
   ncm();
   $('#nn').focus({ preventScroll: true });
 }
 /* Zurück: zur Buchung bzw. Maske schließen */
-const ncx = () => (NC.from ? op() : cl());
+const ncx = () => (NC.from == 2 ? rback() : NC.from ? op() : cl());
 /* 1.35.1: Fehlermeldung ganz sichtbar machen: über der festen Knopfzeile (.stkb) halten. Der Abstand wird aus deren Höhe berechnet.
    Zweiter Aufruf nach 380 ms, weil das Fokus-Zentrieren des Eingabefelds (focusin, 320 ms) sonst wieder verschiebt. */
 function evis(e) {
@@ -1148,6 +1226,11 @@ function ac() {
   const c = { id: uid(), t: NC.t, n, i: NC.i };
   S.cats.push(c);
   P();
+  if (NC.from == 2) {
+    RE.q = '';
+    RE.c = c.id;
+    return rback();
+  }
   if (NC.from) {
     X.q = '';
     X.ac = 0;

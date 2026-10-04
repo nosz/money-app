@@ -1175,3 +1175,6 @@ details.gx[open]>summary,#res details[open]>summary{border-bottom:1px solid var(
 .fsel .ckv b{font-weight:400}
 .fsel em{font-style:normal;color:var(--m)}
 .sh .pk .pc{flex:none;color:var(--m);font-size:var(--fs-s);font-variant-numeric:tabular-nums}
+
+/* ===== 1.42.0: Wiederkehrende Buchung: Abstand zwischen Symbol und Name im Kategorie-Feld ===== */
+.sh .sel .ckv b{display:inline-block;margin-right:8px;vertical-align:middle}

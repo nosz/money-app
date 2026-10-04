@@ -1,13 +1,24 @@
-# MoneyApp – Nächste Schritte (Stand 1.41.0)
+# MoneyApp – Nächste Schritte (Stand 1.42.0)
 
 Diese Datei ist für einen Coding-Agenten gedacht. Sie beschreibt den aktuellen Stand, die bereits getroffenen
 Entscheidungen und die nächsten Schritte in fester Reihenfolge. Konzept: Skill „banking-eingabemasken“.
 
 ## 1. Aktueller Stand
 
-**Version 1.41.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
+**Version 1.42.0** (`APP_VERSION` in `js/core.js`, `CACHE_VERSION` in `service-worker.js`, beide gleich).
 
 Fertig:
+
+- **1.42.0: Neue wiederkehrende Buchung (und Bearbeiten) verbessert.** Nur Darstellung und Bedienung; `nrs()`, `rsv()`, Datenformat, Backup und Fälligkeitslogik unverändert.
+  1) *Feldreihenfolge* (`rfm(r, nw)` in `js/app.js`, gilt für `nrd()` und `erd()`): Typ-Leiste (nur neu), Betrag, Kategorie, Wiederholung, Erste bzw. Nächste Fälligkeit mit Hinweiszeile, Notiz zuletzt.
+  2) *Kategorie* als Auswahlfeld `#rck` (`.sel`, `rckin()`): Tipp öffnet die Vollbild-Ansicht `rcp()` (Suche `#rqi`, `rcf()`, Liste `rcl()` mit Linien-Icon, nach Häufigkeit sortiert, Überschrift Ausgaben bzw. Einnahmen, Zeile „Kategorie hinzufügen“ am Ende); `rcpick(id)` setzt `RE.c`; `rback()` kehrt immer in die Maske zurück (`erd()` bzw. `nrd()`, setzt `RE.dbad = 0`, weil das Datumsfeld mit dem letzten gültigen Wert neu gezeichnet wird). Eingaben bleiben erhalten, weil `RE` alle Felder hält.
+  3) *Neue Kategorie aus der Maske:* `ncs(2)` (`NC.from == 2`): Art gesperrt (Text `cty_lockr`), Bezeichnung aus der Suche vorbelegt, `ncx()` und `ac()` kehren mit `rback()` zurück, `ac()` setzt dabei `RE.c` auf die neue Kategorie.
+  4) *Wiederholung* als Leiste „Monatlich | Wöchentlich | Jährlich“ (`.tp.typ.rtp`, `rft(k)` setzt `RE.f` ohne Neuzeichnen) statt Dropdown.
+  5) *Hinweiszeile* `#rhint` unter dem Datum (`rhtx()`, `rhf()`, Texte `rh_1`, `rh_n`, `rh_p`): „Erste Buchung am 01.11.2026, danach monatlich.“ (bei Bearbeiten „Nächste Buchung …“), bei Datum heute oder früher zusätzlich „Bereits fällig, erscheint auf der Startseite.“, bei ungültigem Datum ausgeblendet; `rdc()` aktualisiert sie live.
+  6) *Einstieg:* Knopf „Neue wiederkehrende Buchung“ in den Einstellungen (`js/render.js`, `rec()`) mit Bootstrap Icon `plus` statt „＋“.
+  Geändert: `js/app.js`, `js/render.js`, `js/i18n.js` (neu `rh_1`, `rh_n`, `rh_p`, `cty_lockr`), `css/style.css` (Abschnitt „1.42.0“: Abstand Symbol und Name im Kategorie-Feld, gilt auch in der Buchungsmaske), `js/core.js` (`APP_VERSION`), `service-worker.js` (`CACHE_VERSION`), `money_app_skill.md` (Abschnitt 7c, Abschnitt 10). Keine neuen Dateien.
+  Offen/Hinweis: Beim Wechsel der Art (Ausgabe/Einnahme) und beim Öffnen einer neuen Maske wird weiter die erste Kategorie der Art vorbelegt (bestehende Logik `nrt()`, nicht geändert). Falls gewünscht: leer lassen und „Kategorie wählen“ zeigen, Meldung `e_cat` beim Speichern.
+  Getestet in Chromium (390 px Deutsch, 320 px Englisch): Reihenfolge der Felder, Hinweiszeile live (Wiederholung, Zukunft, heute, leeres Datum), Auswahl mit Suche, Rückkehr mit erhaltenen Eingaben (Betrag, Notiz, Datum, Wiederholung), Neue Kategorie aus der Maske (Art gesperrt, Rückkehr mit neuer Kategorie, Abbrechen), Typwechsel, Speichern (richtige Werte in `S.rec`), Bearbeiten (Hinweis „Nächste Buchung“, Zustand `idle` → `dirty`, Wiederholung geändert und gespeichert), keine Seitenbreite über 320 px, keine JS-Fehler. Echte Geräte nicht getestet.
 
 - **1.41.0: Karte „Buchungen“ (Einstellungen) professioneller, Monatsleiste der Startseite entfernt.** Zwei Rückmeldungen des Nutzers am Handy (Screenshots). Nur Darstellung und Bedienung, Logik der Filter (`fl()`, `rl()`, `fsm()`, `F`), Datenformat und Backup unverändert.
   1) *Monatsleiste entfernt:* Die zweite Zeile der Kopfleiste (Chips wie „Okt“, `mbar()`, `mbu()`, `mgo()`, `mshort()`, `tbr()`-Teil) ist weg, die Kopfleiste ist wieder 48 px hoch (`--mbh` bleibt 0 px in `css/style.css`). Text `mbar` aus `js/i18n.js` entfernt. `mlms()` bleibt (wird von `mlist()` gebraucht), `mtg()` ruft kein `mbu()` mehr auf.
@@ -192,6 +203,8 @@ Symbol wählen, Suche, Emoji-Reiter, leerer Name, Rückkehr in die Buchung mit e
 - Monatsleiste (1.40.0, **seit 1.41.0 entfernt** auf Wunsch des Nutzers, nicht wieder einbauen): Wischbare Chips in einer zweiten Zeile der Kopfleiste, immer sichtbar auf der Startseite (Variante „Pfeile ‹ › in der Monatszeile“ verworfen). Tipp auf einen Chip öffnet diesen Monat, klappt die anderen zu und scrollt die Monatskarte nach oben (Variante „andere Monate bleiben offen“ verworfen). Chips = Monate der Monatsliste (aktueller und zwei davor, nur mit Buchungen).
 
 - Karte „Buchungen“ (1.41.0): Kategorie-Filter als Auswahlfeld mit Vollbild-Auswahl wie in der Buchungsmaske (Variante „eine wischbare Chip-Zeile“ verworfen); „Alle Monate“ als Umschalter „Monat | Alle Monate“ (Variante „Checkbox schlichter gestalten“ verworfen); Suchfeld mit Icon `search`, kürzerem Platzhalter und ✕ zum Leeren (Variante „nur Emoji ersetzen“ verworfen); Ergebniszeile mit „Zurücksetzen“ bleibt direkt unter den Filtern, Knopf mit Icon `x` (Variante „Zusammenfassung über den Filtern“ verworfen).
+
+- Wiederkehrende Buchung (1.42.0, ersetzt die Entscheidung aus 1.31.0 „Kategorie als normales Auswahlfeld, keine Vollbild-Kategorieliste“): Maske selbst verbessern (Variante „nur Einstieg und Ablauf“ verworfen); Kategorie mit Auswahl-Ansicht inklusive „Kategorie hinzufügen“; Wiederholung als Leiste; Hinweiszeile unter der Fälligkeit (Variante „nur Datumsfeld“ verworfen); Reihenfolge Typ, Betrag, Kategorie, Wiederholung, Fälligkeit, Notiz zuletzt (Variante „unverändert“ verworfen). Keine Konto-Leiste (Entscheidung 1.31.0 gilt weiter).
 
 ## 3. Nächste Schritte (in dieser Reihenfolge, je eine Version)
 

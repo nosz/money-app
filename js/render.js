@@ -402,7 +402,7 @@ const V = {
       },
       rec = () => {
         /* 1.21.14: neue wiederkehrende Buchung direkt anlegen (wie „Neue Kategorie“), auch bei leerer Liste */
-        const nb = `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="nrc()">＋ ${t('rec_n')}</button>`;
+        const nb = `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="nrc()">${bi('plus')} ${t('rec_n')}</button>`;
         if (!S.rec.length) return nb + `<small>${t('norec')}</small>`;
         RT.cl = RT.cl || {};
         /* Sortierung wählbar (Standard: nächste Fälligkeit zuerst) */
