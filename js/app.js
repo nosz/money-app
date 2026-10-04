@@ -889,21 +889,31 @@ function rhf() {
   h.textContent = x;
   h.hidden = !x;
 }
-/* Wiederholung gewählt (Leiste), ohne die Maske neu zu zeichnen */
-function rft(k) {
+/* 1.61.0: Wiederholung als Auswahlfeld (wie die Kategorie): Tipp öffnet die Vollbild-Ansicht rfp() mit vier Zeilen (Name, Zusatz, Haken bei der Auswahl);
+   rfpick(k) setzt RE.f und kehrt mit rback() in die Maske zurück (RE hält alle Eingaben). Kürzel unverändert: m, w, q, y. */
+const RFK = ['m', 'w', 'q', 'y'];
+const rfin = () => `<span class=ckv>${esc(t(RE.f || 'm'))}</span>`;
+function rfp() {
+  const row = (k) =>
+    `<button type=button class="pk${RE.f == k ? ' on' : ''}" aria-pressed="${RE.f == k}" onclick="rfpick('${k}')"><span>${t(k)}<small class=hn>${t('rep_' + k)}</small></span>${RE.f == k ? `<i class=ck>${bi('check')}</i>` : ''}</button>`;
+  sheet(
+    `<div class=sht><h2>${t('rep')}</h2><button class=x onclick="rback()" aria-label="${t('x')}">${bi('x')}</button></div><div class=cpl><div class=pl>${RFK.map(row).join('')}</div></div>`,
+    'fs',
+    'r',
+  );
+  const sh = $('.sh');
+  if (sh) {
+    sh.dataset.t = RE.t;
+    sh.scrollTop = 0;
+  }
+}
+function rfpick(k) {
   RE.f = k;
-  document.querySelectorAll('.rtp button').forEach((b) => {
-    const on = b.dataset.f == k;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on);
-  });
-  rhf();
+  rback();
 }
 function rfm(r, nw) {
-  const fb = (k) =>
-    `<button type=button data-f="${k}" class="${r.f == k ? 'on' : ''}" aria-pressed="${r.f == k}" onclick="rft('${k}')">${t(k)}</button>`,
-    hx = rhtx();
-  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button class=sel id=rck aria-haspopup=dialog onclick="rcp()">${rckin()}</button><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><span class=fl>${t('rep')}</span><div class="tp typ rtp" role=group aria-label="${t('rep')}">${['m', 'w', 'q', 'y'].map(fb).join('')}</div></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div><small class=hint id=rhint${hx ? '' : ' hidden'}>${hx}</small></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div>`;
+  const hx = rhtx();
+  return `<div class=fld><label class=fl for=ra>${t('bk_amt')}</label><div class=amw><input class="form-control amt" id=ra inputmode=decimal placeholder="0,00" value="${esc(r.a)}" oninput="RE.a=amc(this)" maxlength=13 autocomplete=off><span class=cur aria-hidden=true>${curSym()}</span></div><div class="em invalid-feedback" id=rea hidden role=alert>${t('e_amt0')}</div></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button class=sel id=rck aria-haspopup=dialog onclick="rcp()">${rckin()}</button><div class="em invalid-feedback" id=rec hidden role=alert>${t('e_cat')}</div></div><div class=fld><span class=fl>${t('rep')}</span><button type=button class=sel id=rfk aria-haspopup=dialog onclick="rfp()">${rfin()}</button></div><div class=fld><label class=fl for=rd>${t(nw ? 'rec_f1' : 'nextd')}</label><input class="form-control" id=rd type=date min="2000-01-01" max="2100-12-31" value="${r.d}" oninput="rdc(this)" onchange="rdc(this)"><div class="em invalid-feedback" id=red hidden role=alert>${t('e_date')}</div><small class=hint id=rhint${hx ? '' : ' hidden'}>${hx}</small></div><div class=fld><label class=fl for=rn>${t('note')}</label><input class="form-control" id=rn maxlength=80 value="${esc(r.n)}" oninput="txc(this);RE.n=this.value" autocomplete=off></div>`;
 }
 /* 1.42.0: Kategorie-Auswahl der wiederkehrenden Buchung: eigene Ansicht über der Maske (wie cpk() der Buchung), Suche, Liste mit Linien-Icon,
    „Neue Kategorie“ am Listenende (ncs(2), Rückkehr mit der neuen Kategorie). RE bleibt erhalten, Rückkehr immer mit rback(). */
