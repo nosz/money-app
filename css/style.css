@@ -1191,3 +1191,8 @@ body.fqf #v::after{content:'';display:block;height:60vh}
 .abt .btn{display:flex;align-items:center;justify-content:center;min-height:48px;text-decoration:none}
 .abt .btn .bi{width:1.1rem;height:1.1rem}
 @media (max-width:360px){.abt .btn{font-size:.9rem;padding-left:10px;padding-right:10px}}
+
+/* ===== 1.48.0: Einstellungen: geöffneter Bereich deutlich markiert (Balken links, Symbol und Pfeil in Hauptfarbe) ===== */
+.sec.open{border-left:4px solid var(--gold)}
+.sec.open>button{padding-left:11px}
+.sec.open>button .ic,.sec.open>button .chev{color:var(--gold)}
