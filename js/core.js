@@ -178,13 +178,13 @@ const balOn = () => true; /* 1.37.1: Kontostände (Bar, Bank, Sparen) immer zeig
 const bstrip = (hi, nav) => {
   if (!balOn()) return '';
   const ks = ['bar', 'bank', 'spar'];
-  /* 1.57.0: Startseite (nav): je Kachel Kopfzeile (links Symbol, rechts Stift), darunter Name und Betrag, alles linksbündig.
+  /* 1.57.0: Startseite (nav): je Kachel Zeile 1 Symbol und Name (seit 1.59.0 in einer Zeile), Zeile 2 Betrag; alles linksbündig. Stift (rechts neben dem Betrag) seit 1.58.0 nur, wenn alle drei Konten 0 sind.
      Sind alle drei Konten 0: gestrichelter Rand in Hauptfarbe und zartes Banner mit Hinweistext darunter. */
   const z = !!nav && ks.every((k) => Math.abs(bal(k)) < 0.005);
   return `<div class="bstrip${nav ? ' nv' : ''}${z ? ' z' : ''}" role=group aria-label="${t('kto')}">${ks
     .map(
       (k) =>
-        `<${nav ? 'button type=button' : 'div'} class="bc${(hi || []).includes(k) ? ' on' : ''}"${nav ? ` onclick="gk('${k}')"` : ''}>${nav ? `<span class=bch>${AV(k)}<i class=pen aria-hidden=true>${AV('pen')}</i></span><span class=bcn>${t('a_' + k)}</span>` : `<span class=bcn>${AV(k)} ${t('a_' + k)}</span>`}<b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b></${nav ? 'button' : 'div'}>`,
+        `<${nav ? 'button type=button' : 'div'} class="bc${(hi || []).includes(k) ? ' on' : ''}"${nav ? ` onclick="gk('${k}')"` : ''}>${nav ? `<span class=bcn>${AV(k)}<span class=bcl>${t('a_' + k)}</span></span><span class=bcv><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b>${z ? `<i class=pen aria-hidden=true>${AV('pen')}</i>` : ''}</span>` : `<span class=bcn>${AV(k)} ${t('a_' + k)}</span><b class="${bal(k) < -0.004 ? 'neg' : ''}">${fmt(bal(k))}</b>`}</${nav ? 'button' : 'div'}>`,
     )
     .join('')}</div>${z ? `<div class=bzh>${AV('pen')}<span>${t('bzh')}</span></div>` : ''}`;
 };
@@ -279,7 +279,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.57.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.59.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 

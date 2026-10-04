@@ -1205,10 +1205,11 @@ nav{bottom:var(--nbo,0px)}
 
 /* ===== 1.57.0: Kacheln auf der Startseite (Banking-Look): Kopfzeile Symbol links, Stift rechts; darunter Name und Betrag; alle drei Konten 0: gestrichelter Rand + Banner ===== */
 .bstrip.nv{gap:6px}
-.bstrip.nv .bc{align-items:stretch;text-align:left;gap:1px;padding:8px 6px 8px 8px}
-.bstrip.nv .bch{display:flex;align-items:center;justify-content:space-between;color:var(--m)}
-.bstrip.nv .bch .ai{width:16px;height:16px}
-.bstrip.nv .bcn{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.bstrip.nv .bc{align-items:stretch;text-align:left;gap:2px;padding:8px 6px 8px 7px}
+.bstrip.nv .bcn{display:flex;align-items:center;gap:3px;min-width:0;overflow:hidden;font-size:min(var(--fs-s),3.6vw)}
+.bstrip.nv .bcn .ai{flex:none;width:13px;height:13px}
+.bstrip.nv .bcl{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.bstrip.nv .bcv{display:flex;align-items:center;justify-content:space-between;gap:4px}
 .bstrip.nv .bc b{font-size:min(var(--fs-m),3.9vw);letter-spacing:-.01em}
 .bstrip.nv .pen{display:inline-flex;flex:none;color:var(--m)}
 .bstrip.nv .pen svg{width:.8rem;height:.8rem;display:block}
