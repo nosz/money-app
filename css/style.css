@@ -1257,3 +1257,16 @@ body.kb.fqf #fcw:not(.fon){display:none}
 /* ===== 1.64.0: Suche in der Karte „Kategorien“ (Feld wie bei den Buchungen, Knopf „Neue Kategorie“ bei offener Tastatur ausgeblendet) ===== */
 #cq{scroll-margin-top:calc(var(--stk) + 8px)}
 body.kb.fqf #ncb{display:none}
+
+/* ===== 1.65.0: Suche auf der Startseite (unter der Monatsleiste, volle Breite; Treffer ersetzen alles darunter; „Zuletzt gesucht“ als Chips) ===== */
+.hqw{margin:0 0 4px}
+.hqw .fsr{margin:0 0 8px}
+.hqw .fsr .form-control.fon{padding-right:2.9rem}
+#hq{scroll-margin-top:calc(var(--stk) + 8px)}
+#hq::-webkit-search-cancel-button,#hq::-webkit-search-decoration{-webkit-appearance:none;display:none}
+.hqc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.hqc[hidden]{display:none}
+.hqcl{flex:0 0 100%;margin:0 2px;font-size:var(--fs-s);color:var(--m);line-height:1.3}
+.hqch{display:inline-flex;align-items:center;max-width:100%;min-height:44px;padding:0 14px;border:1px solid var(--b);border-radius:22px;background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hqsum{scroll-margin-top:calc(var(--stk) + 8px)}
+#hqres .li.tr .dc small{display:block;line-height:1.2}

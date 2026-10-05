@@ -77,6 +77,7 @@ let S,
   F = { q: '', c: '', all: 0 },
   ST = { t: 'e', p: 'm' },
   HS = {},
+  HQ = { q: '', sc: 'd', dir: -1, rec: [] } /* 1.65.0: Suche auf der Startseite (getrennt von F; rec = „Zuletzt gesucht“, nur im Speicher) */,
   X = {},
   SE = { o: null },
   U;
@@ -311,7 +312,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.64.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.65.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 

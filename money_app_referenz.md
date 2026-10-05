@@ -19,6 +19,7 @@ Aufbau der einzelnen Masken und Bereiche (Abschnitte 6 bis 8a). Die Regeln, die 
 | 7k | Onboarding, Kacheln mit Stift |
 | 8a | Keine Monatsleiste |
 | 8b | Aktuelles Datum, Datumswechsel bei offener App |
+| 8c | Suche auf der Startseite |
 
 # 6. Buchungsmaske (von oben nach unten)
 
@@ -151,3 +152,15 @@ Die App funktioniert nach dem ersten Laden ohne Internet (Service Worker, Daten 
 - **`tick()`** (`js/app.js`) vergleicht `iso(new Date())` mit `TD`. Aufgerufen bei Rückkehr in die App (`visibilitychange`, `pageshow`, `focus`) und einmal pro Minute (`setInterval`). Bei Änderung: `D` und `TD` setzen; steht `ym` auf dem aktuellen Monat, springt er auf den neuen, ein bewusst geblätterter Monat bleibt; dann `rd()`. Auch bei zurückgestelltem Handy-Datum.
 - **Nie stören:** Bei offenem Dialog (`#o`) oder fokussiertem Eingabefeld passiert nichts, der nächste Durchlauf prüft erneut (nichts Eingegebenes geht verloren). In den Einstellungen (Eingabefelder) wird nur neu gezeichnet, wenn die Auswertung offen ist (`SE.o == 'stats'`); `D` und `ym` werden trotzdem nachgezogen. Kein Toast, die Karte „fällig“ erscheint von selbst.
 - **Prüfung vor jeder Lieferung:** Uhr über Mitternacht stellen (Datumszeile, Monat, Karte „fällig“ aktualisieren sich); Dialog offen (nichts passiert, nach dem Schließen Nachzug); geblätterter Monat bleibt; Eingabefeld mit Fokus; Handy-Datum zurück; Deutsch und Englisch; 320 px (Zeile bricht nicht um, Pfeile bleiben gleich hoch).
+
+# 8c. Suche auf der Startseite
+
+- **Platz:** Suchfeld `#hq` oben auf der Startseite, direkt unter der Monatsleiste `mn()`, volle Breite, Aufbau wie in 7b (Icon `search` links, ✕ `#hqx` rechts nur bei Eingabe, 44 px). Platzhalter nur „Suchen“ / „Search“ (`hqph`). Kein Abzeichen mit Trefferzahl im Feld (die Zahl steht in der Ergebniszeile). Feldart Suche (Abschnitt 5a, `txc(this)`, `maxlength=60`).
+- **Eigener Zustand:** `HQ = { q, sc, dir, rec }` in `js/core.js`, nur im Speicher, nicht gesichert. Getrennt von `F` (Karte „Buchungen“): kein gemeinsamer Suchtext. `rd()` leert `HQ.q` außerhalb der Startseite, `go()` bei jedem Wechsel (auch Start-Symbol). Ein Neuzeichnen auf der Startseite (z. B. nach Speichern einer Buchung) behält die Suche.
+- **Logik:** startet live ab 2 Zeichen (`hqa()`, Leerzeichen am Rand zählen nicht), durchsucht alle Monate. Gleiche Suchlogik wie 7b (`qam()`, `qdt()`, `qtok()`, `nrm()`); `hqm()` ergänzt den Konto-Namen (Bank, Bar, Gespart; bei Umbuchungen beide Konten). Keine Schnellfilter.
+- **Ansicht:** Solange `hqa()` gilt, ist `#hm` (Konten-Kacheln, Monatsbilanz, „Bleibt bis Monatsende“, Monatsliste) `hidden` und `#hqr` zeigt Ergebniszeile (`#hqsum`) und Liste (`#hqres`). Nur `#hqr`, `#hm`, `#hqc` und `#hqx` werden neu gezeichnet (`hqs()`), das Feld behält den Fokus. Backup-Karte und Monatsleiste stehen über dem Feld und bleiben.
+- **Ergebniszeile:** Anzahl (Buchung/Buchungen), Einnahmen und Ausgaben getrennt (`hqsm()`), Umbuchungen zählen nicht mit; nur Umbuchungen: nur die Anzahl. Text bricht um, wird nie abgeschnitten (`.fsum`).
+- **Liste:** durchgehend über alle Monate, neueste zuerst, Sortier-Kopfzeile (`hrow(…, 'hqsort')`, Datum, Kategorie, Betrag). Zeilen wie `trow()` mit Jahr unter dem Tag; Umbuchungen tragen das Etikett „Umbuchung“. Tipp öffnet die Buchung (`ot()`), danach bleibt die Suche stehen.
+- **Ohne Treffer:** nur „Keine Treffer“ / „No results“ (`hqno`), ohne Hinweis.
+- **Zuletzt gesucht:** `HQ.rec`, höchstens 5, neuester zuerst, ohne Doppelte (ohne Groß-/Kleinschreibung). Gemerkt wird erst beim Tipp auf einen Treffer (`hqt()`, `hqrec()`), nie halbe Eingaben oder Suchen ohne Treffer. Anzeige als Chips (`.hqch`, 44 px) mit kleiner Beschriftung „Zuletzt gesucht“ unter dem Feld, nur solange das Feld leer ist; Tipp auf einen Chip füllt das Feld und sucht (`hqu()`).
+- **Tastatur:** ✕ leert das Feld, zeigt die normale Startseite und lässt die Tastatur offen (`hqclr()`). „Suchen“/Enter und Tipp neben das Feld (`pointerdown`-Handler in `js/app.js`, außerhalb `.hqw`) schließen die Tastatur, die Treffer bleiben stehen (`hqe()` holt die Ergebniszeile nach oben). Fokus-Handler wie `#fq`: Feld rutscht nach oben, `fqf` schafft unten Platz.

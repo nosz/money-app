@@ -31,13 +31,13 @@ const SI = {
   about: BI('<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>'), /* info-circle (1.45.0) */
 };
 const nmx = (x) => (x.t == 'u' ? t('tr') : t(cn(x.c).n));
-const trow = (x, q) => {
+const trow = (x, q, yr) => {
   const u = x.t == 'u',
     c = u ? { i: '⇄', n: 'tr' } : cn(x.c),
     ty = u ? 'u' : x.t,
     kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
     tm = hm(x);
-  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
+  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.${yr ? `<br><small>${x.d.slice(0, 4)}</small>` : ''}</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
 const sortL = (l, sc, dr) => {
   /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
@@ -333,13 +333,105 @@ const frs = () => {
   F.all = 0;
   rd();
 };
+/* 1.65.0: Suche auf der Startseite (eigener Zustand HQ, getrennt von der Suche in den Einstellungen).
+   Gleiche Suchlogik wie die Karte „Buchungen“ (qam(), qdt(), qtok(), nrm()), dazu der Konto-Name als Suchbegriff (Bank, Bar, Gespart; bei Umbuchungen beide Konten).
+   Sucht über alle Monate, startet ab 2 Zeichen, Treffer erscheinen live und ersetzen alles unter dem Suchfeld (#hm wird ausgeblendet, #hqr zeigt die Treffer).
+   „Zuletzt gesucht“ (HQ.rec, höchstens 5): nur im Speicher, nicht gesichert; ein Begriff wird erst beim Tipp auf einen Treffer gemerkt. */
+const hqa = () => HQ.q.trim().length >= 2;
+const hqk = (x) => (x.t == 'u' ? t('a_' + x.f) + ' ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')));
+const hqm = (x, tk) => {
+  const h = nrm((x.n || '') + ' ' + nmx(x) + ' ' + hqk(x));
+  return tk.every((w) => h.includes(w) || qam(x, w) || qdt(x, w));
+};
+const hql = () => {
+  const tk = qtok(HQ.q);
+  return hqa() && tk.length ? sortL(allT().filter((x) => hqm(x, tk)), HQ.sc, HQ.dir) : [];
+};
+/* Ergebniszeile: Anzahl, Einnahmen und Ausgaben getrennt (Umbuchungen zählen nicht mit) */
+const hqsm = (l) => {
+  const sum = (k) => l.reduce((s, x) => (x.t == k ? s + x.a : s), 0);
+  return `<span><b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${l.some((x) => x.t != 'u') ? ` · ${t('inn')} <b class=pos>${fmt(sum('i'))}</b> · ${t('ex')} <b class=neg>${fmt(sum('e'))}</b>` : ''}</span>`;
+};
+const hqr = () => {
+  if (!hqa()) return '';
+  const l = hql();
+  if (!l.length) return `<div class="card card-body"><small>${t('hqno')}</small></div>`;
+  return `<div class=fsum id=hqsum>${hqsm(l)}</div><div class="card card-body" id=hqres onclick="hqt(event)">${hrow(HQ.sc, HQ.dir, 'hqsort')}${l.map((x) => trow(x, HQ.q, 1)).join('')}</div>`;
+};
+const hqcl = () => `<small class=hqcl>${t('hqrec')}</small>` + HQ.rec.map((r, i) => `<button type=button class=hqch onclick="hqu(${i})">${esc(r)}</button>`).join('');
+/* Eingabe: nur die betroffenen Teile neu zeichnen, damit das Feld den Fokus behält */
+function hqs() {
+  const a = hqa(),
+    m = $('#hm'),
+    r = $('#hqr'),
+    c = $('#hqc'),
+    x = $('#hqx'),
+    e = $('#hq');
+  if (m) m.hidden = a;
+  if (r) r.innerHTML = hqr();
+  if (x) x.hidden = !HQ.q;
+  if (e) e.classList.toggle('fon', !!HQ.q);
+  if (c) {
+    c.innerHTML = hqcl();
+    c.hidden = !!HQ.q || !HQ.rec.length;
+  }
+}
+/* ✕: Feld leeren, normale Startseite, Tastatur bleibt offen */
+function hqclr() {
+  HQ.q = '';
+  const e = $('#hq');
+  if (e) {
+    e.value = '';
+    e.focus();
+  }
+  hqs();
+}
+/* Chip „Zuletzt gesucht“ antippen: Feld füllen und suchen */
+function hqu(i) {
+  const r = HQ.rec[i];
+  if (r == null) return;
+  HQ.q = r;
+  const e = $('#hq');
+  if (e) e.value = r;
+  hqs();
+}
+/* Begriff merken (höchstens 5, neuester zuerst, ohne Doppelte) */
+function hqrec() {
+  const q = HQ.q.trim();
+  if (!q) return;
+  HQ.rec = [q].concat(HQ.rec.filter((r) => r.toLowerCase() != q.toLowerCase())).slice(0, 5);
+}
+/* Tipp auf einen Treffer: Suchbegriff merken (die Buchung öffnet die Zeile selbst, danach bleibt die Suche stehen) */
+function hqt(ev) {
+  if (ev.target.closest && ev.target.closest('.li.tr')) hqrec();
+}
+function hqsort(c) {
+  if (HQ.sc == c) HQ.dir = -HQ.dir;
+  else {
+    HQ.sc = c;
+    HQ.dir = c == 'c' ? 1 : -1;
+  }
+  const r = $('#hqr');
+  if (r) r.innerHTML = hqr();
+}
+/* „Suchen“-Taste der Tastatur: Tastatur schließen, Ergebniszeile unter die Kopfleiste holen */
+function hqe() {
+  const e = $('#hq');
+  if (e) e.blur();
+  if (!hqa()) return;
+  setTimeout(() => {
+    const f = $('#hqsum') || $('#hqr');
+    if (f && f.scrollIntoView) f.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, 380);
+}
 /* Ansichten */
 const V = {
   home() {
     const m = mt(ym),
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
-    let h = brCard() + mn() + '<div class="row g-3 home-grid"><div class="col-12 col-lg-5">';
+    const hqw = `<div class=hqw><div class=fsr><span class=fsi>${bi('search')}</span><input id=hq type=search enterkeyhint=search class="form-control${HQ.q ? ' fon' : ''}" placeholder="${t('hqph')}" aria-label="${t('hqph')}" value="${esc(HQ.q)}" oninput="txc(this);HQ.q=this.value;hqs()" onkeydown="if(event.key=='Enter'){event.preventDefault();hqe()}" maxlength=60 autocomplete=off><button type=button id=hqx class=fsx ${HQ.q ? '' : 'hidden '}onclick="hqclr()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=hqc id=hqc role=group aria-label="${t('hqrec')}" ${HQ.q || !HQ.rec.length ? 'hidden' : ''}>${hqcl()}</div></div>`;
+    let h = brCard() + mn() + hqw + `<div id=hqr>${hqr()}</div><div id=hm${hqa() ? ' hidden' : ''}><div class="row g-3 home-grid"><div class="col-12 col-lg-5">`;
     /* solange es keine einzige Buchung gibt: große Karte, die direkt den Buchungsdialog öffnet */
     if (!S.tx.length)
       h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
@@ -364,7 +456,7 @@ const V = {
       h +
       '</div><div class="col-12 col-lg-7">' +
       mlist() +
-      '</div></div>'
+      '</div></div></div>'
     );
   },
   lb() {
@@ -664,6 +756,7 @@ function tbr() {
   $('#tb').innerHTML = `<div class=tbr1><button type=button class="tbh" ${h ? 'aria-current=page ' : ''}onclick="go('home')" aria-label="${t('home')}">${NI.home}</button><span class=tbt>${t(h ? 'home' : 'set')}</span></div>`;
 }
 function rd() {
+  if (tab != 'home') HQ.q = ''; /* 1.65.0: beim Verlassen der Startseite ist die Suche leer */
   tbr();
   $('#v').innerHTML = V[tab]();
   $('#nav').innerHTML =
@@ -721,6 +814,7 @@ function se(k) {
 /* 1.39.0: Home (oben in der Kopfleiste und unten „Start“) springt zusätzlich zum aktuellen Monat */
 function go(x) {
   tab = x;
+  HQ.q = ''; /* 1.65.0: Start-Symbol und Wechsel der Ansicht leeren die Suche der Startseite */
   if (x == 'home') ym = iso(D).slice(0, 7);
   scrollTo(0, 0);
   rd();

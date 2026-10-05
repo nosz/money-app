@@ -1601,7 +1601,7 @@ addEventListener('focusin', (e) => {
   if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return;
   /* 1.44.0: Suchfeld der Karte „Buchungen“ (#fq): Feld oben unter die Kopfleiste (scroll-margin im CSS), damit Kategorie, Ergebniszeile und
      erste Treffer über der Tastatur stehen. Die Klasse fqf schafft Platz unten, damit das Scrollen auch bei wenigen Treffern bis oben reicht. */
-  if (el.id == 'fq' || el.id == 'cq') document.body.classList.add('fqf'); /* 1.64.0: auch das Suchfeld der Karte „Kategorien“ (#cq) */
+  if (el.id == 'fq' || el.id == 'cq' || el.id == 'hq') document.body.classList.add('fqf'); /* 1.64.0: auch das Suchfeld der Karte „Kategorien“ (#cq); 1.65.0: und das Suchfeld der Startseite (#hq) */
   /* 1.62.1: in Masken (#o .sh) mit sfit(): sofort und noch dreimal, solange die Tastatur einfährt (nur wenn das Feld den Fokus behält) */
   if (el.closest('#o .sh')) {
     sfit(el);
@@ -1610,17 +1610,26 @@ addEventListener('focusin', (e) => {
   }
   setTimeout(() => {
     try {
-      el.scrollIntoView({ block: el.id == 'csi' || el.id == 'fq' || el.id == 'cq' ? 'start' : 'center', behavior: 'smooth' });
+      el.scrollIntoView({ block: el.id == 'csi' || el.id == 'fq' || el.id == 'cq' || el.id == 'hq' ? 'start' : 'center', behavior: 'smooth' });
     } catch (x) {}
   }, 320);
 });
 addEventListener('focusout', (e) => {
-  if (!e.target || (e.target.id != 'fq' && e.target.id != 'cq')) return;
+  if (!e.target || (e.target.id != 'fq' && e.target.id != 'cq' && e.target.id != 'hq')) return;
   setTimeout(() => {
     const a = document.activeElement;
-    if (!a || (a.id != 'fq' && a.id != 'cq')) document.body.classList.remove('fqf');
+    if (!a || (a.id != 'fq' && a.id != 'cq' && a.id != 'hq')) document.body.classList.remove('fqf');
   }, 300);
 });
+/* 1.65.0: Tipp neben das Suchfeld der Startseite schließt die Tastatur; die Treffer bleiben stehen. Tipps auf das Feld, das ✕ und die Chips „Zuletzt gesucht“ (alles in .hqw) zählen nicht. */
+document.addEventListener(
+  'pointerdown',
+  (e) => {
+    const a = document.activeElement;
+    if (a && a.id == 'hq' && !(e.target.closest && e.target.closest('.hqw'))) a.blur();
+  },
+  true,
+);
 /* 1.22.0: Kommt die App nach Tagen wieder in den Vordergrund, kann die Backup-Karte fällig sein: Startseite neu zeichnen, aber nur bei Änderung und nie bei offenem Dialog */
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && S && S.set && tab == 'home' && !$('#o') && brShow() != BKS) rd();
