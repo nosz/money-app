@@ -522,6 +522,8 @@ function fcs(id) {
     b = $('#fcb');
   if (v) v.innerHTML = fcin();
   if (b) b.classList.toggle('fon', !!F.c);
+  const w = $('#fcw');
+  if (w) w.classList.toggle('fon', !!F.c);
   rs();
 }
 

@@ -169,18 +169,31 @@ const lst = (l, st, id) => {
     .join('');
 };
 /* Gefilterte Liste (Monat / alle Monate, Kategorie, Suche) */
+/* 1.63.0: Suche. Jedes Wort muss in Notiz, Kategorie, Betrag oder Datum vorkommen (Umlaute egal).
+   Betrag: „45“ = ganze Euro 45, „45,9“ und „45.90“ = beginnt mit 45,9 bzw. 45,90, „1.234,56“ mit Tausenderpunkt. Datum: „12.10.“, „12.10“, „12.10.26“, „12.10.2026“. */
+const qam = (x, w) => {
+  if (/^\d{1,3}(\.\d{3})+(,\d{0,2})?$/.test(w)) w = w.replace(/\./g, '');
+  if (!/^\d+([.,]\d{0,2})?$/.test(w)) return false;
+  const [i, d] = w.replace('.', ',').split(','),
+    s = Number(x.a).toFixed(2).replace('.', ',');
+  return d === undefined ? s.split(',')[0] == i : s.startsWith(i + ',' + d);
+};
+const qdt = (x, w) => {
+  const m = /^(\d{1,2})\.(\d{1,2})\.?(\d{2}|\d{4})?$/.exec(w);
+  if (!m || +m[1] < 1 || +m[1] > 31 || +m[2] < 1 || +m[2] > 12) return false;
+  return +x.d.slice(8) == +m[1] && +x.d.slice(5, 7) == +m[2] && (!m[3] || (m[3].length == 2 ? x.d.slice(2, 4) : x.d.slice(0, 4)) == m[3]);
+};
+const mq = (x, tk) => {
+  const h = nrm((x.n || '') + ' ' + nmx(x));
+  return tk.every((w) => h.includes(w) || qam(x, w) || qdt(x, w));
+};
 const fl = () => {
-  const q = F.q.trim().toLowerCase();
-  return allT().filter(
-    (x) =>
-      (F.all || x.d.startsWith(ym)) &&
-      (!F.c || x.c == F.c) &&
-      (!q || ((x.n || '') + ' ' + nmx(x)).toLowerCase().includes(q)),
-  );
+  const tk = qtok(F.q);
+  return allT().filter((x) => (F.all || x.d.startsWith(ym)) && (!F.c || x.c == F.c) && (!tk.length || mq(x, tk)));
 };
 const rl = () => {
   const l = fl();
-  if (!l.length) return `<small>${t(F.q || F.c ? 'nohit' : 'none')}</small>`;
+  if (!l.length) return F.q.trim() ? `<small class=nhq>${t('nohitq').replace('{q}', esc(F.q.trim()))}</small>` : `<small>${t(F.c ? 'nohit' : 'none')}</small>`;
   return lst(l, F, 'F');
 };
 /* 1.21.0: Zusammenfassung über der Liste: Anzahl, Summe (ohne Umbuchungen) und „Zurücksetzen“ */
@@ -189,17 +202,38 @@ const fsm = () => {
     act = !!(F.q || F.c || F.all),
     net = l.reduce((s, x) => (x.t == 'i' ? s + x.a : x.t == 'e' ? s - x.a : s), 0),
     has = l.some((x) => x.t != 'u');
-  return `<span>${l.length ? `<b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${has ? ` · <b class="${net < 0 ? 'neg' : 'pos'}">${sg(net)}</b>` : ''}` : ''}</span>${act ? `<button type=button class=fclr onclick="frs()">${bi('x')} ${t('frs')}</button>` : ''}`;
+  return `<span>${l.length ? `<b>${l.length}</b> ${t(l.length == 1 ? 'hit1' : 'hitn')}${has ? ` · <b class="${net < 0 ? 'neg' : 'pos'}">${sg(net)}</b>` : ''}` : ''}</span>${act ? `<button type=button class=fclr onclick="frs()">${bi('arrow-ccw')} ${t('frs')}</button>` : ''}`;
 };
 const rs = () => {
   $('#res').innerHTML = rl();
   $('#fsum').innerHTML = fsm();
+  fqn();
 };
+/* 1.63.0: Trefferzahl als Abzeichen im Suchfeld (nur bei Suchtext; rostrot bei 0) */
+function fqn() {
+  const n = $('#fqn');
+  if (!n) return;
+  const c = fl().length;
+  n.hidden = !F.q;
+  n.textContent = c;
+  n.classList.toggle('z', !c);
+  n.setAttribute('aria-label', c + ' ' + t(c == 1 ? 'hit1' : 'hitn'));
+}
 const fr = () => {
   $('#fq').classList.toggle('fon', !!F.q);
   const x = $('#fqx');
   if (x) x.hidden = !F.q;
+  fqn();
 };
+/* 1.63.0: „Suchen“-Taste der Tastatur: Tastatur schließen und die Ergebniszeile unter die Kopfleiste holen, damit die Treffer ganz sichtbar sind */
+function fqe() {
+  const e = $('#fq');
+  if (e) e.blur();
+  setTimeout(() => {
+    const f = $('#fsum');
+    if (f && f.scrollIntoView) f.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, 380);
+}
 /* 1.41.0: Suche leeren (✕ im Feld) */
 function fqc() {
   F.q = '';
@@ -258,7 +292,7 @@ const V = {
   },
   lb() {
     /* 1.41.0: Umschalter Monat | Alle Monate, Monatswahl nur im Modus „Monat“, Suchfeld mit Icon, Kategorie als Auswahlfeld (Ansicht fcp() in js/app.js), Ergebniszeile, Liste */
-    return `<div class=fmd role=group aria-label="${t('month')}"><button type=button class="${F.all ? '' : 'on'}" aria-pressed="${!F.all}" onclick="fmd(0)">${t('month')}</button><button type=button class="${F.all ? 'on' : ''}" aria-pressed="${!!F.all}" onclick="fmd(1)">${t('allm')}</button></div>${F.all ? '' : mn()}<div class=fsr><span class=fsi>${bi('search')}</span><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="txc(this);F.q=this.value;rs();fr()" maxlength=60 autocomplete=off><button type=button id=fqx class=fsx ${F.q ? '' : 'hidden '}onclick="fqc()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=fld><span class=fl>${t('bk_cat')}</span><button type=button id=fcb class="fsel${F.c ? ' fon' : ''}" onclick="fcp()" aria-label="${t('fcat')}"><span class=ckv id=fcv>${fcin()}</span></button></div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
+    return `<div class=fmd role=group aria-label="${t('month')}"><button type=button class="${F.all ? '' : 'on'}" aria-pressed="${!F.all}" onclick="fmd(0)">${t('month')}</button><button type=button class="${F.all ? 'on' : ''}" aria-pressed="${!!F.all}" onclick="fmd(1)">${t('allm')}</button></div>${F.all ? '' : mn()}<div class=fsr><span class=fsi>${bi('search')}</span><input id=fq type=search enterkeyhint=search class="form-control${F.q ? ' fon' : ''}" placeholder="${t('search2')}" aria-label="${t('search2')}" value="${esc(F.q)}" oninput="txc(this);F.q=this.value;rs();fr()" onkeydown="if(event.key=='Enter'){event.preventDefault();fqe()}" maxlength=60 autocomplete=off><span id=fqn class=fqn ${F.q ? '' : 'hidden '}aria-live=polite>${F.q ? fl().length : 0}</span><button type=button id=fqx class=fsx ${F.q ? '' : 'hidden '}onclick="fqc()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class="fld${F.c ? ' fon' : ''}" id=fcw><span class=fl>${t('bk_cat')}</span><button type=button id=fcb class="fsel${F.c ? ' fon' : ''}" onclick="fcp()" aria-label="${t('fcat')}"><span class=ckv id=fcv>${fcin()}</span></button></div><div class=fsum id=fsum>${fsm()}</div><div class="card card-body" id=res>${rl()}</div>`;
   },
   sb() {
     const pre = ST.p == 'y' ? ym.slice(0, 4) : ym,

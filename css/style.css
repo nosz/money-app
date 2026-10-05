@@ -1239,3 +1239,17 @@ nav{bottom:var(--nbo,0px)}
 .kbs .ov .sh .stkb .btn{min-height:44px}
 .kbs .ov .sh .dhint{display:none}
 .kbs .ov .sh .amw .amt{font-size:1.5rem;line-height:1.2;min-height:44px}
+
+/* ===== 1.63.0: Suche in der Karte „Buchungen“: Trefferzahl im Feld, einzeilige Ergebniszeile, Kategorie bei offener Tastatur ausgeblendet ===== */
+.fsr .form-control.fon{padding-right:5.6rem}
+.fsr .fqn{position:absolute;right:46px;top:50%;transform:translateY(-50%);min-width:28px;height:24px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--text);font-size:var(--fs-s);font-weight:700;font-variant-numeric:tabular-nums;pointer-events:none}
+.fsr .fqn[hidden]{display:none}
+.fsr .fqn.z{background:color-mix(in srgb,var(--rust) 14%,var(--surface));color:var(--rust)}
+/* Ergebniszeile: Text wird nie abgeschnitten. Reicht die Breite nicht (Handy), rutscht „Zurücksetzen“ als Ganzes rechtsbündig in die zweite Zeile. */
+.fsum{flex-wrap:wrap;row-gap:0}
+.fsum>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.fsum .fclr{flex:none;margin-left:auto;padding:0 2px;white-space:nowrap}
+.fsum .fclr .bi{width:1rem;height:1rem}
+.nhq{overflow-wrap:anywhere}
+#fsum{scroll-margin-top:calc(var(--stk) + 8px)}
+body.kb.fqf #fcw:not(.fon){display:none}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* MoneyApp – automatische Prüfung vor jeder Lieferung.
    Aufruf im Projektordner:   node tools/check.js
-   Nach dem Packen zusätzlich: node tools/check.js ../money_app_1_62_0.zip
+   Nach dem Packen zusätzlich: node tools/check.js ../money_app_1_63_0.zip
    Keine Abhängigkeiten, nur Node. Rückgabewert 0 = alles in Ordnung, 1 = mindestens ein Fehler.
    Geprüft wird nur, was sich zuverlässig prüfen lässt. Die Punkte, die Augen oder ein Gerät brauchen
    (Optik, Tastatur, Handy), stehen weiter in der Prüfliste von money_app_skill.md. */

@@ -8,19 +8,47 @@ const $ = (s) => document.querySelector(s),
 let TD = iso(D); /* 1.62.0: Tag, für den die Ansicht gezeichnet wurde (tick() vergleicht damit) */
 const esc = (s) =>
   String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-/* 1.20.0: Suchbegriff in Ergebnissen markieren (Text wird maskiert, Treffer in <mark>) */
+/* 1.63.0: Suche in den Buchungen. Umlaute, Akzente und Groß-/Kleinschreibung sind egal (ä = a, ß = ss), mehrere Wörter gelten gemeinsam.
+   snc() normalisiert ein Zeichen, nrm() einen Text, qtok() zerlegt die Eingabe in Wörter. */
+const snc = (c) =>
+  c
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase();
+const nrm = (s) => Array.from(String(s), snc).join('');
+const qtok = (q) => nrm(String(q || '').trim()).split(/\s+/).filter(Boolean);
+/* Suchbegriffe in Ergebnissen markieren (Text wird maskiert, Treffer in <mark>); Treffer ohne Rücksicht auf Umlaute, jedes Wort einzeln */
 const hl = (s, q) => {
   s = String(s);
-  q = String(q || '').trim();
-  if (!q) return esc(s);
-  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-  let o = '',
-    i = 0,
-    m;
-  while ((m = re.exec(s))) {
-    o += esc(s.slice(i, m.index)) + '<mark class=hl>' + esc(m[0]) + '</mark>';
-    i = m.index + m[0].length;
+  const tk = qtok(q);
+  if (!tk.length) return esc(s);
+  let n = '';
+  const mp = [];
+  for (let i = 0; i < s.length; i++) {
+    const c = snc(s[i]);
+    for (let k = 0; k < c.length; k++) {
+      n += c[k];
+      mp.push(i);
+    }
   }
+  const rg = [];
+  tk.forEach((w) => {
+    let p = n.indexOf(w);
+    while (p > -1) {
+      rg.push([mp[p], mp[p + w.length - 1] + 1]);
+      p = n.indexOf(w, p + w.length);
+    }
+  });
+  rg.sort((a, b) => a[0] - b[0]);
+  const m = [];
+  rg.forEach((r) => (m.length && r[0] <= m[m.length - 1][1] ? (m[m.length - 1][1] = Math.max(m[m.length - 1][1], r[1])) : m.push(r.slice())));
+  let o = '',
+    i = 0;
+  m.forEach((r) => {
+    o += esc(s.slice(i, r[0])) + '<mark class=hl>' + esc(s.slice(r[0], r[1])) + '</mark>';
+    i = r[1];
+  });
   return o + esc(s.slice(i));
 };
 /* Ausschnitt einer langen Notiz, der den Treffer sichtbar hält */
@@ -63,6 +91,7 @@ const BIP = {
   pencil: '<path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>', /* pencil */
   note: '<path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/>', /* card-text */
   check: '<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.75.75 0 0 1 0-1.056.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>', /* check-lg (1.36.0: Speichern-Knopf neben dem Kontofeld) */
+  'arrow-ccw': '<path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>', /* arrow-counterclockwise (1.63.0: „Zurücksetzen“ in der Ergebniszeile der Karte „Buchungen“) */
   floppy: '<path d="M11 2H9v3h2z"/><path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>', /* floppy (1.60.0: Speichern-Knopf, solange es etwas zu speichern gibt) */
   search: '<path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>', /* search (1.41.0: Suchfeld in der Karte „Buchungen“) */
   share: '<path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>', /* share (1.45.0: Weiterempfehlen) */
@@ -282,7 +311,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.62.1'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.63.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 
