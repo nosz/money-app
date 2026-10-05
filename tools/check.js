@@ -120,6 +120,14 @@ noFilter.length
   ? bad(`Betragsfeld(er) ohne Filter im oninput: ${noFilter.map((s) => (s.match(/id=\\?"?([\w$]+)/) || [])[1] || '?').join(', ')}`)
   : ok(`${amtInputs.length} Betragsfelder, alle mit Filter (amc direkt oder über ${[...viaAmc].filter((f) => f !== 'amc').join(', ')})`);
 
+/* 7b. Masken und Tastatur (Skill 5c): jedes Feld mit Fokus wird zentral in den freien Bereich geholt, nicht pro Maske einzeln */
+head('7b. Masken und Tastatur');
+const css = rd('css/style.css');
+/\bfunction sfit\(/.test(appSrc) && /\bsfit\(el\)/.test(appSrc.split("addEventListener('focusin'")[1] || '') ? ok('sfit() in js/app.js, vom Fokus-Handler benutzt') : bad('sfit() fehlt oder der Fokus-Handler ruft es nicht auf (Skill 5c)');
+/sfitLater\(\)/.test((appSrc.split('function vvf()')[1] || '').split('\nfunction sfit(')[0]) ? ok('vvf() zieht das Feld bei Änderung des sichtbaren Bereichs nach') : bad('vvf() ruft sfitLater() nicht auf (Skill 5c)');
+/\.kbs \.ov \.sh \.sht\s*\{[^}]*position:\s*static/.test(css) && /\.kb \.ov \.sh \.stkb/.test(css) ? ok('CSS für geöffnete Tastatur (.kb, .kbs) vorhanden') : bad('CSS für .kb/.kbs fehlt (Skill 5c)');
+/\n\s*(?:const|let)?\s*el\.scrollIntoView|scrollIntoView\(\{ block: 'center'/.test((appSrc.split("addEventListener('focusin'")[1] || '').split("addEventListener('focusout'")[0].split("el.closest('#o .sh')")[0]) ? bad('Fokus-Handler zentriert Felder in Masken wieder per scrollIntoView (Skill 5c)') : ok('kein scrollIntoView-Zentrieren vor der Masken-Behandlung');
+
 /* 8. ZIP (nur mit Pfad als Argument): enthält alles Wichtige, keine Test- und Zwischendateien */
 const zip = process.argv[2];
 if (zip) {

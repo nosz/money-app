@@ -1548,13 +1548,43 @@ function vvf() {
   const v = window.visualViewport;
   if (!v) return;
   KB0 = Math.max(KB0, v.height);
-  document.body.classList.toggle('kb', v.height < KB0 - 120);
+  const kb = v.height < KB0 - 120;
+  document.body.classList.toggle('kb', kb);
+  document.body.classList.toggle('kbs', kb && v.height < 400); /* 1.62.1: sehr wenig Platz (Handy quer, große Tastatur): Titelleiste scrollt mit */
   const o = $('#o');
   if (o) {
     o.style.bottom = 'auto';
     o.style.top = v.offsetTop + 'px';
     o.style.height = v.height + 'px';
+    sfitLater(); /* 1.62.1: sichtbarer Bereich hat sich geändert: Feld mit Fokus wieder in den freien Bereich holen */
   }
+}
+/* 1.62.1: Feld mit Fokus in einer Maske immer im freien Bereich halten (zwischen fester Titelleiste und fester Knopfzeile).
+   Ersetzt das feste Warten (320 ms) mit scrollIntoView: Die Tastatur braucht je nach Gerät länger, und scrollIntoView kennt
+   die feste Knopfzeile nicht. Aufruf bei Fokus (mehrfach, solange die Tastatur einfährt) und bei jeder Änderung des sichtbaren Bereichs. */
+function sfit(el) {
+  const sh = el && el.closest ? el.closest('#o .sh') : null;
+  if (!sh) return false;
+  const sr = sh.getBoundingClientRect(),
+    hd = sh.querySelector('.sht'),
+    bar = sh.querySelector('.stkb'),
+    tl = Math.max(sr.top, hd ? hd.getBoundingClientRect().bottom : sr.top) + 8,
+    bl = Math.min(sr.bottom, bar ? bar.getBoundingClientRect().top : sr.bottom) - 8;
+  let r = (el.closest('.fld') || el).getBoundingClientRect();
+  if (r.height > bl - tl) r = el.getBoundingClientRect(); /* Feld samt Beschriftung zu hoch: nur das Feld */
+  let d = 0;
+  if (el.id == 'csi') d = r.top - tl; /* Suchfeld der Kategorie-Auswahl: oben, damit die Treffer über der Tastatur stehen */
+  else if (r.bottom - r.top > bl - tl) d = r.top - tl; /* auch das Feld allein passt nicht (Handy quer): Feldanfang oben */
+  else if (r.top < tl || r.bottom > bl) d = (r.top + r.bottom) / 2 - (tl + bl) / 2;
+  if (Math.abs(d) > 1) sh.scrollTop += d;
+  return true;
+}
+let SFT = 0;
+function sfitLater() {
+  const a = document.activeElement;
+  if (!a || !/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return;
+  cancelAnimationFrame(SFT);
+  SFT = requestAnimationFrame(() => sfit(document.activeElement));
 }
 if (window.visualViewport) {
   visualViewport.addEventListener('resize', vvf);
@@ -1570,6 +1600,12 @@ addEventListener('focusin', (e) => {
   /* 1.44.0: Suchfeld der Karte „Buchungen“ (#fq): Feld oben unter die Kopfleiste (scroll-margin im CSS), damit Kategorie, Ergebniszeile und
      erste Treffer über der Tastatur stehen. Die Klasse fqf schafft Platz unten, damit das Scrollen auch bei wenigen Treffern bis oben reicht. */
   if (el.id == 'fq') document.body.classList.add('fqf');
+  /* 1.62.1: in Masken (#o .sh) mit sfit(): sofort und noch dreimal, solange die Tastatur einfährt (nur wenn das Feld den Fokus behält) */
+  if (el.closest('#o .sh')) {
+    sfit(el);
+    [120, 320, 650].forEach((ms) => setTimeout(() => document.activeElement == el && sfit(el), ms));
+    return;
+  }
   setTimeout(() => {
     try {
       el.scrollIntoView({ block: el.id == 'csi' || el.id == 'fq' ? 'start' : 'center', behavior: 'smooth' });

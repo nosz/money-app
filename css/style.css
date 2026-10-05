@@ -1225,3 +1225,17 @@ nav{bottom:var(--nbo,0px)}
 
 /* ===== 1.62.0: heutiges Datum unter dem Monatsnamen ===== */
 .mn .g .mnd{display:block;margin-top:1px;font-weight:400;color:var(--m);font-size:var(--fs-s)}
+
+/* ===== 1.62.1: Masken bei geöffneter Tastatur (Feld mit Fokus nie unter fester Titelleiste oder Knopfzeile) =====
+   Platz schaffen: Titelleiste und Knopfzeile kompakter, Titel einzeilig. Sehr wenig Platz (.kbs, unter 400 px sichtbar):
+   Titelleiste scrollt mit, nur die Knopfzeile bleibt fest. Das Nachführen des Felds macht sfit() in js/app.js. */
+.kb .ov .sh .sht{padding-top:6px;padding-bottom:6px;margin-bottom:4px}
+.kb .ov .sh .sht h2{font-size:var(--fs-m);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.kb .ov .sh .stkb{margin-top:8px;padding-top:8px;padding-bottom:8px}
+.kb .ov .sh .fld{margin-bottom:12px}
+.kb .ov .sh .amw .amt{min-height:52px;padding-top:6px;padding-bottom:6px}
+.kbs .ov .sh .sht{position:static}
+.kbs .ov .sh .stkb{margin-top:4px;padding-top:6px;padding-bottom:6px}
+.kbs .ov .sh .stkb .btn{min-height:44px}
+.kbs .ov .sh .dhint{display:none}
+.kbs .ov .sh .amw .amt{font-size:1.5rem;line-height:1.2;min-height:44px}
