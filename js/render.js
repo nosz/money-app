@@ -32,12 +32,13 @@ const SI = {
 };
 const nmx = (x) => (x.t == 'u' ? t('tr') : t(cn(x.c).n));
 const trow = (x, q, yr) => {
-  const u = x.t == 'u',
+  const mk = qhl(x, q),
+    u = x.t == 'u',
     c = u ? { i: '⇄', n: 'tr' } : cn(x.c),
     ty = u ? 'u' : x.t,
     kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
     tm = hm(x);
-  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${x.d.slice(8)}.${x.d.slice(5, 7)}.${yr ? `<br><small>${x.d.slice(0, 4)}</small>` : ''}</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
+  return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${mk.d ? `<mark class=hl>${x.d.slice(8)}.${x.d.slice(5, 7)}.</mark>` : `${x.d.slice(8)}.${x.d.slice(5, 7)}.`}${yr || mk.y ? `<br><small>${mk.y ? `<mark class=hl>${x.d.slice(0, 4)}</mark>` : x.d.slice(0, 4)}</small>` : ''}</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${mk.a ? `<mark class=hl>${u ? fmt(x.a) : sg(x.a, x.t)}</mark>` : u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
 const sortL = (l, sc, dr) => {
   /* Datum + Erfassungszeit (Zeitstempel); alte Buchungen ohne Zeitstempel zählen als 0 */
@@ -256,9 +257,26 @@ const qam = (x, w) => {
   return d === undefined ? s.split(',')[0] == i : s.startsWith(i + ',' + d);
 };
 const qdt = (x, w) => {
+  /* 1.66.0: einzelne Zahl (1 bis 31) = Tag des Monats, vierstellige Zahl (2000 bis 2100) = Jahr; Betrag bleibt zusätzlich Treffer (qam) */
+  if (/^\d{1,2}$/.test(w)) return +w >= 1 && +w <= 31 && +x.d.slice(8) == +w;
+  if (/^\d{4}$/.test(w)) return +w >= 2000 && +w <= 2100 && x.d.slice(0, 4) == w;
   const m = /^(\d{1,2})\.(\d{1,2})\.?(\d{2}|\d{4})?$/.exec(w);
   if (!m || +m[1] < 1 || +m[1] > 31 || +m[2] < 1 || +m[2] > 12) return false;
   return +x.d.slice(8) == +m[1] && +x.d.slice(5, 7) == +m[2] && (!m[3] || (m[3].length == 2 ? x.d.slice(2, 4) : x.d.slice(0, 4)) == m[3]);
+};
+/* 1.66.0: Treffer in Datum, Jahr und Betrag markieren (Text markiert hl() in js/core.js). d = Tag und Monat, y = Jahr, a = Betrag */
+const qhl = (x, q) => {
+  const r = { d: false, y: false, a: false };
+  qtok(q).forEach((w) => {
+    if (qam(x, w)) r.a = true;
+    if (!qdt(x, w)) return;
+    if (/^\d{4}$/.test(w)) r.y = true;
+    else {
+      r.d = true;
+      if (/^\d{1,2}\.\d{1,2}\.(\d{2}|\d{4})$/.test(w)) r.y = true;
+    }
+  });
+  return r;
 };
 const mq = (x, tk) => {
   const h = nrm((x.n || '') + ' ' + nmx(x));
