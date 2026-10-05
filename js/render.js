@@ -31,12 +31,14 @@ const SI = {
   about: BI('<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>'), /* info-circle (1.45.0) */
 };
 const nmx = (x) => (x.t == 'u' ? t('tr') : t(cn(x.c).n));
-const trow = (x, q, yr) => {
+const trow = (x, q, yr, ac) => {
   const mk = qhl(x, q),
     u = x.t == 'u',
     c = u ? { i: '⇄', n: 'tr' } : cn(x.c),
     ty = u ? 'u' : x.t,
-    kt = u ? t('a_' + x.f) + ' → ' + t('a_' + x.to) : t('a_' + (x.k || 'bank')),
+    /* 1.67.0: ac = Suche auf der Startseite: Treffer im Konto-Namen markieren (bei Umbuchungen das passende Konto) */
+    ak = (k) => (ac ? hl(t('a_' + k), q) : t('a_' + k)),
+    kt = u ? ak(x.f) + ' → ' + ak(x.to) : ak(x.k || 'bank'),
     tm = hm(x);
   return `<div class="li d-flex align-items-center gap-3 tr" data-id="${x.id}" onclick="ot('${x.id}')"><span class=dc>${mk.d ? `<mark class=hl>${x.d.slice(8)}.${x.d.slice(5, 7)}.</mark>` : `${x.d.slice(8)}.${x.d.slice(5, 7)}.`}${yr || mk.y ? `<br><small>${mk.y ? `<mark class=hl>${x.d.slice(0, 4)}</mark>` : x.d.slice(0, 4)}</small>` : ''}</span><span class=g>${ci(c)} ${hl(t(c.n), q)}${x.r ? ' ↻' : ''}${x.n ? `<br><small>${hl(x.n, q)}</small>` : ''}<br><small><i class="tb ${ty}">${u ? t('tr') : t(x.t)}</i> ${kt}${tm ? ' · ' + tm : ''}</small></span><b class="${x.t == 'i' ? 'pos' : u ? 'm' : 'neg'}">${mk.a ? `<mark class=hl>${u ? fmt(x.a) : sg(x.a, x.t)}</mark>` : u ? fmt(x.a) : sg(x.a, x.t)}</b></div>`;
 };
@@ -374,7 +376,7 @@ const hqr = () => {
   if (!hqa()) return '';
   const l = hql();
   if (!l.length) return `<div class="card card-body"><small>${t('hqno')}</small></div>`;
-  return `<div class=fsum id=hqsum>${hqsm(l)}</div><div class="card card-body" id=hqres onclick="hqt(event)">${hrow(HQ.sc, HQ.dir, 'hqsort')}${l.map((x) => trow(x, HQ.q, 1)).join('')}</div>`;
+  return `<div class=fsum id=hqsum>${hqsm(l)}</div><div class="card card-body" id=hqres onclick="hqt(event)">${hrow(HQ.sc, HQ.dir, 'hqsort')}${l.map((x) => trow(x, HQ.q, 1, 1)).join('')}</div>`;
 };
 const hqcl = () => `<small class=hqcl>${t('hqrec')}</small>` + HQ.rec.map((r, i) => `<button type=button class=hqch onclick="hqu(${i})">${esc(r)}</button>`).join('');
 /* Eingabe: nur die betroffenen Teile neu zeichnen, damit das Feld den Fokus behält */
