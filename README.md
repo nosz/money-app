@@ -18,7 +18,7 @@ Das Design ist ruhig und klassisch, angelehnt an Banking-Apps. Bedient wird sie 
 - **Konten:** Bank, Bar und Gespart mit jeweils eigenem Kontostand
 - **Kategorien:** Standardkategorien und eigene Kategorien mit Symbol (Bootstrap Icons oder Emoji)
 - **Wiederkehrende Buchungen:** monatlich, wöchentlich, vierteljährlich oder jährlich, mit Anzeige der Fälligkeit
-- **Auswertung und Filter:** Monats- und Gesamtansicht, Suche nach Notiz, Kategorie, Betrag oder Datum (mehrere Wörter, Umlaute egal) mit Trefferzahl im Suchfeld, Summe der Treffer
+- **Auswertung und Filter:** Monats- und Gesamtansicht, Suche nach Notiz, Kategorie, Betrag oder Datum (mehrere Wörter, Umlaute egal) mit Trefferzahl im Suchfeld, Summe der Treffer; Suche auch in der Kategorienliste
 - **Backup:** Komplett-Sicherung als Datei erstellen und wieder importieren, mit Backup-Erinnerung
 - **CSV-Export:** Buchungen als Tabelle für Excel, LibreOffice und Co.
 - **PIN-Sperre:** optionaler Schutz mit 4 bis 6 Ziffern

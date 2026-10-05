@@ -71,6 +71,18 @@ Gilt für „Neue wiederkehrende Buchung“ (`nrd()`) und „Bearbeiten“ (`erd
 - Der Einstiegsknopf in den Einstellungen trägt das Bootstrap Icon `plus`, kein „＋“-Zeichen.
 - Keine Konto-Leiste (neu angelegte laufen über Bank). Logik, Datenformat und Fälligkeitsberechnung unverändert.
 
+# 7e. Einstellungen: Karte „Kategorien“ (Suche)
+
+Aufbau von oben nach unten (`cats()` ruft `cth()` in `js/render.js`):
+1. Suchfeld wie in der Karte „Buchungen“ (Abschnitt 7b, gleiche Klassen `.fsr`, `.fsi`, `.fsx`, `.fqn`): Lupe, Platzhalter „Kategorie suchen“, Trefferzahl als Abzeichen (`#cqn`, rostrot bei 0), ✕ zum Leeren (`#cqx`, `cqc()`). Feldart Suche (Abschnitt 5a), `txc()`, `maxlength=60`.
+2. Knopf „Neue Kategorie“ (`#ncb`). Bei offener Tastatur und Fokus im Suchfeld ausgeblendet (`body.kb.fqf #ncb`), damit die Treffer höher stehen.
+3. Liste `#cl` (`catl()`): Gruppen Ausgaben und Einnahmen, je mit sortierbarer Kopfzeile (Name, Anzahl) und Zeilen mit Symbol, Name, Anzahl der Buchungen.
+- Suche (`cqm()`, `catn()`, `cqs()`): nur nach dem Kategorienamen. Umlaute und Groß-/Kleinschreibung egal (ä = a, ß = ss), mehrere Wörter gelten gemeinsam (`qtok()`, `nrm()` aus `js/core.js`, dieselben Hilfen wie bei den Buchungen). Treffer im Namen werden markiert (`hl()`). Keine Suche in Notizen von Buchungen.
+- Gruppen beim Suchen: Gruppen mit Treffern sind aufgeklappt, Gruppen ohne Treffer fehlen, die Zahl in der Überschrift ist die Trefferzahl der Gruppe. Der gemerkte Zustand (`CT.cl`) wird beim Suchen nicht verändert (`ontoggle` speichert nur ohne Suchtext), nach dem Leeren stehen die Gruppen wieder wie vorher.
+- Ohne Treffer: „Keine Treffer für „…“. Ändere die Suche oder setze sie zurück.“ (`nohitq`).
+- Tastatur: Fokus im Feld setzt `body.fqf` (wie `#fq`, Fokus-Handler in `js/app.js`), das Feld rutscht unter die Kopfleiste (`scroll-margin-top` auf `#cq`). „Suchen“-Taste: `cqe()` schließt die Tastatur und holt das Feld wieder unter die Kopfleiste, die Treffer stehen darunter.
+- Änderungen im Suchfeld zeichnen nur Liste, Abzeichen und ✕ neu (`cqs()`), nie das Feld, damit Fokus und Tastatur bleiben. Sortieren (`csort()`) zeichnet die Ansicht neu, `CT.q` bleibt erhalten.
+
 # 7d. Einstellungen: Bereich „App-Info / Weiterempfehlen“
 
 Letzter Bereich der Einstellungen, Titel „App-Info / Weiterempfehlen“ / „App info / Recommend“ (Textschlüssel `about`; `sec('about', SI.about, t('about'), about)` in `V.set()`, `js/render.js`), Symbol `info-circle`. Von oben nach unten, Handy zuerst, nichts bricht um und kein Text wird abgeschnitten (390 und 320 px):

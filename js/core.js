@@ -311,7 +311,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.63.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.64.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 

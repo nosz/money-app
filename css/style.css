@@ -1253,3 +1253,7 @@ nav{bottom:var(--nbo,0px)}
 .nhq{overflow-wrap:anywhere}
 #fsum{scroll-margin-top:calc(var(--stk) + 8px)}
 body.kb.fqf #fcw:not(.fon){display:none}
+
+/* ===== 1.64.0: Suche in der Karte „Kategorien“ (Feld wie bei den Buchungen, Knopf „Neue Kategorie“ bei offener Tastatur ausgeblendet) ===== */
+#cq{scroll-margin-top:calc(var(--stk) + 8px)}
+body.kb.fqf #ncb{display:none}

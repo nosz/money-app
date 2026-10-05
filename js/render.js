@@ -76,6 +76,83 @@ function csort(c) {
   }
   rd();
 }
+/* 1.64.0: Karte „Kategorien“ mit Suche (nur Kategoriename; Umlaute und Groß-/Kleinschreibung egal, mehrere Wörter gelten gemeinsam).
+   Beim Suchen werden Gruppen mit Treffern aufgeklappt, Gruppen ohne Treffer fehlen; der gemerkte Zustand (CT.cl) bleibt unberührt. */
+const cqm = (c) => {
+  const tk = qtok(CT.q);
+  return !tk.length || tk.every((w) => nrm(t(c.n)).includes(w));
+};
+const catn = () => S.cats.filter(cqm).length;
+function catl() {
+  CT.cl = CT.cl || {};
+  const cm = {};
+  S.tx.forEach((x) => (cm[x.c] = (cm[x.c] || 0) + 1));
+  const cnt = (id) => cm[id] || 0,
+    nm = (c) => t(c.n).toLowerCase(),
+    sc = CT.sc || 'n',
+    dr = CT.dir || (sc == 'u' ? -1 : 1),
+    ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
+    sq = qtok(CT.q).length > 0,
+    head = `<div class="li d-flex align-items-center gap-3 hd ch"><span class=ic></span><span class=g onclick="csort('n')">${t('name')}${ar('n')}</span><span class=cc onclick="csort('u')">${t('cnt')}${ar('u')}</span><span class=sp></span></div>`,
+    so = (a, b) => (sc == 'u' ? cnt(a.id) - cnt(b.id) : nm(a).localeCompare(nm(b))) * dr || nm(a).localeCompare(nm(b));
+  const grp = (ty, ti) => {
+    const l = S.cats.filter((c) => c.t == ty && cqm(c)).sort(so);
+    return l.length
+      ? `<details class=gx ${sq || CT.cl[ty] === false ? 'open' : ''} ontoggle="if(!CT.q.trim())CT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
+          head +
+          l
+            .map(
+              (c) =>
+                `<div class="li cr" role=button tabindex=0 onclick="ecs('${c.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ecs('${c.id}')}"><span class=ic>${ci(c)}</span><div class=g>${hl(t(c.n), CT.q)}</div><small>${cnt(c.id)}</small><span class=chv aria-hidden=true>›</span></div>`,
+            )
+            .join('') +
+          '</details>'
+      : '';
+  };
+  return grp('e', t('ex')) + grp('i', t('inn')) || (sq ? `<div class=nr><small class=nhq>${t('nohitq').replace('{q}', esc(CT.q.trim()))}</small></div>` : '');
+}
+function cth() {
+  CT.q = CT.q || '';
+  return (
+    `<div class=fsr><span class=fsi>${bi('search')}</span><input id=cq type=search enterkeyhint=search class="form-control${CT.q ? ' fon' : ''}" placeholder="${t('csrch')}" aria-label="${t('csrch')}" value="${esc(CT.q)}" oninput="txc(this);CT.q=this.value;cqs()" onkeydown="if(event.key=='Enter'){event.preventDefault();cqe()}" maxlength=60 autocomplete=off><span id=cqn class="fqn${CT.q && !catn() ? ' z' : ''}" ${CT.q ? '' : 'hidden '}aria-live=polite>${catn()}</span><button type=button id=cqx class=fsx ${CT.q ? '' : 'hidden '}onclick="cqc()" aria-label="${t('fqc')}">${bi('x')}</button></div>` +
+    `<button id=ncb class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="ncs(0)">＋ ${t('newc')}</button><div id=cl>${catl()}</div>`
+  );
+}
+/* Suche in „Kategorien“: nur die Liste, das Abzeichen und das ✕ ändern sich (Feld und Fokus bleiben) */
+function cqs() {
+  const l = $('#cl');
+  if (l) l.innerHTML = catl();
+  const e = $('#cq');
+  if (e) e.classList.toggle('fon', !!CT.q);
+  const x = $('#cqx');
+  if (x) x.hidden = !CT.q;
+  const n = $('#cqn');
+  if (n) {
+    const c = catn();
+    n.hidden = !CT.q;
+    n.textContent = c;
+    n.classList.toggle('z', !c);
+    n.setAttribute('aria-label', c + ' ' + t(c == 1 ? 'hitc1' : 'hitcn'));
+  }
+}
+function cqc() {
+  CT.q = '';
+  const e = $('#cq');
+  if (e) {
+    e.value = '';
+    e.focus();
+  }
+  cqs();
+}
+/* „Suchen“-Taste: Tastatur schließen, das Suchfeld unter die Kopfleiste holen, damit die Treffer darunter ganz sichtbar sind */
+function cqe() {
+  const e = $('#cq');
+  if (e) e.blur();
+  setTimeout(() => {
+    const f = $('#cq');
+    if (f && f.scrollIntoView) f.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, 380);
+}
 /* Wiederkehrende Buchungen: Sortierung über Fällig / Name / Betrag */
 function rsort(c) {
   if ((RT.sc || 'f') == c) RT.dir = -(RT.dir || (c == 'a' ? -1 : 1));
@@ -463,38 +540,7 @@ const V = {
         };
         return nb + grp('e', t('ex')) + grp('i', t('inn'));
       },
-      cats = () => {
-        CT.cl = CT.cl || {};
-        const cm = {};
-        S.tx.forEach((x) => (cm[x.c] = (cm[x.c] || 0) + 1));
-        const cnt = (id) => cm[id] || 0,
-          nm = (c) => t(c.n).toLowerCase(),
-          sc = CT.sc || 'n',
-          dr = CT.dir || (sc == 'u' ? -1 : 1),
-          ar = (c) => (sc == c ? (dr > 0 ? ' ▲' : ' ▼') : ''),
-          head = `<div class="li d-flex align-items-center gap-3 hd ch"><span class=ic></span><span class=g onclick="csort('n')">${t('name')}${ar('n')}</span><span class=cc onclick="csort('u')">${t('cnt')}${ar('u')}</span><span class=sp></span></div>`,
-          so = (a, b) =>
-            (sc == 'u' ? cnt(a.id) - cnt(b.id) : nm(a).localeCompare(nm(b))) * dr || nm(a).localeCompare(nm(b));
-        const grp = (ty, ti) => {
-          const l = S.cats.filter((c) => c.t == ty).sort(so);
-          return l.length
-            ? `<details class=gx ${CT.cl[ty] === false ? 'open' : ''} ontoggle="CT.cl.${ty}=!this.open"><summary class="rh ${ty}">${ti} (${l.length})</summary>` +
-                head +
-                l
-                  .map(
-                    (c) =>
-                      `<div class="li cr" role=button tabindex=0 onclick="ecs('${c.id}')" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ecs('${c.id}')}"><span class=ic>${ci(c)}</span><div class=g>${esc(t(c.n))}</div><small>${cnt(c.id)}</small><span class=chv aria-hidden=true>›</span></div>`,
-                  )
-                  .join('') +
-                '</details>'
-            : '';
-        };
-        return (
-          `<button class="btn btn-primary" style="width:100%;margin:2px 0 8px" onclick="ncs(0)">＋ ${t('newc')}</button>` +
-          grp('e', t('ex')) +
-          grp('i', t('inn'))
-        );
-      },
+      cats = () => cth(),
       /* Beispielbetrag 12,50 in beiden Darstellungen, in der gewählten Währung */
       dx = (d) =>
         new Intl.NumberFormat(loc(), { style: 'currency', currency: s.cur, minimumFractionDigits: d, maximumFractionDigits: d }).format(12.5),
