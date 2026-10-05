@@ -1,6 +1,8 @@
 /* MoneyApp – Ansichten und Navigation */
+/* 1.62.0: heutiges Datum (klein, grau) unter dem Monatsnamen, z. B. „Sonntag, 1. November“ */
+const tlab = () => D.toLocaleDateString(loc(), { weekday: 'long', day: 'numeric', month: 'long' });
 const mn = () =>
-  `<div class=mn><button class="btn btn-secondary s" onclick="mv(-1)">‹</button><div class=g>${ST.p == 'y' && tab == 'set' && SE.o == 'stats' ? ym.slice(0, 4) : mlab(ym)}</div><button class="btn btn-secondary s" onclick="mv(1)">›</button></div>`;
+  `<div class=mn><button class="btn btn-secondary s" onclick="mv(-1)">‹</button><div class=g>${ST.p == 'y' && tab == 'set' && SE.o == 'stats' ? ym.slice(0, 4) : mlab(ym)}<small class=mnd>${tlab()}</small></div><button class="btn btn-secondary s" onclick="mv(1)">›</button></div>`;
 function mv(d) {
   const [y, m] = ym.split('-'),
     n =

@@ -1,9 +1,11 @@
 /* MoneyApp – Hilfsfunktionen, Standardkategorien, Formatierung, Version */
+/* 1.62.0: D ist veränderlich; tick() in js/app.js hält es aktuell (Datumswechsel bei offener App) */
+let D = new Date();
 const $ = (s) => document.querySelector(s),
-  D = new Date(),
   pad = (n) => String(n).padStart(2, '0'),
   iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
   uid = () => Math.random().toString(36).slice(2, 9);
+let TD = iso(D); /* 1.62.0: Tag, für den die Ansicht gezeichnet wurde (tick() vergleicht damit) */
 const esc = (s) =>
   String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 /* 1.20.0: Suchbegriff in Ergebnissen markieren (Text wird maskiert, Treffer in <mark>) */
@@ -280,7 +282,7 @@ const brStatus = () => {
     a = S.set.lb ? t('bkr_s1').replace('{l}', brDate(S.set.lb)) : t('bkr_s2');
   return a + ' · ' + (nx <= Date.now() ? t('bkr_s3') : t('bkr_s4').replace('{n}', brDate(nx)));
 };
-const APP_VERSION = '1.61.1'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
+const APP_VERSION = '1.62.0'; /* Anzeige in den Einstellungen. Bei jedem Release hochzählen, zusammen mit CACHE_VERSION in service-worker.js */
 /* 1.45.0: Adresse des Open-Source-Projekts (Karte „Über die App“). Hier ändern, falls das Projekt umzieht. */
 const GITHUB_URL = 'https://github.com/nosz/money-app';
 

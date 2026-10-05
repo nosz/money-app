@@ -18,6 +18,7 @@ Aufbau der einzelnen Masken und Bereiche (Abschnitte 6 bis 8a). Die Regeln, die 
 | 7j | Startseite ohne Doppel-Hinweis, untere Leiste |
 | 7k | Onboarding, Kacheln mit Stift |
 | 8a | Keine Monatsleiste |
+| 8b | Aktuelles Datum, Datumswechsel bei offener App |
 
 # 6. Buchungsmaske (von oben nach unten)
 
@@ -129,3 +130,11 @@ Die App funktioniert nach dem ersten Laden ohne Internet (Service Worker, Daten 
 
 - Die Monatsleiste (wischbare Chips in einer zweiten Zeile der Kopfleiste) ist entfernt und wird nicht wieder eingebaut. Die Kopfleiste `#tb` besteht nur aus Home-Symbol und Titel (48 px, `--mbh` bleibt 0).
 - Monate auf der Startseite werden über die Monatszeilen der Monatsliste geöffnet (`mtg()`), die Karte scrollt nach oben.
+
+# 8b. Aktuelles Datum und Datumswechsel bei offener App
+
+- **Anzeige:** In der Monatsleiste `mn()` (`js/render.js`) steht unter dem Monatsnamen eine kleine graue Zeile `.mnd` mit dem heutigen Tag, z. B. „Sonntag, 1. November“ (`tlab()`, Sprache aus `loc()`). Sie steht in jeder Ansicht mit Monatsleiste (Start, Buchungen, Auswertung), auch wenn ein anderer Monat gewählt ist, und zeigt immer HEUTE, nicht den gewählten Monat. Regular, `--fs-s`, Farbe `--m`; keine neuen Texte nötig.
+- **`D` ist veränderlich** (`let D` in `js/core.js`), `TD` merkt den Tag (ISO), für den die Ansicht gezeichnet wurde. Alles, was „heute“ braucht (fällige Buchungen `dues()`, „Bleibt bis Monatsende“, Resttage, Standarddatum), liest `D` zum Zeitpunkt des Zeichnens. Kein Datum beim Start in eine Konstante kopieren.
+- **`tick()`** (`js/app.js`) vergleicht `iso(new Date())` mit `TD`. Aufgerufen bei Rückkehr in die App (`visibilitychange`, `pageshow`, `focus`) und einmal pro Minute (`setInterval`). Bei Änderung: `D` und `TD` setzen; steht `ym` auf dem aktuellen Monat, springt er auf den neuen, ein bewusst geblätterter Monat bleibt; dann `rd()`. Auch bei zurückgestelltem Handy-Datum.
+- **Nie stören:** Bei offenem Dialog (`#o`) oder fokussiertem Eingabefeld passiert nichts, der nächste Durchlauf prüft erneut (nichts Eingegebenes geht verloren). In den Einstellungen (Eingabefelder) wird nur neu gezeichnet, wenn die Auswertung offen ist (`SE.o == 'stats'`); `D` und `ym` werden trotzdem nachgezogen. Kein Toast, die Karte „fällig“ erscheint von selbst.
+- **Prüfung vor jeder Lieferung:** Uhr über Mitternacht stellen (Datumszeile, Monat, Karte „fällig“ aktualisieren sich); Dialog offen (nichts passiert, nach dem Schließen Nachzug); geblätterter Monat bleibt; Eingabefeld mit Fokus; Handy-Datum zurück; Deutsch und Englisch; 320 px (Zeile bricht nicht um, Pfeile bleiben gleich hoch).

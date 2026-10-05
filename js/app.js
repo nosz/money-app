@@ -1586,6 +1586,25 @@ addEventListener('focusout', (e) => {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && S && S.set && tab == 'home' && !$('#o') && brShow() != BKS) rd();
 });
+/* 1.62.0: Datum aktuell halten. Wechselt der Tag bei offener oder im Hintergrund liegender App (Mitternacht, Handy-Uhr geändert), werden D und der Monat nachgezogen und die Ansicht neu gezeichnet. Nie bei offenem Dialog und nie, solange ein Eingabefeld den Fokus hat (nichts Eingegebenes geht verloren); dann prüft der nächste Durchlauf erneut. Wer auf einen anderen Monat geblättert hat, bleibt dort. */
+function tick() {
+  if (!S || !S.set) return;
+  const n = new Date(),
+    ti = iso(n);
+  if (ti == TD) return;
+  const a = document.activeElement;
+  if ($('#o') || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) return;
+  const cur = ym == TD.slice(0, 7);
+  D = n;
+  TD = ti;
+  if (cur) ym = ti.slice(0, 7);
+  /* Einstellungen enthalten Eingabefelder: dort nur neu zeichnen, wenn die Auswertung offen ist */
+  if (tab != 'set' || SE.o == 'stats') rd();
+}
+document.addEventListener('visibilitychange', () => !document.hidden && tick());
+addEventListener('pageshow', tick);
+addEventListener('focus', tick);
+setInterval(tick, 60000);
 /* 1.21.23: Live-Prüfung eines Kontofelds beim Tippen (p = 'st' Einstellungen, 'ob' Onboarding) */
 function kLive(p, k) {
   const i = $('#' + p + '_' + k),

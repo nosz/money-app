@@ -1222,3 +1222,6 @@ nav{bottom:var(--nbo,0px)}
 .sh .pk .ck .bi{width:1.25rem;height:1.25rem}
 .sh .pk .hn{white-space:normal}
 .sh .pl .pk{min-height:56px}
+
+/* ===== 1.62.0: heutiges Datum unter dem Monatsnamen ===== */
+.mn .g .mnd{display:block;margin-top:1px;font-weight:400;color:var(--m);font-size:var(--fs-s)}

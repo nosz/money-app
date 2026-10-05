@@ -25,6 +25,7 @@ Das Design ist ruhig und klassisch, angelehnt an Banking-Apps. Bedient wird sie 
 - **Darstellung:** Farbschema und Schriftgröße einstellbar
 - **Sprachen:** Deutsch und Englisch
 - **Offline-fähig:** Service Worker, nach dem ersten Laden ohne Internet nutzbar
+- **Aktuelles Datum:** Der heutige Tag steht unter dem Monatsnamen; die App zieht Datum, Monat und fällige Buchungen selbst nach, wenn der Tag bei offener App wechselt
 - **Geprüfte Eingaben:** Beträge, Texte, Daten und PIN werden beim Tippen und Einfügen geprüft
 
 ## Datenschutz
