@@ -466,8 +466,10 @@ const V = {
         hs = hasSt(),
         c = Math.round(((hs ? bal('bank') + bal('bar') : m.b - sq) + u) * 100),
         rf = Math.floor(c / 100),
-        pd = Math.floor(Math.floor(c / dl) / 100);
-      h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</div><small>${t('pd')}</small> <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b>${u || (sq && !hs) ? `<small>${u ? `<br>${t('incl')} ${sg(u)}` : ''}${sq && !hs ? `<br>${t('spabz')} ${fmt(sq)}` : ''}</small>` : ''}</div>`;
+        pd = Math.floor(Math.floor(c / dl) / 100),
+        /* 1.68.0: Hinweise klein in Klammern direkt hinter dem Betrag (Karte hat 3 Zeilen); beide Hinweise in einer Klammer, dürfen umbrechen */
+        hn = [u ? `${t('incl')} ${sg(u)}` : '', sq && !hs ? `${t('spabz')} ${fmt(sq)}` : ''].filter(Boolean);
+      h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div><span class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</span>${hn.length ? ` <small>(${hn.join(', ')})</small>` : ''}</div><small>${t('pd')}</small> <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b></div>`;
     }
     if (n)
       h += `<div class="card card-body" onclick=dsh() style=cursor:pointer><b>🔔 ${n} ${t('due')}</b> ›</div>`;
@@ -750,7 +752,6 @@ const V = {
           ),
         );
     return (
-      `<h2>${t('set')}</h2>` +
       sec('list', SI.list, t('list'), () => V.lb()) +
       sec('stats', SI.stats, t('stats'), () => V.sb()) +
       sec('kto', SI.kto, t('kto'), kto) +

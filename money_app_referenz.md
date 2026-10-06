@@ -20,6 +20,7 @@ Aufbau der einzelnen Masken und Bereiche (Abschnitte 6 bis 8a). Die Regeln, die 
 | 8a | Keine Monatsleiste |
 | 8b | Aktuelles Datum, Datumswechsel bei offener App |
 | 8c | Suche auf der Startseite |
+| 8d | Karte „Bleibt bis Monatsende“ |
 
 # 6. Buchungsmaske (von oben nach unten)
 
@@ -165,3 +166,8 @@ Die App funktioniert nach dem ersten Laden ohne Internet (Service Worker, Daten 
 - **Zuletzt gesucht:** `HQ.rec`, höchstens 5, neuester zuerst, ohne Doppelte (ohne Groß-/Kleinschreibung). Gemerkt wird erst beim Tipp auf einen Treffer (`hqt()`, `hqrec()`), nie halbe Eingaben oder Suchen ohne Treffer. Anzeige als Chips (`.hqch`, 44 px) mit kleiner Beschriftung „Zuletzt gesucht“ unter dem Feld, nur solange das Feld leer ist; Tipp auf einen Chip füllt das Feld und sucht (`hqu()`).
 - **Tastatur:** ✕ leert das Feld, zeigt die normale Startseite und lässt die Tastatur offen (`hqclr()`). „Suchen“/Enter und Tipp neben das Feld (`pointerdown`-Handler in `js/app.js`, außerhalb `.hqw`) schließen die Tastatur, die Treffer bleiben stehen (`hqe()` holt die Ergebniszeile nach oben). Fokus-Handler wie `#fq`: Feld rutscht nach oben, `fqf` schafft unten Platz.
 - **Seit 1.66.0:** Tag und Jahr als Suchbegriff („04“, „2026“) und Markierung von Datum, Jahr und Betrag, siehe 7b. Auf der Startseite startet die Suche erst ab 2 Zeichen, ein einzelner Tag unter 10 wird als „04“ gesucht.
+
+# 8d. Karte „Bleibt bis Monatsende“
+
+- **Drei Zeilen:** Titel „Bleibt bis Monatsende (noch N Tage)“, Betrag mit Hinweisen direkt dahinter, „Pro Tag …“. Der Betrag steht als `<span class="big">`, die Hinweise als `<small>(…)</small>` dahinter (gleiche Darstellung wie „(noch N Tage)“ im Titel), keine eigenen Hinweiszeilen darunter.
+- **Hinweise** (`hn` in `V.home()`): „inkl. noch fälliger Buchungen +X“ (wenn fällige Buchungen offen sind) und „abzgl. Gespartes X“ (nur solange unter Einstellungen → Konten kein Stand gespeichert ist, `hasSt()`; dann wird aus der Monatsbilanz gerechnet und die in diesem Monat nach Gespart umgebuchte Summe abgezogen). Texte ohne Doppelpunkt (`incl`, `spabz`). Gilt kein Hinweis, steht keine Klammer da. Gelten beide, stehen sie in einer gemeinsamen Klammer, durch Komma getrennt, und dürfen umbrechen (Karte dann vier Zeilen).
