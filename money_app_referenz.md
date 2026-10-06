@@ -118,7 +118,7 @@ Ziel: Die geteilte Nachricht soll in WhatsApp und Co. mit Bild und Beschreibung 
 
 # 7h. Keine Installations-Hinweise
 
-Die App zeigt nirgends eigene Installations-Hinweise: nicht im Willkommen-Fenster, nicht auf der Startseite. Entfernt wurden `obi()`, `obIns()`, `ins()`, die Variable `DP`, der Startseiten-Block mit `S.set.hd`, die Texte `inst`, `ins`, `oit`, `oi_a`, `oi_m`, `oi_i`, das Symbol `inst` und der Stil `.pv.pi`. `S.set.hd` bleibt als unbenutztes Feld in alten Daten und Backups bestehen (Datenformat nicht ändern). Der Listener `beforeinstallprompt` ruft nur `preventDefault()` auf, damit der Browser keine eigene Mini-Leiste zeigt; Installieren geht weiter über das Browser-Menü. Der Hinweis auf die Offline-Nutzung (7i) und die Symbole fürs Handy (7f) bleiben. Keine neuen Installations-Hinweise ohne ausdrücklichen Wunsch.
+Die App zeigt nirgends eigene Installations-Hinweise: nicht im Willkommen-Fenster, nicht auf der Startseite. Entfernt wurden `obi()`, `obIns()`, `ins()`, die Variable `DP`, der Startseiten-Block mit `S.set.hd`, die Texte `inst`, `ins`, `oit`, `oi_a`, `oi_m`, `oi_i`, das Symbol `inst` und der Stil `.pv.pi`. `S.set.hd` bleibt als unbenutztes Feld in alten Daten und Backups bestehen (Datenformat nicht ändern). Seit 1.69.0 gibt es keinen Listener `beforeinstallprompt` mehr (vorher nur `preventDefault()`): das Installationsangebot des Browsers (z. B. Mini-Leiste in Chrome auf Android) wird nicht mehr unterdrückt, die App selbst zeigt weiterhin nichts; Installieren geht auch über das Browser-Menü. Der Hinweis auf die Offline-Nutzung (7i) und die Symbole fürs Handy (7f) bleiben. Keine neuen Installations-Hinweise ohne ausdrücklichen Wunsch.
 
 # 7i. Offline-Hinweis
 

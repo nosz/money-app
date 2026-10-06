@@ -1749,8 +1749,7 @@ function od() {
   cl();
   P();
 }
-/* 1.55.0: keine eigenen Installations-Hinweise mehr. Das Browser-eigene Angebot (Mini-Leiste) bleibt unterdrückt, Installieren geht weiter über das Browser-Menü. */
-addEventListener('beforeinstallprompt', (e) => e.preventDefault());
+/* 1.55.0: keine eigenen Installations-Hinweise in der App. 1.69.0: der Listener `beforeinstallprompt` ist entfernt, das Browser-eigene Installationsangebot (z. B. Mini-Leiste in Chrome auf Android) wird nicht mehr unterdrückt. */
 (async () => {
   try {
     S = await dbGet();
