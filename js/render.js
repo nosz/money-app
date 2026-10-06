@@ -465,8 +465,9 @@ const V = {
         dl = new Date(D.getFullYear(), D.getMonth() + 1, 0).getDate() - D.getDate() + 1,
         hs = hasSt(),
         c = Math.round(((hs ? bal('bank') + bal('bar') : m.b - sq) + u) * 100),
-        rf = Math.floor(c / 100),
-        pd = Math.floor(Math.floor(c / dl) / 100),
+        /* 1.71.0/1.72.0: Betrag wird nicht abgerundet: mit Nachkommastellen genau auf den Cent, sonst normal auf ganze Euro gerundet (fmt()), damit er zu den gerundeten Kacheln passt; nur „Pro Tag“ wird abgerundet (mit Nachkommastellen auf den Cent, sonst auf ganze Euro) */
+        rf = c / 100,
+        pd = decOn() ? Math.floor(c / dl) / 100 : Math.floor(Math.floor(c / dl) / 100),
         /* 1.68.0: Hinweise klein in Klammern direkt hinter dem Betrag (Karte hat 3 Zeilen); beide Hinweise in einer Klammer, dürfen umbrechen */
         sv = hs ? bal('spar') : sq /* 1.70.0: mit gespeicherten Kontoständen zeigt der Hinweis den Stand von Gespart (Betrag selbst rechnet unverändert aus Bar + Bank), sonst die Umbuchung dieses Monats */,
         hn = [u ? `${t('incl')} ${sg(u)}` : '', (hs ? sv > 0.004 : sq) ? `${t('spabz')} ${fmt(sv)}` : ''].filter(Boolean);
