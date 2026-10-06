@@ -468,7 +468,8 @@ const V = {
         rf = Math.floor(c / 100),
         pd = Math.floor(Math.floor(c / dl) / 100),
         /* 1.68.0: Hinweise klein in Klammern direkt hinter dem Betrag (Karte hat 3 Zeilen); beide Hinweise in einer Klammer, dürfen umbrechen */
-        hn = [u ? `${t('incl')} ${sg(u)}` : '', sq && !hs ? `${t('spabz')} ${fmt(sq)}` : ''].filter(Boolean);
+        sv = hs ? bal('spar') : sq /* 1.70.0: mit gespeicherten Kontoständen zeigt der Hinweis den Stand von Gespart (Betrag selbst rechnet unverändert aus Bar + Bank), sonst die Umbuchung dieses Monats */,
+        hn = [u ? `${t('incl')} ${sg(u)}` : '', (hs ? sv > 0.004 : sq) ? `${t('spabz')} ${fmt(sv)}` : ''].filter(Boolean);
       h += `<div class="card card-body"><small>${t('left')} (${dtxt(dl)})</small><div><span class="big ${c < 0 ? 'neg' : ''}">${fmt(rf)}</span>${hn.length ? ` <small>(${hn.join(', ')})</small>` : ''}</div><small>${t('pd')}</small> <b class="${c < 0 ? 'neg' : ''}">${c < 0 ? t('over') : fmt(pd)}</b></div>`;
     }
     if (n)
