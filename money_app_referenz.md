@@ -17,6 +17,7 @@ Aufbau der einzelnen Masken und Bereiche (Abschnitte 6 bis 8a). Die Regeln, die 
 | 7i | Offline-Hinweis |
 | 7j | Startseite ohne Doppel-Hinweis, untere Leiste |
 | 7k | Onboarding, Kacheln mit Stift |
+| 7l | Backup einspielen, Meldung (Toast), Symbole bei Backup |
 | 8a | Keine Monatsleiste |
 | 8b | Aktuelles Datum, Datumswechsel bei offener App |
 | 8c | Suche auf der Startseite |
@@ -140,6 +141,12 @@ Die App funktioniert nach dem ersten Laden ohne Internet (Service Worker, Daten 
 - **Kacheln auf der Startseite** (`bstrip(hi, nav)` in `js/core.js`, nur mit `nav`, Banking-Look): Zeile 1 Kontosymbol und Kontoname in EINER Zeile, Zeile 2 der Betrag, alles linksbündig. Der Stift (`pen`, Bootstrap Icon `pencil`) steht rechts neben dem Betrag NUR, wenn alle drei Konten 0,00 € sind. Schrift des Namens `min(var(--fs-s),3.6vw)`, Symbol 13 px, Betrag `min(var(--fs-m),3.9vw)`, damit bei 320 px „Gespart“ und „1.234,56 €“ ohne Abschneiden passen (Der Stift steht nicht neben dem Namen, weil er bei 320 px Namen abschnitt, und nicht als Abzeichen an der Ecke.). Kein zusätzlicher Text im Normalfall (Platz sparen). In Dialogen (ohne `nav`) bleiben die Kacheln mittig ohne Stift.
 - **Alle drei Konten 0,00 €:** Klasse `.bstrip.z`: gestrichelter Rand in Hauptfarbe und Stift in Hauptfarbe, darunter ein zartes Banner (`.bzh`, helle Hauptfarbe, kleines Stift-Symbol, normale Schrift, Text `bzh`: „Tippe auf ein Konto, um deinen Kontostand einzutragen.“). Sobald ein Konto ungleich 0 ist, entfallen Rand, Banner und Stift (die Kachel bleibt antippbar). Keine Animation.
 - Tippen auf eine Kachel springt wie bisher zum Konto-Feld in den Einstellungen (`gk(k)`).
+
+# 7l. Backup einspielen, Meldung (Toast), Symbole bei Backup
+
+- **Einspielen:** Es gibt nur noch „Ersetzen“ (kein „Zusammenführen“, seit 1.75.0). `im()` in `js/app.js` zeigt nach der Dateiwahl den Dialog „Backup einspielen?“ (`imd`) mit dem Text `imdt` („Alle vorhandenen Daten werden durch das Backup ersetzt.“) und der Knopfzeile `acts('cl()', 'ip()', t('rpl'))`: „Abbrechen“ links, „Ersetzen“ rechts in Rostrot. `ip()` ersetzt alle Daten (Zähler der Backup-Erinnerung startet neu, `negHint()` danach). Ungültige Datei: Dialog „Datei nicht lesbar“ wie bisher. `mergeIn()` und die Texte `mrg`, `e_impb`, `e_impt` sind entfernt; `e_ver` bleibt (Starthinweis `negHint()`).
+- **Symbole** (Einstellungen → Daten & Sicherheit, `dat()` in `js/render.js`): „Backup erstellen“ mit `download`, „Backup einspielen“ mit `upload` (neu in `BIP`, Quelle `img/upload.svg`). Keine Emojis.
+- **Meldung (Toast, `#toast`):** Bricht um (`white-space: normal`, `width: max-content`, `max-width: calc(100vw - 32px)`, `overflow-wrap: anywhere`), damit lange Texte (Dateiname im Backup-Toast) nicht über den Rand laufen. Der Knopf („Rückgängig“, „Aktualisieren“) bleibt rechts, einzeilig und sichtbar (`flex: none`). Kurze Meldungen bleiben einzeilig. Neue Meldungen dürfen länger sein, dürfen aber nie breiter als der Bildschirm werden.
 
 # 8a. Startseite: keine Monatsleiste
 

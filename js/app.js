@@ -1404,10 +1404,8 @@ function im(el) {
       const d = JSON.parse(s);
       if (!Array.isArray(d.tx) || !d.cats) throw 0;
       X = { imp: d, nc: 0 };
-      const q = chk(() => mergeIn(d)),
-        bm = q.length ? t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)) : '';
       sheet(
-        `${hd(t('imd'))}${bm ? `<div class="em blk" role=alert style="margin:0 0 14px">${bi('warn')} ${esc(bm)}</div>` : ''}<button class="btn btn-primary pr" style="width:100%" ${bm ? 'disabled' : ''} onclick="ip(0)">${t('mrg')}</button>${acts('cl()', 'ip(1)', t('rpl'))}`,
+        `${hd(t('imd'))}<p class=cdm>${t('imdt')}</p>${acts('cl()', 'ip()', t('rpl'))}`,
       );
     } catch (e) {
       X = {};
@@ -1422,43 +1420,17 @@ const trTo = () =>
   S.tr.forEach((x) => {
     if (!x.to) x.to = x.f == 'bank' ? 'bar' : 'bank';
   });
-const mergeIn = (d) => {
-  const ids = new Set(S.tx.map((x) => x.id));
-  d.tx.forEach((x) => {
-    if (!ids.has(x.id)) S.tx.push(x);
-  });
-  d.cats.forEach((c) => {
-    if (!S.cats.some((x) => x.id == c.id)) S.cats.push(c);
-  });
-  (d.rec || []).forEach((x) => {
-    if (!S.rec.some((y) => y.id == x.id)) S.rec.push(x);
-  });
-  (d.tr || []).forEach((x) => {
-    if (!S.tr.some((y) => y.id == x.id)) S.tr.push(x);
-  });
-  trTo();
-};
-function ip(r) {
+function ip() {
   const d = X.imp;
-  if (r) {
-    S = { ...blank(), ...d, set: { ...blank().set, ...d.set } };
-    /* 1.22.0: wiederhergestellte Daten sind in genau dieser Datei gesichert: Zähler der Backup-Erinnerung neu starten */
-    S.set.lb = Date.now();
-    delete S.set.bs;
-  } else {
-    /* 1.21.22: Zusammenführen darf Bar/Gespart nicht unter 0 bringen (Ersetzen übernimmt den Stand des Backups, Hinweis siehe negHint) */
-    const q = chk(() => mergeIn(d));
-    if (q.length)
-      return sheet(
-        `${hd(t('e_impt'))}<div class="em blk" role=alert style="margin:0 0 14px">${bi('warn')} ${esc(t('e_impb').replace(/\{k\}/g, t('a_' + q[0].k)).replace('{n}', fmt(q[0].n)))}</div><button class="btn btn-primary" style="width:100%" onclick="${S.ob ? 'cl()' : 'ob()'}">${t('e_ver')}</button>`,
-      );
-    mergeIn(d);
-  }
+  S = { ...blank(), ...d, set: { ...blank().set, ...d.set } };
+  /* 1.22.0: wiederhergestellte Daten sind in genau dieser Datei gesichert: Zähler der Backup-Erinnerung neu starten */
+  S.set.lb = Date.now();
+  delete S.set.bs;
   trTo();
   S.ob = 1; /* wer ein Backup einspielt, braucht den Willkommensdialog nicht */
   cl();
   P();
-  if (r) setTimeout(negHint, 400);
+  setTimeout(negHint, 400);
 }
 /* 1.21.22: Starthinweis, wenn Bar/Gespart (Altbestand) im Minus liegt: pro Konto einmal; wird ein Konto wieder positiv, kann der Hinweis später erneut erscheinen */
 function negHint() {

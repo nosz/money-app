@@ -758,7 +758,7 @@ const V = {
         '',
       /* 1.25.0: Backup steht allein im Vordergrund; der CSV-Export (kein Backup) ist ausgeblendet, bis der Schalter eingeschaltet wird */
       dat = () =>
-        `<button type=button class="btn btn-secondary s w-100" onclick="bk('j')">${t('bk')}</button><small style="display:block;margin-top:8px">${t('bkj')}</small><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">📥 ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
+        `<button type=button class="btn btn-secondary s w-100" onclick="bk('j')">${bi('download')} ${t('bk')}</button><small style="display:block;margin-top:8px">${t('bkj')}</small><button type=button class="btn btn-secondary s w-100" style="margin-top:12px" onclick="$('#imf').click()">${bi('upload')} ${t('imp')}</button><input id=imf class=vh type=file accept=".json,application/json" onchange="im(this)" tabindex=-1 aria-hidden=true>` +
         bx(
           lb(
             'bkr',
