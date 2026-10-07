@@ -1615,6 +1615,8 @@ addEventListener('focusin', (e) => {
   }, 320);
 });
 addEventListener('focusout', (e) => {
+  /* 1.73.0: Verlassen des Suchfelds der Startseite merkt den Begriff (Tipp auf ✕ oder Vorschlag im Feldbereich zählt nicht als Verlassen) */
+  if (e.target && e.target.id == 'hq' && Date.now() - (window.hqSkip || 0) > 500) hqrem();
   if (!e.target || (e.target.id != 'fq' && e.target.id != 'cq' && e.target.id != 'hq')) return;
   setTimeout(() => {
     const a = document.activeElement;
@@ -1626,7 +1628,8 @@ document.addEventListener(
   'pointerdown',
   (e) => {
     const a = document.activeElement;
-    if (a && a.id == 'hq' && !(e.target.closest && e.target.closest('.hqw'))) a.blur();
+    if (a && a.id == 'hq' && e.target.closest && e.target.closest('.hqw')) window.hqSkip = Date.now();
+    if (a && a.id == 'hq' && !(e.target.closest && e.target.closest('.hqw, .hqc'))) a.blur();
   },
   true,
 );

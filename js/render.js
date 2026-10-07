@@ -386,7 +386,12 @@ function hqs() {
     r = $('#hqr'),
     c = $('#hqc'),
     x = $('#hqx'),
+    g = $('#hqs'),
     e = $('#hq');
+  if (g) {
+    g.innerHTML = hqsg();
+    g.hidden = !g.innerHTML;
+  }
   if (m) m.hidden = a;
   if (r) r.innerHTML = hqr();
   if (x) x.hidden = !HQ.q;
@@ -415,12 +420,31 @@ function hqu(i) {
   if (e) e.value = r;
   hqs();
 }
-/* Begriff merken (höchstens 5, neuester zuerst, ohne Doppelte) */
+/* Begriff merken (höchstens 5, neuester zuerst; Doppelte und kürzere Anfänge des Begriffs, z. B. „Frei“ vor „Freizeit“, entfallen) */
 function hqrec() {
   const q = HQ.q.trim();
   if (!q) return;
-  HQ.rec = [q].concat(HQ.rec.filter((r) => r.toLowerCase() != q.toLowerCase())).slice(0, 5);
+  const l = q.toLowerCase();
+  HQ.rec = [q].concat(HQ.rec.filter((r) => !l.startsWith(r.toLowerCase()))).slice(0, 5);
 }
+/* 1.73.0: auch beim Drücken von „Suchen“ (Enter) und beim Verlassen des Feldes merken: mindestens 2 Zeichen und mindestens ein Treffer */
+function hqrem() {
+  if (hqa() && hql().length) hqrec();
+}
+/* 1.73.0: Vorschläge beim Tippen: passende frühere Begriffe (HQ.rec) als Chips in einer Zeile im festen Bereich oben, höchstens 5; der Index zeigt auf HQ.rec (hqu) */
+const hqsg = () => {
+  const q = nrm(HQ.q.trim());
+  if (!q) return '';
+  return HQ.rec
+    .map((r, i) => [r, i])
+    .filter(([r]) => {
+      const n = nrm(r);
+      return n.includes(q) && n != q;
+    })
+    .slice(0, 5)
+    .map(([r, i]) => `<button type=button class=hqch onclick="hqu(${i})">${esc(r)}</button>`)
+    .join('');
+};
 /* Tipp auf einen Treffer: Suchbegriff merken (die Buchung öffnet die Zeile selbst, danach bleibt die Suche stehen) */
 function hqt(ev) {
   if (ev.target.closest && ev.target.closest('.li.tr')) hqrec();
@@ -436,6 +460,7 @@ function hqsort(c) {
 }
 /* „Suchen“-Taste der Tastatur: Tastatur schließen, Ergebniszeile unter die Kopfleiste holen */
 function hqe() {
+  hqrem();
   const e = $('#hq');
   if (e) e.blur();
   if (!hqa()) return;
@@ -450,8 +475,10 @@ const V = {
     const m = mt(ym),
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
-    const hqw = `<div class=hqw><div class=fsr><span class=fsi>${bi('search')}</span><input id=hq type=search enterkeyhint=search class="form-control${HQ.q ? ' fon' : ''}" placeholder="${t('hqph')}" aria-label="${t('hqph')}" value="${esc(HQ.q)}" oninput="txc(this);HQ.q=this.value;hqs()" onkeydown="if(event.key=='Enter'){event.preventDefault();hqe()}" maxlength=60 autocomplete=off><button type=button id=hqx class=fsx ${HQ.q ? '' : 'hidden '}onclick="hqclr()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=hqc id=hqc role=group aria-label="${t('hqrec')}" ${HQ.q || !HQ.rec.length ? 'hidden' : ''}>${hqcl()}</div></div>`;
-    let h = brCard() + mn() + hqw + `<div id=hqr>${hqr()}</div><div id=hm${hqa() ? ' hidden' : ''}><div class="row g-3 home-grid"><div class="col-12 col-lg-5">`;
+    /* 1.73.0: Suchfeld ganz oben, direkt unter der Kopfleiste und vor der Monatsleiste, bleibt beim Scrollen oben stehen (.hqw, sticky); darin die Vorschläge beim Tippen (#hqs). Die Chips „Zuletzt gesucht“ (#hqc) folgen darunter, nur bei leerem Feld, und scrollen mit weg. */
+    const hqw = `<div class=hqw><div class=fsr><span class=fsi>${bi('search')}</span><input id=hq type=search enterkeyhint=search class="form-control${HQ.q ? ' fon' : ''}" placeholder="${t('hqph')}" aria-label="${t('hqph')}" value="${esc(HQ.q)}" oninput="txc(this);HQ.q=this.value;hqs()" onkeydown="if(event.key=='Enter'){event.preventDefault();hqe()}" maxlength=60 autocomplete=off><button type=button id=hqx class=fsx ${HQ.q ? '' : 'hidden '}onclick="hqclr()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=hqs id=hqs role=group aria-label="${t('hqrec')}"${hqsg() ? '' : ' hidden'}>${hqsg()}</div></div><div class=hqc id=hqc role=group aria-label="${t('hqrec')}" ${HQ.q || !HQ.rec.length ? 'hidden' : ''}>${hqcl()}</div>`;
+    /* Backup-Karte und Monatsleiste stehen unter dem Suchfeld und gehören damit zu #hm (bei aktiver Suche ausgeblendet) */
+    let h = `<div class=hmw>${hqw}<div id=hqr>${hqr()}</div><div id=hm${hqa() ? ' hidden' : ''}>` + brCard() + mn() + `<div class="row g-3 home-grid"><div class="col-12 col-lg-5">`;
     /* solange es keine einzige Buchung gibt: große Karte, die direkt den Buchungsdialog öffnet */
     if (!S.tx.length)
       h += `<div class="card card-body first" role=button tabindex=0 onclick="ot()" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();ot()}"><b>${AV('plus')} ${t('ofirst')}</b><small>${t('ofirst2')}</small></div>`;
@@ -480,7 +507,7 @@ const V = {
       h +
       '</div><div class="col-12 col-lg-7">' +
       mlist() +
-      '</div></div></div>'
+      '</div></div></div></div>'
     );
   },
   lb() {

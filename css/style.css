@@ -1259,10 +1259,16 @@ body.kb.fqf #fcw:not(.fon){display:none}
 body.kb.fqf #ncb{display:none}
 
 /* ===== 1.65.0: Suche auf der Startseite (unter der Monatsleiste, volle Breite; Treffer ersetzen alles darunter; „Zuletzt gesucht“ als Chips) ===== */
-.hqw{margin:0 0 4px}
-.hqw .fsr{margin:0 0 8px}
+.hmw{--hqh:75px;--stk:calc(var(--tbt) + var(--hqh))}
+/* 1.73.0: Suchfeld ganz oben, bleibt unter der Kopfleiste stehen (wie .tps); darin die Vorschläge in einer Zeile */
+.hqw{position:sticky;top:var(--tbt);z-index:3;margin:-12px -14px 8px;padding:8px 14px 6px;background:var(--ink);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
+.hqw .fsr{margin:0}
+.hqs{display:flex;gap:8px;margin:8px 0 0;overflow-x:auto;scrollbar-width:none}
+.hqs::-webkit-scrollbar{display:none}
+.hqs[hidden]{display:none}
+.hqs .hqch{flex:none}
 .hqw .fsr .form-control.fon{padding-right:2.9rem}
-#hq{scroll-margin-top:calc(var(--stk) + 8px)}
+#hq{scroll-margin-top:calc(var(--tbt) + 8px)}
 #hq::-webkit-search-cancel-button,#hq::-webkit-search-decoration{-webkit-appearance:none;display:none}
 .hqc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
 .hqc[hidden]{display:none}
