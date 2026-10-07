@@ -378,33 +378,24 @@ const hqr = () => {
   if (!l.length) return `<div class="card card-body"><small>${t('hqno')}</small></div>`;
   return `<div class=fsum id=hqsum>${hqsm(l)}</div><div class="card card-body" id=hqres onclick="hqt(event)">${hrow(HQ.sc, HQ.dir, 'hqsort')}${l.map((x) => trow(x, HQ.q, 1, 1)).join('')}</div>`;
 };
-const hqcl = () => `<small class=hqcl>${t('hqrec')}</small>` + HQ.rec.map((r, i) => `<button type=button class=hqch onclick="hqu(${i})">${esc(r)}</button>`).join('');
 /* Eingabe: nur die betroffenen Teile neu zeichnen, damit das Feld den Fokus behält */
 function hqs() {
   const a = hqa(),
     m = $('#hm'),
     r = $('#hqr'),
-    c = $('#hqc'),
     x = $('#hqx'),
-    g = $('#hqs'),
     e = $('#hq');
-  if (g) {
-    g.innerHTML = hqsg();
-    g.hidden = !g.innerHTML;
-  }
+  hqdr();
   if (m) m.hidden = a;
   if (r) r.innerHTML = hqr();
   /* 1.74.0: bei jeder Änderung einer aktiven Suche ganz nach oben scrollen, damit nach dem Scrollen in einem Monat keine Treffer außerhalb der Ansicht liegen */
   if (a && (document.scrollingElement || document.documentElement).scrollTop > 0) scrollTo(0, 0);
   if (x) x.hidden = !HQ.q;
   if (e) e.classList.toggle('fon', !!HQ.q);
-  if (c) {
-    c.innerHTML = hqcl();
-    c.hidden = !!HQ.q || !HQ.rec.length;
-  }
 }
 /* ✕: Feld leeren, normale Startseite, Tastatur bleibt offen */
 function hqclr() {
+  hqrem(); /* 1.76.0: Begriff vor dem Leeren merken */
   HQ.q = '';
   const e = $('#hq');
   if (e) {
@@ -413,7 +404,7 @@ function hqclr() {
   }
   hqs();
 }
-/* Chip „Zuletzt gesucht“ antippen: Feld füllen und suchen */
+/* Zeile der Liste antippen (zuletzt gesucht oder Vorschlag): Feld füllen, suchen, Tastatur schließen und Ergebniszeile nach oben holen (hqe) */
 function hqu(i) {
   const r = HQ.rec[i];
   if (r == null) return;
@@ -421,6 +412,7 @@ function hqu(i) {
   const e = $('#hq');
   if (e) e.value = r;
   hqs();
+  hqe();
 }
 /* Begriff merken (höchstens 5, neuester zuerst; Doppelte und kürzere Anfänge des Begriffs, z. B. „Frei“ vor „Freizeit“, entfallen) */
 function hqrec() {
@@ -428,25 +420,45 @@ function hqrec() {
   if (!q) return;
   const l = q.toLowerCase();
   HQ.rec = [q].concat(HQ.rec.filter((r) => !l.startsWith(r.toLowerCase()))).slice(0, 5);
+  /* 1.76.0: auf dem Gerät behalten (nicht im Backup); Fehler (privater Modus, Speicher voll) werden ignoriert */
+  try {
+    localStorage.setItem('ma_hq', JSON.stringify(HQ.rec));
+  } catch (e) {}
+  hqdr();
+}
+/* 1.76.0: Begriff auch nach kurzer Tipp-Pause merken (Android-Tastatur ohne „Suchen“); hqrem() prüft 2 Zeichen und mindestens einen Treffer */
+function hqtm() {
+  clearTimeout(hqtm.i);
+  hqtm.i = setTimeout(hqrem, 1500);
 }
 /* 1.73.0: auch beim Drücken von „Suchen“ (Enter) und beim Verlassen des Feldes merken: mindestens 2 Zeichen und mindestens ein Treffer */
 function hqrem() {
   if (hqa() && hql().length) hqrec();
 }
-/* 1.73.0: Vorschläge beim Tippen: passende frühere Begriffe (HQ.rec) als Chips in einer Zeile im festen Bereich oben, höchstens 5; der Index zeigt auf HQ.rec (hqu) */
-const hqsg = () => {
-  const q = nrm(HQ.q.trim());
-  if (!q) return '';
-  return HQ.rec
-    .map((r, i) => [r, i])
-    .filter(([r]) => {
-      const n = nrm(r);
-      return n.includes(q) && n != q;
-    })
-    .slice(0, 5)
-    .map(([r, i]) => `<button type=button class=hqch onclick="hqu(${i})">${esc(r)}</button>`)
-    .join('');
+/* 1.77.0: Liste unter dem Suchfeld (#hqd, wie bei einer Adressleiste): nur sichtbar, solange das Feld den Fokus hat (CSS .hqw:focus-within), über den Inhalt gelegt, ohne Platz auf der Startseite zu brauchen.
+   Leeres Feld: „Zuletzt gesucht“ (HQ.rec, höchstens 5). Mit Text: passende frühere Begriffe als Vorschläge (höchstens 5). Eine Zeile = ein Begriff, 44 px, Symbol links; der Index zeigt auf HQ.rec (hqu). */
+const hqdl = () => {
+  const q = nrm(HQ.q.trim()),
+    l = HQ.rec
+      .map((r, i) => [r, i])
+      .filter(([r]) => {
+        if (!q) return true;
+        const n = nrm(r);
+        return n.includes(q) && n != q;
+      })
+      .slice(0, 5);
+  if (!l.length) return '';
+  return (
+    (q ? '' : `<small class=hqdh>${t('hqrec')}</small>`) +
+    l.map(([r, i]) => `<button type=button class=hqdr onclick="hqu(${i})">${bi(q ? 'search' : 'clock-history')}<span>${esc(r)}</span></button>`).join('')
+  );
 };
+function hqdr() {
+  const d = $('#hqd');
+  if (!d) return;
+  d.innerHTML = hqdl();
+  d.hidden = !d.innerHTML;
+}
 /* Tipp auf einen Treffer: Suchbegriff merken (die Buchung öffnet die Zeile selbst, danach bleibt die Suche stehen) */
 function hqt(ev) {
   if (ev.target.closest && ev.target.closest('.li.tr')) hqrec();
@@ -478,7 +490,7 @@ const V = {
       cur = ym == iso(D).slice(0, 7),
       n = dues().length;
     /* 1.73.0: Suchfeld ganz oben, direkt unter der Kopfleiste und vor der Monatsleiste, bleibt beim Scrollen oben stehen (.hqw, sticky); darin die Vorschläge beim Tippen (#hqs). Die Chips „Zuletzt gesucht“ (#hqc) folgen darunter, nur bei leerem Feld, und scrollen mit weg. */
-    const hqw = `<div class=hqw><div class=fsr><span class=fsi>${bi('search')}</span><input id=hq type=search enterkeyhint=search class="form-control${HQ.q ? ' fon' : ''}" placeholder="${t('hqph')}" aria-label="${t('hqph')}" value="${esc(HQ.q)}" oninput="txc(this);HQ.q=this.value;hqs()" onkeydown="if(event.key=='Enter'){event.preventDefault();hqe()}" maxlength=60 autocomplete=off><button type=button id=hqx class=fsx ${HQ.q ? '' : 'hidden '}onclick="hqclr()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=hqs id=hqs role=group aria-label="${t('hqrec')}"${hqsg() ? '' : ' hidden'}>${hqsg()}</div></div><div class=hqc id=hqc role=group aria-label="${t('hqrec')}" ${HQ.q || !HQ.rec.length ? 'hidden' : ''}>${hqcl()}</div>`;
+    const hqw = `<div class=hqw><div class=fsr><span class=fsi>${bi('search')}</span><input id=hq type=search enterkeyhint=search class="form-control${HQ.q ? ' fon' : ''}" placeholder="${t('hqph')}" aria-label="${t('hqph')}" value="${esc(HQ.q)}" oninput="txc(this);HQ.q=this.value;hqs();hqtm()" onkeydown="if(event.key=='Enter'){event.preventDefault();hqe()}else if(event.key=='Escape')this.blur()" maxlength=60 autocomplete=off><button type=button id=hqx class=fsx ${HQ.q ? '' : 'hidden '}onclick="hqclr()" aria-label="${t('fqc')}">${bi('x')}</button></div><div class=hqd id=hqd role=group aria-label="${t('hqrec')}" onmousedown="event.preventDefault()"${hqdl() ? '' : ' hidden'}>${hqdl()}</div></div>`;
     /* Backup-Karte und Monatsleiste stehen unter dem Suchfeld und gehören damit zu #hm (bei aktiver Suche ausgeblendet) */
     let h = `<div class=hmw>${hqw}<div id=hqr>${hqr()}</div><div id=hm${hqa() ? ' hidden' : ''}>` + brCard() + mn() + `<div class="row g-3 home-grid"><div class="col-12 col-lg-5">`;
     /* solange es keine einzige Buchung gibt: große Karte, die direkt den Buchungsdialog öffnet */

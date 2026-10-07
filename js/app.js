@@ -1597,13 +1597,13 @@ addEventListener('focusout', (e) => {
     if (!a || (a.id != 'fq' && a.id != 'cq' && a.id != 'hq')) document.body.classList.remove('fqf');
   }, 300);
 });
-/* 1.65.0: Tipp neben das Suchfeld der Startseite schließt die Tastatur; die Treffer bleiben stehen. Tipps auf das Feld, das ✕ und die Chips „Zuletzt gesucht“ (alles in .hqw) zählen nicht. */
+/* 1.65.0: Tipp neben das Suchfeld der Startseite schließt die Tastatur; die Treffer bleiben stehen. Tipps auf das Feld, das ✕ und die Liste „Zuletzt gesucht“ (alles in .hqw) zählen nicht. */
 document.addEventListener(
   'pointerdown',
   (e) => {
     const a = document.activeElement;
     if (a && a.id == 'hq' && e.target.closest && e.target.closest('.hqw')) window.hqSkip = Date.now();
-    if (a && a.id == 'hq' && !(e.target.closest && e.target.closest('.hqw, .hqc'))) a.blur();
+    if (a && a.id == 'hq' && !(e.target.closest && e.target.closest('.hqw'))) a.blur();
   },
   true,
 );

@@ -1263,20 +1263,22 @@ body.kb.fqf #ncb{display:none}
 /* 1.73.0: Suchfeld ganz oben, bleibt unter der Kopfleiste stehen (wie .tps); darin die Vorschläge in einer Zeile */
 .hqw{position:sticky;top:var(--tbt);z-index:3;margin:-12px -14px 8px;padding:8px 14px 6px;background:var(--ink);box-shadow:0 8px 8px -8px color-mix(in srgb,var(--text) 18%,transparent)}
 .hqw .fsr{margin:0}
-.hqs{display:flex;gap:8px;margin:8px 0 0;overflow-x:auto;scrollbar-width:none}
-.hqs::-webkit-scrollbar{display:none}
-.hqs[hidden]{display:none}
-.hqs .hqch{flex:none}
 .hqw .fsr .form-control.fon{padding-right:2.9rem}
 #hq{scroll-margin-top:calc(var(--tbt) + 8px)}
 #hq::-webkit-search-cancel-button,#hq::-webkit-search-decoration{-webkit-appearance:none;display:none}
-.hqc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
-.hqc[hidden]{display:none}
-.hqcl{flex:0 0 100%;margin:0 2px;font-size:var(--fs-s);color:var(--m);line-height:1.3}
-.hqch{display:inline-flex;align-items:center;max-width:100%;min-height:44px;padding:0 14px;border:1px solid var(--b);border-radius:22px;background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-m);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #hqsum{scroll-margin-top:calc(var(--stk) + 8px)}
 #hqres .li.tr .dc small{display:block;line-height:1.2}
 
 /* ===== 1.75.0: Toast bricht um (lange Meldungen wie der Backup-Dateiname), Knopf bleibt rechts sichtbar ===== */
 #toast{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:left;overflow-wrap:anywhere;line-height:1.35}
 #toast button{flex:none;white-space:nowrap}
+
+/* ===== 1.77.0: „Zuletzt gesucht“ und Vorschläge als Liste unter dem Suchfeld (Adressleisten-Stil): nur bei Fokus im Feld, über den Inhalt gelegt, braucht keinen Platz auf der Startseite ===== */
+.hqd{position:absolute;left:14px;right:14px;top:calc(100% - 4px);z-index:4;display:none;padding:4px 0;background:var(--surface);border:1px solid var(--b);border-radius:var(--r-m);box-shadow:0 10px 24px -8px color-mix(in srgb,var(--text) 35%,transparent);overflow:hidden}
+.hqw:focus-within .hqd:not([hidden]){display:block}
+.hqdh{display:block;margin:4px 14px 0;font-size:var(--fs-s);color:var(--m);line-height:1.3}
+.hqdr{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 14px;border:0;background:transparent;color:var(--text);font:inherit;font-size:var(--fs-m);text-align:left;cursor:pointer}
+.hqdr+.hqdr{border-top:1px solid color-mix(in srgb,var(--text) 8%,var(--surface))}
+.hqdr svg.bi{flex:none;width:1.1em;height:1.1em;color:var(--m)}
+.hqdr span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hqdr:active{background:color-mix(in srgb,var(--gold) 14%,var(--surface))}
