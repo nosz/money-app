@@ -1602,6 +1602,8 @@ addEventListener('focusin', (e) => {
   /* 1.44.0: Suchfeld der Karte „Buchungen“ (#fq): Feld oben unter die Kopfleiste (scroll-margin im CSS), damit Kategorie, Ergebniszeile und
      erste Treffer über der Tastatur stehen. Die Klasse fqf schafft Platz unten, damit das Scrollen auch bei wenigen Treffern bis oben reicht. */
   if (el.id == 'fq' || el.id == 'cq' || el.id == 'hq') document.body.classList.add('fqf'); /* 1.64.0: auch das Suchfeld der Karte „Kategorien“ (#cq); 1.65.0: und das Suchfeld der Startseite (#hq) */
+  /* 1.74.0: das Suchfeld der Startseite (#hq) steht seit 1.73.0 fest oben und ist immer sichtbar; kein Hochscrollen des Feldes mehr (es würde die Suche nach oben scrollen überstimmen) */
+  if (el.id == 'hq') return;
   /* 1.62.1: in Masken (#o .sh) mit sfit(): sofort und noch dreimal, solange die Tastatur einfährt (nur wenn das Feld den Fokus behält) */
   if (el.closest('#o .sh')) {
     sfit(el);

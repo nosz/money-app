@@ -394,6 +394,8 @@ function hqs() {
   }
   if (m) m.hidden = a;
   if (r) r.innerHTML = hqr();
+  /* 1.74.0: bei jeder Änderung einer aktiven Suche ganz nach oben scrollen, damit nach dem Scrollen in einem Monat keine Treffer außerhalb der Ansicht liegen */
+  if (a && (document.scrollingElement || document.documentElement).scrollTop > 0) scrollTo(0, 0);
   if (x) x.hidden = !HQ.q;
   if (e) e.classList.toggle('fon', !!HQ.q);
   if (c) {
